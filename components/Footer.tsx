@@ -36,7 +36,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              {siteLogo ? (
+              {siteLogo && (
                 <div className="relative w-10 h-10 rounded-xl overflow-hidden">
                   <Image
                     src={siteLogo}
@@ -44,10 +44,6 @@ export function Footer() {
                     fill
                     className="object-contain"
                   />
-                </div>
-              ) : (
-                <div className="w-10 h-10 bg-gradient-to-r from-neon-green to-neon-green-light rounded-xl flex items-center justify-center shadow-neon-sm">
-                  <span className="text-white font-black text-xl">P</span>
                 </div>
               )}
               <span className="text-xl font-heading font-black text-dark-text">Pass Vé Phim</span>

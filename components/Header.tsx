@@ -32,7 +32,7 @@ export function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 flex-shrink-0 group">
-            {siteLogo ? (
+            {siteLogo && (
               <div className="relative w-10 h-10 rounded-xl overflow-hidden group-hover:scale-105 transition-transform">
                 <Image
                   src={siteLogo}
@@ -40,10 +40,6 @@ export function Header() {
                   fill
                   className="object-contain"
                 />
-              </div>
-            ) : (
-              <div className="w-10 h-10 bg-gradient-to-r from-neon-green to-neon-green-light rounded-xl flex items-center justify-center shadow-neon-sm group-hover:shadow-neon transition-all">
-                <span className="text-white font-black text-xl">P</span>
               </div>
             )}
             <span className="text-xl font-heading font-black text-dark-text hidden sm:block">
