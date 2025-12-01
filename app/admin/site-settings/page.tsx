@@ -97,11 +97,12 @@ export default function SiteSettingsPage() {
           setSettings((prev) => ({ ...prev, [type]: data.url }));
           toast.success(`Upload ${type} thành công!`);
         } else {
-          toast.error("Upload thất bại");
+          toast.error(data.error || "Upload thất bại");
+          console.error("Upload error:", data);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Upload error:", error);
-        toast.error("Có lỗi xảy ra khi upload");
+        toast.error(error.message || "Có lỗi xảy ra khi upload");
       } finally {
         setUploading(null);
       }
@@ -156,14 +157,14 @@ export default function SiteSettingsPage() {
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
             Quay lại
-          </Button>
+          </div>
           <div className="flex items-center gap-3">
             <Settings className="w-6 h-6 text-neon-green" />
             <h1 className="text-2xl font-bold text-dark-text">Quản lý Trang chủ</h1>
           </div>
         </div>
 
-        <Card className="p-6 space-y-6">
+        <Card className="p-6 space-y-6 bg-dark-card border-dark-border">
           {/* Site Name & Description */}
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-dark-text">Thông tin cơ bản</h2>
@@ -182,7 +183,7 @@ export default function SiteSettingsPage() {
                 onChange={(e) => setSettings({ ...settings, siteDescription: e.target.value })}
                 placeholder="Mô tả ngắn về website..."
                 rows={3}
-                className="w-full px-4 py-2.5 rounded-lg border border-dark-300 dark:border-dark-600 bg-white dark:bg-dark-800 text-dark-900 dark:text-dark-100"
+                className="w-full px-4 py-2.5 rounded-lg border border-dark-border bg-dark-800 text-dark-100 placeholder-dark-text2 focus:outline-none focus:border-neon-green focus:ring-2 focus:ring-neon-green/20"
               />
             </div>
           </div>
@@ -368,7 +369,7 @@ export default function SiteSettingsPage() {
                       value={settings.themeColor}
                       onChange={(e) => setSettings({ ...settings, themeColor: e.target.value })}
                       placeholder="#0F172A"
-                      className="font-mono"
+                      className="font-mono bg-dark-800 text-dark-100"
                     />
                     <p className="text-xs text-dark-text2 mt-1">Màu nền chính của website</p>
                   </div>
@@ -390,7 +391,7 @@ export default function SiteSettingsPage() {
                       value={settings.primaryColor}
                       onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
                       placeholder="#10B981"
-                      className="font-mono"
+                      className="font-mono bg-dark-800 text-dark-100"
                     />
                     <p className="text-xs text-dark-text2 mt-1">Màu chủ đạo cho nút, link, highlight</p>
                   </div>
