@@ -93,7 +93,7 @@ export function TicketCard({
   }, [status, onHoldBy, session]);
 
   // Check if this is my purchase (sold to me)
-  const isMyPurchase = isSold && buyer && session?.user?.email;
+  const isMyPurchase = isSold && (buyerEmail === session?.user?.email || (buyer && session?.user?.email));
 
   useEffect(() => {
     if (!expireAt) return;

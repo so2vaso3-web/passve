@@ -326,6 +326,9 @@ export async function GET(request: NextRequest) {
         status: ticket.status,
         onHoldBy: ticket.onHoldBy?.toString(),
         onHoldAt: ticket.onHoldAt,
+        ticketCode: ticket.ticketCode,
+        buyer: ticket.buyer?._id?.toString(),
+        buyerEmail: ticket.buyer?.email,
         seller: {
           name: ticket.seller?.name || "Unknown",
           avatar: ticket.seller?.image,
