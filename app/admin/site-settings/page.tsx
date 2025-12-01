@@ -297,52 +297,105 @@ export default function SiteSettingsPage() {
 
             {/* OG Image */}
             <div>
-              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-3">
                 Open Graph Image (Ảnh chia sẻ mạng xã hội)
               </label>
-              <div className="flex items-center gap-4">
-                {settings.ogImage && (
-                  <div className="relative w-32 h-32 border border-dark-border rounded-lg overflow-hidden">
+              <div className="flex items-start gap-4">
+                {settings.ogImage ? (
+                  <div className="relative w-32 h-32 border-2 border-dark-border rounded-lg overflow-hidden bg-dark-card">
                     <Image
                       src={settings.ogImage}
                       alt="OG Image"
                       fill
                       className="object-cover"
                     />
+                    <button
+                      onClick={() => setSettings({ ...settings, ogImage: "" })}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                      title="Xóa ảnh"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ) : (
+                  <div className="w-32 h-32 border-2 border-dashed border-dark-border rounded-lg flex items-center justify-center bg-dark-card">
+                    <ImageIcon className="w-8 h-8 text-dark-text2" />
                   </div>
                 )}
-                <Button
-                  onClick={() => handleImageUpload("ogImage")}
-                  disabled={uploading === "ogImage"}
-                  className="flex items-center gap-2"
-                >
-                  {uploading === "ogImage" ? (
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  ) : (
-                    <Upload className="w-4 h-4" />
-                  )}
-                  {uploading === "ogImage" ? "Đang upload..." : "Upload OG Image"}
-                </Button>
+                <div className="flex-1">
+                  <Button
+                    onClick={() => handleImageUpload("ogImage")}
+                    disabled={uploading === "ogImage"}
+                    className="flex items-center gap-2 bg-neon-green hover:bg-neon-green/80 text-white px-6 py-3 rounded-lg font-semibold"
+                  >
+                    {uploading === "ogImage" ? (
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    ) : (
+                      <Upload className="w-5 h-5" />
+                    )}
+                    {uploading === "ogImage" ? "Đang upload..." : settings.ogImage ? "Thay đổi Ảnh" : "Tải lên Ảnh OG"}
+                  </Button>
+                  <p className="text-xs text-dark-text2 mt-2">
+                    Kích thước khuyến nghị: 1200x630px (tỷ lệ 1.91:1) - Ảnh hiển thị khi chia sẻ link lên Facebook, Zalo, etc.
+                  </p>
+                </div>
               </div>
+              {settings.ogImage && (
+                <div className="mt-2 p-2 bg-dark-card rounded border border-dark-border">
+                  <p className="text-xs text-dark-text2">URL: <span className="text-neon-green break-all">{settings.ogImage}</span></p>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Colors */}
           <div className="space-y-4 border-t border-dark-border pt-6">
             <h2 className="text-xl font-semibold text-dark-text">Màu sắc</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Theme Color"
-                type="color"
-                value={settings.themeColor}
-                onChange={(e) => setSettings({ ...settings, themeColor: e.target.value })}
-              />
-              <Input
-                label="Primary Color"
-                type="color"
-                value={settings.primaryColor}
-                onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                  Theme Color
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={settings.themeColor}
+                    onChange={(e) => setSettings({ ...settings, themeColor: e.target.value })}
+                    className="w-16 h-16 rounded-lg border-2 border-dark-border cursor-pointer"
+                  />
+                  <div className="flex-1">
+                    <Input
+                      value={settings.themeColor}
+                      onChange={(e) => setSettings({ ...settings, themeColor: e.target.value })}
+                      placeholder="#0F172A"
+                      className="font-mono"
+                    />
+                    <p className="text-xs text-dark-text2 mt-1">Màu nền chính của website</p>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                  Primary Color
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={settings.primaryColor}
+                    onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
+                    className="w-16 h-16 rounded-lg border-2 border-dark-border cursor-pointer"
+                  />
+                  <div className="flex-1">
+                    <Input
+                      value={settings.primaryColor}
+                      onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
+                      placeholder="#10B981"
+                      className="font-mono"
+                    />
+                    <p className="text-xs text-dark-text2 mt-1">Màu chủ đạo cho nút, link, highlight</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
