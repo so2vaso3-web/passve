@@ -201,7 +201,7 @@ export function SellTicketForm() {
                     >
                       {movie.poster_path && (
                         <img
-                          src={getPosterUrl(movie.poster_path, "w92")}
+                          src={getPosterUrl(movie.poster_path, "w500")}
                           alt={movie.title}
                           className="w-12 h-16 object-cover rounded"
                         />
