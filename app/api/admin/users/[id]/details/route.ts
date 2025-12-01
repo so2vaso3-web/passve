@@ -28,13 +28,22 @@ export async function GET(
     let wallet = await Wallet.findOne({ user: params.id }).lean();
     if (!wallet) {
       // Create wallet if not exists
-      const newWallet = await Wallet.create({
+      await Wallet.create({
         user: params.id,
         balance: 0,
         escrow: 0,
         totalEarned: 0,
       });
-      wallet = newWallet.toObject();
+      // Fetch the newly created wallet with lean() for type consistency
+      wallet = await Wallet.findOne({ user: params.id }).lean();
+      if (!wallet) {
+        // Fallback: create default wallet object if fetch fails
+        wallet = {
+          balance: 0,
+          escrow: 0,
+          totalEarned: 0,
+        } as typeof wallet;
+      }
     }
 
     // Get tickets stats

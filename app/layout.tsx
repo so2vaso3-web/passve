@@ -30,12 +30,13 @@ export const metadata: Metadata = {
     title: "Pass Vé Phim",
     description: "Mua bán vé phim, vé concert, vé sự kiện uy tín",
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
   themeColor: "#0F172A",
 };
 
