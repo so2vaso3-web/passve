@@ -82,8 +82,10 @@ export function ChatModal({ ticketId, ticket, seller, onClose }: ChatModalProps)
   useEffect(() => {
     if (roomId) {
       fetchMessages();
-      // Poll for new messages every 2 seconds
-      const interval = setInterval(fetchMessages, 2000);
+      // Poll for new messages every 3 seconds (optimized for performance)
+      const interval = setInterval(() => {
+        fetchMessages();
+      }, 3000);
       return () => clearInterval(interval);
     }
   }, [roomId]);

@@ -39,8 +39,8 @@ export function ChatSidebar({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     if (session) {
       fetchRooms();
-      // Poll for updates every 2 seconds
-      const interval = setInterval(fetchRooms, 2000);
+      // Poll for updates every 3 seconds (optimized for performance)
+      const interval = setInterval(fetchRooms, 3000);
       return () => clearInterval(interval);
     }
   }, [session]);
