@@ -126,20 +126,18 @@ export function EditPostForm({ ticketId, initialData }: EditPostFormProps) {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    const newImages: string[] = [];
+    if (formData.images.length + files.length > 5) {
+      toast.error("Tối đa 5 ảnh");
+      return;
+    }
+
     setUploading(true);
 
     try {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (formData.images.length + newImages.length >= 5) {
-          toast.error("Tối đa 5 ảnh");
-          break;
-        }
-
+      // Upload tất cả ảnh song song (parallel) thay vì tuần tự - nhanh hơn nhiều
+      const uploadPromises = Array.from(files).map(async (file) => {
         if (file.size > 5 * 1024 * 1024) {
-          toast.error(`Ảnh ${file.name} vượt quá 5MB`);
-          continue;
+          throw new Error(`Ảnh ${file.name} vượt quá 5MB`);
         }
 
         const formDataUpload = new FormData();
@@ -150,21 +148,24 @@ export function EditPostForm({ ticketId, initialData }: EditPostFormProps) {
           body: formDataUpload,
         });
 
-        const data = await res.json();
-        if (res.ok && data.url) {
-          newImages.push(data.url);
-        } else {
-          toast.error(`Upload ${file.name} thất bại`);
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.error || `Upload ${file.name} thất bại`);
         }
-      }
 
-      if (newImages.length > 0) {
-        setValue("images", [...formData.images, ...newImages]);
-        toast.success(`Đã upload ${newImages.length} ảnh`);
+        const data = await res.json();
+        return data.url;
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+      
+      if (uploadedUrls.length > 0) {
+        setValue("images", [...formData.images, ...uploadedUrls]);
+        toast.success(`Đã upload ${uploadedUrls.length} ảnh`);
       }
     } catch (error: any) {
       console.error("Upload error:", error);
-      toast.error("Có lỗi xảy ra khi upload");
+      toast.error(error.message || "Có lỗi xảy ra khi upload");
     } finally {
       setUploading(false);
       if (fileInputRef.current) {
