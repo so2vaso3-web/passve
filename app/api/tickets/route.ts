@@ -289,16 +289,19 @@ export async function GET(request: NextRequest) {
       query.category = category;
     }
 
-    // Filter by city
+    // Filter by city - dùng regex case-insensitive để match chính xác hơn
     const city = searchParams.get("city");
     if (city && city !== "all") {
-      query.city = { $regex: new RegExp(city.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i") };
+      // Escape special regex characters và dùng exact match case-insensitive
+      const escapedCity = city.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      query.city = { $regex: new RegExp(`^${escapedCity}$`, "i") };
     }
 
     // Filter by district (tìm trong cinema field)
     const district = searchParams.get("district");
     if (district && district !== "all" && city && city !== "all") {
-      query.cinema = { $regex: new RegExp(district.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i") };
+      const escapedDistrict = district.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      query.cinema = { $regex: new RegExp(escapedDistrict, "i") };
     }
 
     const tickets = await Ticket.find(query)
