@@ -149,14 +149,14 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
               <button
                 key={tab.id}
                 onClick={() => handleTabChange(tab.id)}
-                className={`flex items-center gap-2 px-4 py-3 font-semibold text-sm transition-colors whitespace-nowrap ${
+                className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 font-semibold text-xs sm:text-sm transition-colors whitespace-nowrap ${
                   activeTab === tab.id
                     ? "text-[#10B981] border-b-2 border-[#10B981] bg-[#111827]"
                     : "text-white/70 hover:text-[#10B981]"
                 }`}
               >
-                <Icon className="w-4 h-4" />
-                <span className="hidden sm:inline">{tab.label}</span>
+                <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="hidden xs:inline">{tab.label}</span>
               </button>
             );
           })}
@@ -164,23 +164,23 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
       </div>
 
       {/* Tab Content */}
-      <div className="p-4 md:p-6 bg-[#111827]">
+      <div className="p-3 sm:p-4 md:p-6 bg-[#111827]">
         {activeTab === "transactions" && (
           <div>
             <WalletBox balance={wallet.balance} escrow={wallet.escrow} totalEarned={wallet.totalEarned} />
-            <div className="flex gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
               <button
                 onClick={() => setShowDepositForm(true)}
-                className="flex-1 bg-neon-green hover:bg-neon-green-light text-white px-7 py-3 rounded-xl font-semibold transition-all hover:shadow-neon flex items-center justify-center gap-2"
+                className="flex-1 bg-neon-green hover:bg-neon-green-light text-white px-4 sm:px-6 md:px-7 py-2.5 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all hover:shadow-neon flex items-center justify-center gap-2"
               >
-                <ArrowUp className="w-5 h-5" />
+                <ArrowUp className="w-4 h-4 sm:w-5 sm:h-5" />
                 Nạp tiền
               </button>
               <button
                 onClick={() => setShowWithdrawForm(true)}
-                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-7 py-3 rounded-xl font-semibold transition-all hover:shadow-neon flex items-center justify-center gap-2"
+                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-4 sm:px-6 md:px-7 py-2.5 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all hover:shadow-neon flex items-center justify-center gap-2"
               >
-                <ArrowDown className="w-5 h-5" />
+                <ArrowDown className="w-4 h-4 sm:w-5 sm:h-5" />
                 Rút tiền
               </button>
             </div>
@@ -250,7 +250,7 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
                   setEditingBank(null);
                   setShowBankForm(true);
                 }}
-                className="bg-[#10B981] hover:bg-[#059669] text-white px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2 transition-all"
+                className="bg-[#10B981] hover:bg-[#059669] text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl font-semibold text-sm sm:text-base flex items-center gap-2 transition-all"
               >
                 <Plus className="w-4 h-4" />
                 Thêm tài khoản
@@ -272,7 +272,7 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 {bankAccounts.map((bank) => (
                   <div
                     key={bank._id}
