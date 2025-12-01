@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Save, Upload, Image as ImageIcon, Settings, ArrowLeft } from "lucide-react";
+import { Save, Upload, Image as ImageIcon, Settings, ArrowLeft, X } from "lucide-react";
 import toast from "react-hot-toast";
 import Image from "next/image";
 
@@ -193,69 +193,105 @@ export default function SiteSettingsPage() {
             
             {/* Logo */}
             <div>
-              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-3">
                 Logo Website
               </label>
-              <div className="flex items-center gap-4">
-                {settings.logo && (
-                  <div className="relative w-32 h-32 border border-dark-border rounded-lg overflow-hidden">
+              <div className="flex items-start gap-4">
+                {settings.logo ? (
+                  <div className="relative w-32 h-32 border-2 border-dark-border rounded-lg overflow-hidden bg-dark-card">
                     <Image
                       src={settings.logo}
                       alt="Logo"
                       fill
-                      className="object-contain"
+                      className="object-contain p-2"
                     />
+                    <button
+                      onClick={() => setSettings({ ...settings, logo: "" })}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                      title="Xóa logo"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ) : (
+                  <div className="w-32 h-32 border-2 border-dashed border-dark-border rounded-lg flex items-center justify-center bg-dark-card">
+                    <ImageIcon className="w-8 h-8 text-dark-text2" />
                   </div>
                 )}
-                <Button
-                  onClick={() => handleImageUpload("logo")}
-                  disabled={uploading === "logo"}
-                  className="flex items-center gap-2"
-                >
-                  {uploading === "logo" ? (
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  ) : (
-                    <Upload className="w-4 h-4" />
-                  )}
-                  {uploading === "logo" ? "Đang upload..." : "Upload Logo"}
-                </Button>
+                <div className="flex-1">
+                  <Button
+                    onClick={() => handleImageUpload("logo")}
+                    disabled={uploading === "logo"}
+                    className="flex items-center gap-2 bg-neon-green hover:bg-neon-green/80 text-white px-6 py-3 rounded-lg font-semibold"
+                  >
+                    {uploading === "logo" ? (
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    ) : (
+                      <Upload className="w-5 h-5" />
+                    )}
+                    {uploading === "logo" ? "Đang upload..." : settings.logo ? "Thay đổi Logo" : "Tải lên Logo"}
+                  </Button>
+                  <p className="text-xs text-dark-text2 mt-2">
+                    Kích thước khuyến nghị: 200x200px hoặc lớn hơn (tỷ lệ 1:1)
+                  </p>
+                </div>
               </div>
               {settings.logo && (
-                <p className="text-xs text-dark-text2 mt-2">URL: {settings.logo}</p>
+                <div className="mt-2 p-2 bg-dark-card rounded border border-dark-border">
+                  <p className="text-xs text-dark-text2">URL: <span className="text-neon-green break-all">{settings.logo}</span></p>
+                </div>
               )}
             </div>
 
             {/* Favicon */}
             <div>
-              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-3">
                 Favicon (Icon tab trình duyệt)
               </label>
-              <div className="flex items-center gap-4">
-                {settings.favicon && (
-                  <div className="relative w-16 h-16 border border-dark-border rounded-lg overflow-hidden">
+              <div className="flex items-start gap-4">
+                {settings.favicon ? (
+                  <div className="relative w-16 h-16 border-2 border-dark-border rounded-lg overflow-hidden bg-dark-card">
                     <Image
                       src={settings.favicon}
                       alt="Favicon"
                       fill
-                      className="object-contain"
+                      className="object-contain p-1"
                     />
+                    <button
+                      onClick={() => setSettings({ ...settings, favicon: "" })}
+                      className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                      title="Xóa favicon"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ) : (
+                  <div className="w-16 h-16 border-2 border-dashed border-dark-border rounded-lg flex items-center justify-center bg-dark-card">
+                    <ImageIcon className="w-6 h-6 text-dark-text2" />
                   </div>
                 )}
-                <Button
-                  onClick={() => handleImageUpload("favicon")}
-                  disabled={uploading === "favicon"}
-                  className="flex items-center gap-2"
-                >
-                  {uploading === "favicon" ? (
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                  ) : (
-                    <Upload className="w-4 h-4" />
-                  )}
-                  {uploading === "favicon" ? "Đang upload..." : "Upload Favicon"}
-                </Button>
+                <div className="flex-1">
+                  <Button
+                    onClick={() => handleImageUpload("favicon")}
+                    disabled={uploading === "favicon"}
+                    className="flex items-center gap-2 bg-neon-green hover:bg-neon-green/80 text-white px-6 py-3 rounded-lg font-semibold"
+                  >
+                    {uploading === "favicon" ? (
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    ) : (
+                      <Upload className="w-5 h-5" />
+                    )}
+                    {uploading === "favicon" ? "Đang upload..." : settings.favicon ? "Thay đổi Favicon" : "Tải lên Favicon"}
+                  </Button>
+                  <p className="text-xs text-dark-text2 mt-2">
+                    Kích thước khuyến nghị: 32x32px hoặc 64x64px (tỷ lệ 1:1, định dạng .ico hoặc .png)
+                  </p>
+                </div>
               </div>
               {settings.favicon && (
-                <p className="text-xs text-dark-text2 mt-2">URL: {settings.favicon}</p>
+                <div className="mt-2 p-2 bg-dark-card rounded border border-dark-border">
+                  <p className="text-xs text-dark-text2">URL: <span className="text-neon-green break-all">{settings.favicon}</span></p>
+                </div>
               )}
             </div>
 
