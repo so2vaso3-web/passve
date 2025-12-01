@@ -38,6 +38,7 @@ interface TicketCardProps {
   status?: string;
   onHoldBy?: string;
   ticketCode?: string;
+  qrImage?: string;
   buyer?: string;
   buyerEmail?: string;
 }
@@ -63,6 +64,7 @@ export function TicketCard({
   status,
   onHoldBy,
   ticketCode,
+  qrImage,
   buyer,
   buyerEmail,
 }: TicketCardProps) {

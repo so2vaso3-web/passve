@@ -14,7 +14,8 @@ export interface ITicket extends Document {
   quantity: number; // Số lượng vé
   originalPrice: number; // Giá gốc
   sellingPrice: number; // Giá bán lại
-  images: string[]; // URLs ảnh vé từ Cloudinary
+  images: string[]; // URLs ảnh vé từ Cloudinary (ảnh chính, hiển thị công khai)
+  qrImage?: string; // URL ảnh mã QR (ẩn, chỉ hiển thị khi người mua đã mua)
   reason?: string; // Lý do bán
   description?: string;
   ticketCode?: string; // Mã vé (nếu có sẵn, người mua sẽ nhận ngay)

@@ -38,7 +38,9 @@ export function SellTicketForm() {
   const [movieResults, setMovieResults] = useState<TMDBMovie[]>([]);
   const [selectedMovie, setSelectedMovie] = useState<TMDBMovie | null>(null);
   const [images, setImages] = useState<string[]>([]);
+  const [qrImage, setQrImage] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadingQR, setUploadingQR] = useState(false);
 
   const {
     register,
@@ -317,10 +319,10 @@ export function SellTicketForm() {
           </p>
         </div>
 
-        {/* Images */}
+        {/* Main Images */}
         <div>
           <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
-            Ảnh vé (tối đa 5 ảnh)
+            Ảnh vé chính (tối đa 5 ảnh) <span className="text-dark-400 dark:text-dark-500 text-xs">*Hiển thị công khai</span>
           </label>
           <div className="grid grid-cols-5 gap-4 mb-4">
             {images.map((url, index) => (
@@ -354,6 +356,68 @@ export function SellTicketForm() {
                 )}
               </label>
             )}
+          </div>
+        </div>
+
+        {/* QR Image */}
+        <div>
+          <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+            Ảnh mã QR <span className="text-dark-400 dark:text-dark-500 text-xs">(tùy chọn - ẩn, chỉ hiển thị khi khách mua)</span>
+          </label>
+          <p className="text-xs text-dark-500 dark:text-dark-400 mb-3">
+            📷 Chụp màn hình hoặc forward tin nhắn/email chứa mã QR. Ảnh này sẽ được ẩn và chỉ hiển thị cho người mua sau khi họ thanh toán.
+          </p>
+          <div className="flex items-start gap-4">
+            {qrImage ? (
+              <div className="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-dark-border bg-dark-card">
+                <Image
+                  src={qrImage}
+                  alt="Mã QR"
+                  fill
+                  className="object-contain p-2"
+                />
+                <button
+                  type="button"
+                  onClick={() => setQrImage(null)}
+                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                  title="Xóa ảnh QR"
+                >
+                  ×
+                </button>
+              </div>
+            ) : (
+              <div className="w-32 h-32 border-2 border-dashed border-dark-border rounded-lg flex items-center justify-center bg-dark-card">
+                <svg className="w-8 h-8 text-dark-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+              </div>
+            )}
+            <div className="flex-1">
+              <label className="inline-block bg-neon-green hover:bg-neon-green-light text-white px-6 py-3 rounded-lg font-semibold cursor-pointer transition-all hover:shadow-neon-sm">
+                {uploadingQR ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Đang upload...</span>
+                  </div>
+                ) : qrImage ? (
+                  "Thay đổi ảnh QR"
+                ) : (
+                  "Tải lên ảnh mã QR"
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleQRImageUpload}
+                  className="hidden"
+                  disabled={uploadingQR}
+                />
+              </label>
+              {qrImage && (
+                <p className="mt-2 text-xs text-neon-green">
+                  ✓ Đã tải lên ảnh mã QR
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
