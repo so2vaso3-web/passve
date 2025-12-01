@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import cloudinary from "@/lib/cloudinary";
 import { writeFile } from "fs/promises";
 import { join } from "path";
 import { existsSync, mkdirSync } from "fs";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,7 +28,39 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Create uploads directory if it doesn't exist
+    // Try Cloudinary first (if configured)
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+    const apiKey = process.env.CLOUDINARY_API_KEY;
+    const apiSecret = process.env.CLOUDINARY_API_SECRET;
+
+    if (cloudName && cloudName !== "your-cloudinary-cloud-name" && apiKey && apiSecret) {
+      try {
+        // Convert buffer to base64
+        const base64 = buffer.toString("base64");
+        const dataURI = `data:${file.type};base64,${base64}`;
+
+        // Upload to Cloudinary
+        const result = await cloudinary.uploader.upload(dataURI, {
+          folder: "pass-ve-phim",
+          resource_type: "image",
+          transformation: [
+            { width: 1200, height: 1200, crop: "limit" },
+            { quality: "auto" },
+          ],
+        });
+
+        return NextResponse.json({
+          url: result.secure_url,
+          filename: result.public_id,
+          cloudinary: true,
+        });
+      } catch (cloudinaryError: any) {
+        console.error("Cloudinary upload error:", cloudinaryError);
+        // Fallback to local storage if Cloudinary fails
+      }
+    }
+
+    // Fallback: Save to local storage (for development or if Cloudinary not configured)
     const uploadsDir = join(process.cwd(), "public", "uploads");
     if (!existsSync(uploadsDir)) {
       mkdirSync(uploadsDir, { recursive: true });
@@ -44,11 +79,11 @@ export async function POST(request: NextRequest) {
     // Return public URL
     const url = `/uploads/${filename}`;
 
-    return NextResponse.json({ url, filename });
-  } catch (error) {
+    return NextResponse.json({ url, filename, cloudinary: false });
+  } catch (error: any) {
     console.error("Upload error:", error);
     return NextResponse.json(
-      { error: "Failed to upload file" },
+      { error: error.message || "Failed to upload file" },
       { status: 500 }
     );
   }
