@@ -62,42 +62,54 @@ export async function POST(request: NextRequest) {
     }
 
     // Khởi tạo SePay client theo code mẫu
-    const client = new SePayPgClient({
-      env: SEPAY_ENV as "sandbox" | "production",
-      merchant_id: SEPAY_MERCHANT_ID,
-      secret_key: SEPAY_SECRET_KEY,
-    });
-
-    // Lấy checkout URL
-    const checkoutURL = client.checkout.initCheckoutUrl();
-
-    // Tạo checkout form fields theo code mẫu
-    const orderInvoiceNumber = `INV-${transaction._id.toString()}-${Date.now()}`;
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    let client: any;
+    let checkoutURL: string;
+    let checkoutFormfields: any;
     
-    const checkoutFormfields = client.checkout.initOneTimePaymentFields({
-      payment_method: "BANK_TRANSFER",
-      order_invoice_number: orderInvoiceNumber,
-      order_amount: amount,
-      currency: "VND",
-      order_description: description || `Nạp tiền ${new Intl.NumberFormat("vi-VN").format(amount)} VNĐ`,
-      success_url: `${baseUrl}/payment/success?transactionId=${transaction._id}`,
-      error_url: `${baseUrl}/payment/cancel?transactionId=${transaction._id}`,
-      cancel_url: `${baseUrl}/payment/cancel?transactionId=${transaction._id}`,
-    });
+    try {
+      client = new SePayPgClient({
+        env: SEPAY_ENV as "sandbox" | "production",
+        merchant_id: SEPAY_MERCHANT_ID,
+        secret_key: SEPAY_SECRET_KEY,
+      });
 
-    // Lưu order invoice number
-    await Transaction.findByIdAndUpdate(transaction._id, {
-      sepayTransactionId: orderInvoiceNumber,
-      sepayPaymentUrl: checkoutURL,
-    });
+      // Lấy checkout URL
+      checkoutURL = client.checkout.initCheckoutUrl();
+
+      // Tạo checkout form fields theo code mẫu
+      const orderInvoiceNumber = `INV-${transaction._id.toString()}-${Date.now()}`;
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+      
+      checkoutFormfields = client.checkout.initOneTimePaymentFields({
+        payment_method: "BANK_TRANSFER",
+        order_invoice_number: orderInvoiceNumber,
+        order_amount: amount,
+        currency: "VND",
+        order_description: description || `Nạp tiền ${new Intl.NumberFormat("vi-VN").format(amount)} VNĐ`,
+        success_url: `${baseUrl}/payment/success?transactionId=${transaction._id}`,
+        error_url: `${baseUrl}/payment/cancel?transactionId=${transaction._id}`,
+        cancel_url: `${baseUrl}/payment/cancel?transactionId=${transaction._id}`,
+      });
+
+      // Lưu order invoice number
+      await Transaction.findByIdAndUpdate(transaction._id, {
+        sepayTransactionId: orderInvoiceNumber,
+        sepayPaymentUrl: checkoutURL,
+      });
+    } catch (sepayError: any) {
+      console.error("SePay client error:", sepayError);
+      // Nếu SePay package không hoạt động, trả về lỗi rõ ràng
+      return NextResponse.json(
+        { error: `Lỗi SePay: ${sepayError.message || "Không thể khởi tạo SePay client"}` },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
       transactionId: transaction._id,
       checkoutUrl: checkoutURL,
       checkoutFormfields: checkoutFormfields,
-      orderInvoiceNumber: orderInvoiceNumber,
       amount: amount,
     });
   } catch (error: any) {
