@@ -13,6 +13,7 @@ import { searchMovies, getPosterUrl } from "@/lib/tmdb";
 import type { TMDBMovie } from "@/lib/tmdb";
 import toast from "react-hot-toast";
 import Image from "next/image";
+import { Loader2 } from "lucide-react";
 
 const ticketSchema = z.object({
   movieTitle: z.string().min(1, "Vui lòng nhập tên phim/sự kiện"),

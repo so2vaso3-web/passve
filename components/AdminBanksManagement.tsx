@@ -165,9 +165,9 @@ export function AdminBanksManagement({ initialBanks }: AdminBanksManagementProps
               <Pin className="w-4 h-4 text-neon-green flex-shrink-0 mt-0.5" />
               <p>
                 <strong className="text-dark-text">Lưu ý:</strong> Đây là tài khoản ngân hàng/ví điện tử của <strong className="text-neon-green">HỆ THỐNG</strong> (không phải của user). 
-              Bao gồm: <strong>Số tài khoản</strong>, <strong>Chủ tài khoản</strong>, <strong>QR code</strong> (nếu có), và <strong>Logo ngân hàng</strong> để hiển thị trong form nạp tiền.
-            </p>
-          </div>
+                Bao gồm: <strong>Số tài khoản</strong>, <strong>Chủ tài khoản</strong>, <strong>QR code</strong> (nếu có), và <strong>Logo ngân hàng</strong> để hiển thị trong form nạp tiền.
+              </p>
+            </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
