@@ -289,6 +289,18 @@ export async function GET(request: NextRequest) {
       query.category = category;
     }
 
+    // Filter by city
+    const city = searchParams.get("city");
+    if (city && city !== "all") {
+      query.city = { $regex: new RegExp(city.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i") };
+    }
+
+    // Filter by district (tìm trong cinema field)
+    const district = searchParams.get("district");
+    if (district && district !== "all" && city && city !== "all") {
+      query.cinema = { $regex: new RegExp(district.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i") };
+    }
+
     const tickets = await Ticket.find(query)
       .populate({
         path: "seller",

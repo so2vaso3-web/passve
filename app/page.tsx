@@ -32,15 +32,18 @@ async function getTickets(category?: string, city?: string, district?: string, s
       }
     }
 
-    // Filter by city
+    // Filter by city - dùng regex case-insensitive để match chính xác hơn
     if (city && city !== "all") {
-      query.city = city;
+      // Escape special regex characters và dùng case-insensitive
+      const escapedCity = city.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      query.city = { $regex: new RegExp(`^${escapedCity}$`, "i") };
     }
 
     // Filter by district (tìm trong cinema field)
     if (district && district !== "all" && city && city !== "all") {
       // Tìm vé có cinema chứa tên quận/huyện
-      query.cinema = { $regex: district, $options: "i" };
+      const escapedDistrict = district.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      query.cinema = { $regex: new RegExp(escapedDistrict, "i") };
     }
 
     // Filter by seller
