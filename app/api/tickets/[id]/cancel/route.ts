@@ -54,9 +54,9 @@ export async function POST(
       );
     }
 
-    // Kiểm tra quyền
-    const buyerId = (ticket.buyer as any)?._id?.toString() || ticket.buyer?.toString();
-    const isBuyer = buyerId === user._id.toString();
+    // Kiểm tra quyền - lấy buyerId một lần
+    const buyerIdString = (ticket.buyer as any)?._id?.toString() || ticket.buyer?.toString();
+    const isBuyer = buyerIdString === user._id.toString();
     const isAdmin = user.role === "admin";
 
     if (!isBuyer && !isAdmin) {
@@ -66,13 +66,18 @@ export async function POST(
       );
     }
 
-    // Kiểm tra thời gian - chỉ cho phép hủy trong vòng 24h sau khi mua
+    // Kiểm tra thời gian - chỉ cho phép hủy trong vòng 5 phút sau khi mua
     const soldAt = ticket.soldAt || ticket.createdAt;
-    const hoursSincePurchase = (Date.now() - new Date(soldAt).getTime()) / (1000 * 60 * 60);
+    const minutesSincePurchase = (Date.now() - new Date(soldAt).getTime()) / (1000 * 60);
     
-    if (hoursSincePurchase > 24 && !isAdmin) {
+    if (minutesSincePurchase > 5 && !isAdmin) {
+      const timeElapsed = Math.floor(minutesSincePurchase);
       return NextResponse.json(
-        { error: "Chỉ có thể hủy vé trong vòng 24 giờ sau khi mua" },
+        { 
+          error: `Đã quá 5 phút, không thể hủy vé. Thời gian đã trôi qua: ${timeElapsed} phút.`,
+          timeLimit: 5,
+          timeElapsed: timeElapsed,
+        },
         { status: 400 }
       );
     }
@@ -82,12 +87,12 @@ export async function POST(
     const totalPaid = ticket.sellingPrice + buyerFee;
     const sellerReceives = Math.round(ticket.sellingPrice * 0.93);
 
-    // Get wallets
-    const buyerId = (ticket.buyer as any)?._id || ticket.buyer;
-    let buyerWallet = await Wallet.findOne({ user: buyerId });
+    // Get wallets - sử dụng buyerId từ populate
+    const buyerIdForWallet = (ticket.buyer as any)?._id || ticket.buyer;
+    let buyerWallet = await Wallet.findOne({ user: buyerIdForWallet });
     if (!buyerWallet) {
       buyerWallet = await Wallet.create({
-        user: buyerId,
+        user: buyerIdForWallet,
         balance: 0,
         escrow: 0,
         totalEarned: 0,
@@ -130,12 +135,11 @@ export async function POST(
         ticket.status = "cancelled";
         await ticket.save({ session: dbSession });
 
-        // Tạo transactions
-        const buyerId = (ticket.buyer as any)?._id || ticket.buyer;
+        // Tạo transactions - sử dụng buyerIdForWallet đã định nghĩa
         await Transaction.create(
           [
             {
-              user: buyerId,
+              user: buyerIdForWallet,
               type: "refund",
               amount: totalPaid,
               status: "completed",
@@ -180,4 +184,3 @@ export async function POST(
     );
   }
 }
-

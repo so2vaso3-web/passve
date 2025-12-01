@@ -410,3 +410,33 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
   );
 }
 
+
+        <BankAccountForm
+          account={editingBank}
+          onClose={() => {
+            setShowBankForm(false);
+            setEditingBank(null);
+          }}
+          onSuccess={loadData}
+        />
+      )}
+
+      {showDepositForm && (
+        <DepositForm
+          userId={userId}
+          onClose={() => setShowDepositForm(false)}
+          onSuccess={loadData}
+        />
+      )}
+
+      {showWithdrawForm && (
+        <WithdrawForm
+          balance={wallet.balance}
+          onClose={() => setShowWithdrawForm(false)}
+          onSuccess={loadData}
+        />
+      )}
+    </div>
+  );
+}
+
