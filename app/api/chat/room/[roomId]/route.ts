@@ -39,12 +39,14 @@ export async function GET(
     }
 
     // Check if user is part of this room
-    const buyerId = typeof room.buyer === 'object' && '_id' in room.buyer 
-      ? room.buyer._id.toString() 
-      : room.buyer.toString();
-    const sellerId = typeof room.seller === 'object' && '_id' in room.seller 
-      ? room.seller._id.toString() 
-      : room.seller.toString();
+    const buyerRaw = room.buyer as any;
+    const sellerRaw = room.seller as any;
+    const buyerId = typeof buyerRaw === 'object' && buyerRaw && '_id' in buyerRaw 
+      ? buyerRaw._id.toString() 
+      : String(buyerRaw);
+    const sellerId = typeof sellerRaw === 'object' && sellerRaw && '_id' in sellerRaw 
+      ? sellerRaw._id.toString() 
+      : String(sellerRaw);
     
     if (buyerId !== user._id.toString() && sellerId !== user._id.toString()) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
