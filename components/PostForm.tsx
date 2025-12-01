@@ -189,18 +189,10 @@ export function PostForm() {
       return false;
     }
 
-    // If priceMode is "desired", convert to selling price
-    if (priceMode === "desired") {
-      sellingPrice = calculateSellingPrice();
-      if (sellingPrice < 50000) {
-        toast.error("Giá bán tính toán phải lớn hơn hoặc bằng 50,000 VNĐ");
-        return false;
-      }
-    } else {
-      if (!sellingPrice || sellingPrice < 50000) {
-        toast.error("Giá bán lại phải lớn hơn hoặc bằng 50,000 VNĐ");
-        return false;
-      }
+    // Validate selling price
+    if (!sellingPrice || sellingPrice < 50000) {
+      toast.error("Giá bán lại phải lớn hơn hoặc bằng 50,000 VNĐ");
+      return false;
     }
 
     if (formData.images.length === 0) {
