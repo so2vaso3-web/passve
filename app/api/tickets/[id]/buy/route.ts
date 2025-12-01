@@ -36,8 +36,8 @@ export async function POST(
       );
     }
 
-    // Get ticket
-    const ticket = await Ticket.findById(params.id).populate("seller");
+    // Get ticket - select qrImage và ticketCode để kiểm tra
+    const ticket = await Ticket.findById(params.id).populate("seller").select("+qrImage +ticketCode");
     if (!ticket) {
       return NextResponse.json(
         { error: "Không tìm thấy vé" },
