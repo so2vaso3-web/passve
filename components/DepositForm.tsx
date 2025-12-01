@@ -6,9 +6,11 @@ import { Loader2, CreditCard, Building2 } from "lucide-react";
 
 interface DepositFormProps {
   userId: string;
+  onClose?: () => void;
+  onSuccess?: () => void | Promise<void>;
 }
 
-export function DepositForm({ userId }: DepositFormProps) {
+export function DepositForm({ userId, onClose, onSuccess }: DepositFormProps) {
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState("");
 

@@ -232,7 +232,7 @@ export function PostForm() {
           seats: formData.seats,
           quantity: formData.quantity,
           originalPrice: parseFloat(formData.originalPrice),
-          sellingPrice: priceMode === "desired" ? calculateSellingPrice() : parseFloat(formData.sellingPrice),
+          sellingPrice: parseFloat(formData.sellingPrice),
           images: formData.images,
           reason: formData.reason,
           description: formData.description,
@@ -656,11 +656,11 @@ export function PostForm() {
                     className="w-full px-4 py-3 border-2 border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-green focus:border-neon-green transition-all text-dark-text placeholder:text-dark-text2 font-medium bg-dark-card-bright"
                     required
                   />
-                  {priceMode === "desired" && formData.sellingPrice && (
+                  {priceMode === "desired" && formData.sellingPrice && formData.originalPrice && (
                     <div className="mt-2 p-3 bg-dark-bg border border-dark-border rounded-lg">
                       <p className="text-xs text-dark-text2 mb-1">Hệ thống sẽ tự tính:</p>
                       <p className="text-sm text-dark-text font-semibold">
-                        Giá bán cho khách: <span className="text-neon-green">{formatPrice(calculateSellingPrice())} đ</span>
+                        Giá bán cho khách: <span className="text-neon-green">{formatPrice((parseFloat(formData.sellingPrice) / 0.93).toString())} đ</span>
                       </p>
                       <p className="text-xs text-dark-text2 mt-1">
                         Bạn sẽ nhận về: <span className="text-dark-text font-semibold">{formatPrice(formData.sellingPrice)} đ</span> (sau phí 7%)
@@ -671,7 +671,7 @@ export function PostForm() {
                     <div className="mt-2 p-3 bg-dark-bg border border-dark-border rounded-lg">
                       <p className="text-xs text-dark-text2 mb-1">Sau phí nền tảng 7%:</p>
                       <p className="text-sm text-dark-text font-semibold">
-                        Bạn sẽ nhận về: <span className="text-neon-green">{formatPrice(calculateSellerReceives())} đ</span>
+                        Bạn sẽ nhận về: <span className="text-neon-green">{formatPrice((parseFloat(formData.sellingPrice) * 0.93).toString())} đ</span>
                       </p>
                     </div>
                   )}
