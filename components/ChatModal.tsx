@@ -192,7 +192,7 @@ export function ChatModal({ ticketId, ticket, seller, onClose }: ChatModalProps)
     if (!file || !roomId) return;
 
     // TODO: Upload to Cloudinary and send message with attachment
-    toast.info("Tính năng gửi file đang được phát triển");
+    toast("Tính năng gửi file đang được phát triển");
   };
 
   const playNotificationSound = () => {
