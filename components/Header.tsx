@@ -91,13 +91,21 @@ export function Header() {
                 </button>
               </div>
             ) : (
-              <button
-                onClick={() => signIn("google", { callbackUrl: "/" })}
-                className="hidden sm:flex items-center gap-2 bg-neon-green hover:bg-neon-green-light text-white px-5 py-2.5 rounded-xl font-semibold text-base transition-all hover:shadow-neon hover:scale-105 active:scale-95"
-              >
-                <User size={18} />
-                Đăng nhập
-              </button>
+              <div className="hidden sm:flex items-center gap-3">
+                <Link
+                  href="/api/auth/signin"
+                  className="flex items-center gap-2 bg-dark-card hover:bg-dark-border text-dark-text border-2 border-dark-border hover:border-neon-green px-5 py-2.5 rounded-xl font-semibold text-base transition-all hover:scale-105 active:scale-95"
+                >
+                  <User size={18} />
+                  Đăng nhập
+                </Link>
+                <Link
+                  href="/signup"
+                  className="flex items-center gap-2 bg-neon-green hover:bg-neon-green-light text-white px-5 py-2.5 rounded-xl font-semibold text-base transition-all hover:shadow-neon hover:scale-105 active:scale-95"
+                >
+                  Đăng ký
+                </Link>
+              </div>
             )}
 
             {/* Post button */}
@@ -166,16 +174,23 @@ export function Header() {
                 <LogOut size={18} /> Đăng xuất
               </button>
             ) : (
-              <button
-                onClick={() => {
-                  signIn("google", { callbackUrl: "/" });
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full bg-neon-green hover:bg-neon-green-light text-white py-3 rounded-xl font-semibold text-base transition-all mt-2 hover:shadow-neon"
-              >
-                <User size={18} className="inline mr-2" />
-                Đăng nhập
-              </button>
+              <>
+                <Link
+                  href="/api/auth/signin"
+                  className="block w-full bg-dark-card hover:bg-dark-border text-dark-text border-2 border-dark-border hover:border-neon-green py-3 rounded-xl font-semibold text-base transition-all mt-2 text-center"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <User size={18} className="inline mr-2" />
+                  Đăng nhập
+                </Link>
+                <Link
+                  href="/signup"
+                  className="block w-full bg-neon-green hover:bg-neon-green-light text-white py-3 rounded-xl font-semibold text-base transition-all mt-2 text-center hover:shadow-neon"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Đăng ký
+                </Link>
+              </>
             )}
             <Link
               href="/sell"
