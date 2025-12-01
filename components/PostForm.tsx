@@ -732,12 +732,15 @@ export function PostForm() {
             <div>
               <label className="block text-sm font-semibold text-dark-text mb-2">
                 <ImageIcon className="w-4 h-4 inline mr-1" />
-                Hình ảnh vé/QR/mã code{" "}
+                Hình ảnh{" "}
                 {formData.images.length > 0 && (
                   <span className="text-primary">({formData.images.length}/5)</span>
                 )}{" "}
                 <span className="text-red-500">*</span>
               </label>
+              <p className="text-xs text-dark-text2 mb-3">
+                💡 Nên tải ảnh thông tin vé (mặt trước, mặt sau, thông tin ghế, v.v.)
+              </p>
 
               {formData.images.length > 0 && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-4">
