@@ -11,6 +11,7 @@ export interface IBankAccount {
 export interface IUser extends Document {
   name: string;
   email: string;
+  password?: string; // Password hash (chỉ dùng cho email/password login)
   phone?: string;
   image?: string;
   role: "user" | "admin";
@@ -34,6 +35,10 @@ const UserSchema = new Schema<IUser>(
       required: true,
       unique: true,
       lowercase: true,
+    },
+    password: {
+      type: String,
+      select: false, // Không trả về password khi query mặc định
     },
     phone: {
       type: String,

@@ -1,9 +1,11 @@
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
 import clientPromise from "@/lib/mongodb-client";
 import connectDB from "@/lib/mongodb";
 import User from "@/models/User";
+import bcrypt from "bcryptjs";
 
 export const authOptions: NextAuthOptions = {
   // Tạm thời dùng JWT session thay vì database session (không cần MongoDB)
@@ -15,6 +17,54 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "dummy",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "dummy",
+    }),
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
+
+        try {
+          await connectDB();
+          const user = await User.findOne({ email: credentials.email.toLowerCase() })
+            .select("+password") // Include password field
+            .maxTimeMS(5000);
+
+          if (!user || !user.password) {
+            return null;
+          }
+
+          // Check if user is active
+          if (user.isActive === false) {
+            throw new Error("Tài khoản của bạn đã bị khóa");
+          }
+
+          // Verify password
+          const isValid = await bcrypt.compare(credentials.password, user.password);
+          if (!isValid) {
+            return null;
+          }
+
+          return {
+            id: user._id.toString(),
+            email: user.email,
+            name: user.name,
+            image: user.image,
+            role: user.role,
+          };
+        } catch (error: any) {
+          console.error("Credentials auth error:", error);
+          if (error.message?.includes("khóa")) {
+            throw error;
+          }
+          return null;
+        }
+      },
     }),
   ],
   callbacks: {
