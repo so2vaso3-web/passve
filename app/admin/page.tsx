@@ -44,11 +44,11 @@ async function getAdminStats() {
       Transaction.aggregate([
         { $match: { type: "deposit", status: "completed" } },
         { $group: { _id: null, total: { $sum: "$amount" } } },
-      ]).maxTimeMS(5000).catch(() => [{ total: 0 }]),
+      ], { maxTimeMS: 5000 }).catch(() => [{ total: 0 }]),
       Transaction.aggregate([
         { $match: { type: "withdraw", status: "completed" } },
         { $group: { _id: null, total: { $sum: "$amount" } } },
-      ]).maxTimeMS(5000).catch(() => [{ total: 0 }]),
+      ], { maxTimeMS: 5000 }).catch(() => [{ total: 0 }]),
     ]);
 
     return {
