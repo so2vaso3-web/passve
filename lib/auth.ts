@@ -5,7 +5,6 @@ import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
 import clientPromise from "@/lib/mongodb-client";
 import connectDB from "@/lib/mongodb";
 import User from "@/models/User";
-import bcrypt from "bcryptjs";
 
 export const authOptions: NextAuthOptions = {
   // Tạm thời dùng JWT session thay vì database session (không cần MongoDB)
@@ -30,6 +29,9 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
+          // Dynamic import bcryptjs để tránh lỗi build
+          const bcrypt = (await import("bcryptjs")).default;
+          
           await connectDB();
           const user = await User.findOne({ email: credentials.email.toLowerCase() })
             .select("+password") // Include password field
