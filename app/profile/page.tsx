@@ -13,8 +13,6 @@ import {
   CreditCard,
   LogOut,
   Star,
-  ArrowUp,
-  ArrowDown,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import toast from "react-hot-toast";
@@ -296,16 +294,15 @@ export default function ProfilePage() {
               </p>
               
               {/* Nạp tiền và Rút tiền buttons */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2.5">
                 <button
                   onClick={() => {
                     const currentScroll = window.scrollY;
                     router.push("/profile?tab=deposit");
                     setTimeout(() => window.scrollTo(0, currentScroll), 0);
                   }}
-                  className="bg-[#10B981] hover:bg-[#059669] text-white px-3 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2"
+                  className="bg-gradient-to-r from-[#10B981] to-[#34D399] hover:from-[#059669] hover:to-[#10B981] text-white px-3 py-2 rounded-lg font-semibold text-sm transition-all duration-200 hover:shadow-neon-sm active:scale-[0.98]"
                 >
-                  <ArrowUp className="w-4 h-4" />
                   Nạp tiền
                 </button>
                 <button
@@ -314,9 +311,8 @@ export default function ProfilePage() {
                     router.push("/profile?tab=withdraw");
                     setTimeout(() => window.scrollTo(0, currentScroll), 0);
                   }}
-                  className="bg-[#EF4444] hover:bg-[#DC2626] text-white px-3 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2"
+                  className="bg-gradient-to-r from-[#EF4444] to-[#F87171] hover:from-[#DC2626] hover:to-[#EF4444] text-white px-3 py-2 rounded-lg font-semibold text-sm transition-all duration-200 hover:shadow-lg hover:shadow-red-500/30 active:scale-[0.98]"
                 >
-                  <ArrowDown className="w-4 h-4" />
                   Rút tiền
                 </button>
               </div>

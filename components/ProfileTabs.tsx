@@ -203,19 +203,17 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
         {activeTab === "transactions" && (
           <div>
             <WalletBox balance={wallet.balance} escrow={wallet.escrow} totalEarned={wallet.totalEarned} />
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 mb-4 sm:mb-6">
               <button
                 onClick={() => setShowDepositForm(true)}
-                className="flex-1 bg-neon-green hover:bg-neon-green-light text-white px-4 sm:px-6 md:px-7 py-2.5 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all hover:shadow-neon flex items-center justify-center gap-2"
+                className="flex-1 bg-gradient-to-r from-neon-green to-neon-green-light hover:from-[#059669] hover:to-neon-green text-white px-4 sm:px-5 py-2.5 sm:py-2.5 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base transition-all duration-200 hover:shadow-neon-sm active:scale-[0.98]"
               >
-                <ArrowUp className="w-4 h-4 sm:w-5 sm:h-5" />
                 Nạp tiền
               </button>
               <button
                 onClick={() => setShowWithdrawForm(true)}
-                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-4 sm:px-6 md:px-7 py-2.5 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all hover:shadow-neon flex items-center justify-center gap-2"
+                className="flex-1 bg-gradient-to-r from-[#EF4444] to-[#F87171] hover:from-[#DC2626] hover:to-[#EF4444] text-white px-4 sm:px-5 py-2.5 sm:py-2.5 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base transition-all duration-200 hover:shadow-lg hover:shadow-red-500/30 active:scale-[0.98]"
               >
-                <ArrowDown className="w-4 h-4 sm:w-5 sm:h-5" />
                 Rút tiền
               </button>
             </div>
