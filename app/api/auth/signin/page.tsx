@@ -177,7 +177,7 @@ export default function SignInPage() {
           <div className="mt-6 text-center">
             <p className="text-sm text-dark-text2">
               Chưa có tài khoản?{" "}
-              <Link href="/api/auth/signup" className="text-neon-green hover:underline font-semibold">
+              <Link href="/api/signup" className="text-neon-green hover:underline font-semibold">
                 Đăng ký ngay
               </Link>
             </p>
