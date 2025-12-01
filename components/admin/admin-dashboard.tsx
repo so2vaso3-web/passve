@@ -165,13 +165,13 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
         </div>
 
         <Tabs
-        tabs={[
-          { id: "tickets", label: "Duyệt vé" },
-          { id: "transactions", label: "Giao dịch" },
-        ]}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-      />
+          tabs={[
+            { id: "tickets", label: "Duyệt vé" },
+            { id: "transactions", label: "Giao dịch" },
+          ]}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
 
       {activeTab === "tickets" && (
         <div className="mt-6 space-y-4">
@@ -262,6 +262,7 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }

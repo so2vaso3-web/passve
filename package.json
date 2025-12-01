@@ -10,6 +10,8 @@
     "lint": "next lint",
     "seed": "tsx scripts/seed.ts",
     "set-admin": "tsx scripts/set-admin.ts",
+    "change-password": "tsx scripts/change-password.ts",
+    "test-db": "node scripts/test-mongodb.js",
     "cleanup": "powershell -ExecutionPolicy Bypass -File scripts/cleanup.ps1",
     "update-oauth": "powershell -ExecutionPolicy Bypass -File scripts/update-google-oauth.ps1"
   },
