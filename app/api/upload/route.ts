@@ -35,23 +35,31 @@ export async function POST(request: NextRequest) {
 
     if (cloudName && cloudName !== "your-cloudinary-cloud-name" && apiKey && apiSecret) {
       try {
-        // Convert buffer to base64
-        const base64 = buffer.toString("base64");
-        const dataURI = `data:${file.type};base64,${base64}`;
-
-        // Upload to Cloudinary
-        const result = await cloudinary.uploader.upload(dataURI, {
-          folder: "pass-ve-phim",
-          resource_type: "image",
-          transformation: [
-            { width: 1200, height: 1200, crop: "limit" },
-            { quality: "auto" },
-          ],
+        // Upload trực tiếp từ buffer stream (nhanh hơn base64)
+        // Sử dụng upload_stream để tránh phải convert to base64
+        const result = await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            {
+              folder: "pass-ve-phim",
+              resource_type: "image",
+              transformation: [
+                { width: 1200, height: 1200, crop: "limit" },
+                { quality: "auto:good" }, // Tối ưu chất lượng vs tốc độ
+                { fetch_format: "auto" }, // Tự động chọn format tốt nhất (webp nếu có thể)
+              ],
+              eager_async: false, // Không cần async transformation
+            },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          );
+          uploadStream.end(buffer);
         });
 
         return NextResponse.json({
-          url: result.secure_url,
-          filename: result.public_id,
+          url: (result as any).secure_url,
+          filename: (result as any).public_id,
           cloudinary: true,
         });
       } catch (cloudinaryError: any) {
