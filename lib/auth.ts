@@ -29,15 +29,26 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
+          const db = await connectDB();
+          if (!db) {
+            console.error("Database not connected for credentials auth");
+            return null;
+          }
+
           // Dynamic import bcryptjs để tránh lỗi build
           const bcrypt = (await import("bcryptjs")).default;
           
-          await connectDB();
           const user = await User.findOne({ email: credentials.email.toLowerCase() })
             .select("+password") // Include password field
             .maxTimeMS(5000);
 
-          if (!user || !user.password) {
+          if (!user) {
+            console.log("User not found:", credentials.email);
+            return null;
+          }
+
+          if (!user.password) {
+            console.log("User has no password (maybe signed up with Google):", credentials.email);
             return null;
           }
 
@@ -49,6 +60,7 @@ export const authOptions: NextAuthOptions = {
           // Verify password
           const isValid = await bcrypt.compare(credentials.password, user.password);
           if (!isValid) {
+            console.log("Invalid password for:", credentials.email);
             return null;
           }
 

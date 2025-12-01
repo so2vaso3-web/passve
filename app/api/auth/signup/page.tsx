@@ -47,8 +47,8 @@ export default function SignUpPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
+          name: formData.name.trim(),
+          email: formData.email.trim().toLowerCase(),
           password: formData.password,
         }),
       });
@@ -61,23 +61,27 @@ export default function SignUpPage() {
 
       toast.success("Đăng ký thành công! Đang đăng nhập...");
 
+      // Đợi một chút để đảm bảo user đã được tạo
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       // Tự động đăng nhập sau khi đăng ký
       const signInResult = await signIn("credentials", {
-        email: formData.email,
+        email: formData.email.trim().toLowerCase(),
         password: formData.password,
         redirect: false,
       });
 
       if (signInResult?.ok) {
+        toast.success("Đăng nhập thành công!");
         router.push("/");
         router.refresh();
       } else {
+        toast.error("Đăng ký thành công nhưng đăng nhập thất bại. Vui lòng đăng nhập thủ công.");
         router.push("/api/auth/signin");
       }
     } catch (error: any) {
       console.error("Sign up error:", error);
       toast.error(error.message || "Đăng ký thất bại. Vui lòng thử lại.");
-    } finally {
       setIsLoading(false);
     }
   };

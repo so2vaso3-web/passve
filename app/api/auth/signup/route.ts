@@ -51,22 +51,52 @@ export async function POST(request: NextRequest) {
     }
 
     // Dynamic import bcryptjs để tránh lỗi build
-    const bcrypt = (await import("bcryptjs")).default;
+    let bcrypt: any;
+    try {
+      bcrypt = (await import("bcryptjs")).default;
+    } catch (importError) {
+      console.error("Failed to import bcryptjs:", importError);
+      return NextResponse.json(
+        { error: "Lỗi hệ thống. Vui lòng thử lại sau." },
+        { status: 500 }
+      );
+    }
     
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    let hashedPassword: string;
+    try {
+      hashedPassword = await bcrypt.hash(password, 10);
+    } catch (hashError: any) {
+      console.error("Password hash error:", hashError);
+      return NextResponse.json(
+        { error: "Lỗi khi mã hóa mật khẩu. Vui lòng thử lại." },
+        { status: 500 }
+      );
+    }
 
     // Set admin cho email admpcv3@gmail.com
     const isAdmin = email.toLowerCase() === "admpcv3@gmail.com";
 
     // Create user
-    const user = await User.create({
-      name: name.trim(),
-      email: email.toLowerCase().trim(),
-      password: hashedPassword, // Lưu password đã hash
-      role: isAdmin ? "admin" : "user",
-      isActive: true,
-    });
+    let user;
+    try {
+      user = await User.create({
+        name: name.trim(),
+        email: email.toLowerCase().trim(),
+        password: hashedPassword, // Lưu password đã hash
+        role: isAdmin ? "admin" : "user",
+        isActive: true,
+      });
+    } catch (createError: any) {
+      console.error("User creation error:", createError);
+      if (createError.code === 11000) {
+        return NextResponse.json(
+          { error: "Email này đã được sử dụng" },
+          { status: 400 }
+        );
+      }
+      throw createError;
+    }
 
     return NextResponse.json(
       {
