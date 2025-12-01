@@ -64,6 +64,13 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
       if (activeTab === "selling" || activeTab === "sold" || activeTab === "purchased") {
         // For purchased tab, get both on_hold and purchased tickets
         if (activeTab === "purchased") {
+          // Tự động fix các vé on_hold có QR image (chỉ chạy 1 lần khi load)
+          try {
+            await fetch("/api/tickets/fix-onhold", { method: "POST", cache: "no-store" });
+          } catch (error) {
+            // Ignore errors - chỉ admin mới có thể fix
+          }
+
           const [onHoldRes, purchasedRes] = await Promise.all([
             fetch(`/api/tickets?user=${userId}&status=on_hold`, { cache: "no-store" }),
             fetch(`/api/tickets?user=${userId}&status=purchased`, { cache: "no-store" }),
