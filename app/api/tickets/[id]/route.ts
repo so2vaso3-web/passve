@@ -50,8 +50,19 @@ export async function PATCH(
     }
 
     // Kiểm tra quyền: chỉ seller hoặc admin mới được sửa
-    const isSeller = ticket.seller?.toString() === (session.user as any).id;
-    const isAdmin = (session.user as any)?.role === "admin";
+    // Lấy user ID từ database
+    const User = (await import("@/models/User")).default;
+    const dbUser = await User.findOne({ email: session.user?.email }).select("_id role").lean();
+    
+    if (!dbUser) {
+      return NextResponse.json(
+        { error: "Không tìm thấy thông tin người dùng" },
+        { status: 401 }
+      );
+    }
+
+    const isSeller = ticket.seller?.toString() === dbUser._id.toString();
+    const isAdmin = dbUser.role === "admin";
 
     if (!isSeller && !isAdmin) {
       return NextResponse.json(
@@ -157,8 +168,19 @@ export async function DELETE(
     }
 
     // Kiểm tra quyền: chỉ seller hoặc admin mới được xóa
-    const isSeller = ticket.seller?.toString() === (session.user as any).id;
-    const isAdmin = (session.user as any)?.role === "admin";
+    // Lấy user ID từ database
+    const User = (await import("@/models/User")).default;
+    const dbUser = await User.findOne({ email: session.user?.email }).select("_id role").lean();
+    
+    if (!dbUser) {
+      return NextResponse.json(
+        { error: "Không tìm thấy thông tin người dùng" },
+        { status: 401 }
+      );
+    }
+
+    const isSeller = ticket.seller?.toString() === dbUser._id.toString();
+    const isAdmin = dbUser.role === "admin";
 
     if (!isSeller && !isAdmin) {
       return NextResponse.json(

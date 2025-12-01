@@ -27,9 +27,16 @@ export default async function EditTicketPage({
     }
 
     // Kiểm tra quyền: chỉ seller hoặc admin mới được sửa
-    const isSeller =
-      (ticket.seller as any)?._id?.toString() === (session.user as any).id;
-    const isAdmin = (session.user as any)?.role === "admin";
+    // Lấy user ID từ database
+    const User = (await import("@/models/User")).default;
+    const dbUser = await User.findOne({ email: session.user?.email }).select("_id role").lean();
+    
+    if (!dbUser) {
+      redirect("/");
+    }
+
+    const isSeller = (ticket.seller as any)?._id?.toString() === dbUser._id.toString();
+    const isAdmin = dbUser.role === "admin";
 
     if (!isSeller && !isAdmin) {
       redirect("/");
