@@ -363,6 +363,7 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
 
       {showDepositForm && (
         <DepositForm
+          userId={userId}
           onClose={() => setShowDepositForm(false)}
           onSuccess={loadData}
         />
