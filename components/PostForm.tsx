@@ -20,6 +20,7 @@ interface PostFormData {
   originalPrice: string;
   sellingPrice: string;
   images: string[];
+  qrImage?: string; // Ảnh mã QR (ẩn, chỉ hiển thị khi khách mua)
   reason: string;
   description: string;
 }
@@ -36,8 +37,10 @@ export function PostForm() {
   const { data: session } = useSession();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const qrFileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingQR, setUploadingQR] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
 
   const [formData, setFormData] = useState<PostFormData>({
@@ -52,6 +55,7 @@ export function PostForm() {
     originalPrice: "",
     sellingPrice: "",
     images: [],
+    qrImage: undefined,
     reason: "",
     description: "",
   });
@@ -130,6 +134,49 @@ export function PostForm() {
         target: { files },
       } as any;
       handleImageSelect(fakeEvent);
+    }
+  };
+
+  // QR Image upload
+  const handleQRImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Ảnh QR vượt quá 5MB");
+      return;
+    }
+
+    setUploadingQR(true);
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append("file", file);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: uploadFormData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Upload failed");
+      }
+
+      const data = await response.json();
+      setFormData((prev) => ({
+        ...prev,
+        qrImage: data.url,
+      }));
+
+      toast.success("Đã upload ảnh mã QR");
+    } catch (error: any) {
+      console.error("Upload QR error:", error);
+      toast.error(error.message || "Lỗi khi upload ảnh QR");
+    } finally {
+      setUploadingQR(false);
+      if (qrFileInputRef.current) {
+        qrFileInputRef.current.value = "";
+      }
     }
   };
 
@@ -234,6 +281,7 @@ export function PostForm() {
           originalPrice: parseFloat(formData.originalPrice),
           sellingPrice: parseFloat(formData.sellingPrice),
           images: formData.images,
+          qrImage: formData.qrImage,
           reason: formData.reason,
           description: formData.description,
         }),
@@ -755,6 +803,76 @@ export function PostForm() {
                   />
                 </label>
               )}
+            </div>
+
+            {/* Upload ảnh QR */}
+            <div>
+              <label className="block text-sm font-semibold text-dark-text mb-2">
+                <ImageIcon className="w-4 h-4 inline mr-1" />
+                Ảnh mã QR <span className="text-dark-text2 text-xs font-normal">(tùy chọn - ẩn, chỉ hiển thị khi khách mua)</span>
+              </label>
+              <p className="text-xs text-dark-text2 mb-3">
+                📷 Chụp màn hình hoặc forward tin nhắn/email chứa mã QR. Ảnh này sẽ được ẩn và chỉ hiển thị cho người mua sau khi họ thanh toán.
+              </p>
+              <div className="flex items-start gap-4">
+                {formData.qrImage ? (
+                  <div className="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-neon-green/30 bg-dark-card">
+                    <Image
+                      src={formData.qrImage}
+                      alt="Mã QR"
+                      fill
+                      className="object-contain p-2"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, qrImage: undefined })}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                      title="Xóa ảnh QR"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="w-32 h-32 border-2 border-dashed border-dark-border rounded-lg flex items-center justify-center bg-dark-card">
+                    <ImageIcon className="w-8 h-8 text-dark-text2" />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <label
+                    htmlFor="qr-image-upload"
+                    className={`inline-block px-6 py-3 rounded-lg font-semibold cursor-pointer transition-all ${
+                      uploadingQR
+                        ? "bg-dark-border text-dark-text2 cursor-not-allowed"
+                        : "bg-neon-green hover:bg-neon-green-light text-white hover:shadow-neon-sm"
+                    }`}
+                  >
+                    {uploadingQR ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>Đang upload...</span>
+                      </div>
+                    ) : formData.qrImage ? (
+                      "Thay đổi ảnh QR"
+                    ) : (
+                      "Tải lên ảnh mã QR"
+                    )}
+                  </label>
+                  <input
+                    ref={qrFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    id="qr-image-upload"
+                    onChange={handleQRImageSelect}
+                    disabled={uploadingQR}
+                  />
+                  {formData.qrImage && (
+                    <p className="mt-2 text-xs text-neon-green">
+                      ✓ Đã tải lên ảnh mã QR
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* Lý do bán */}
