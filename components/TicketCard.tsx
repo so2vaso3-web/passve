@@ -318,16 +318,36 @@ export function TicketCard({
             )}
           </div>
 
-          {/* Show ticket code if purchased */}
-          {isMyPurchase && ticketCode && (
-            <div className="mb-4 p-3 bg-neon-green/10 border border-neon-green/30 rounded-xl">
-              <div className="flex items-center gap-2 mb-1">
-                <Ticket className="w-4 h-4 text-neon-green" />
-                <span className="text-xs font-semibold text-neon-green">Mã vé của bạn:</span>
-              </div>
-              <p className="text-lg font-black text-neon-green font-mono tracking-wider">
-                {ticketCode}
-              </p>
+          {/* Show ticket code and QR image if purchased */}
+          {isMyPurchase && (ticketCode || qrImage) && (
+            <div className="mb-4 p-3 bg-neon-green/10 border border-neon-green/30 rounded-xl space-y-3">
+              {ticketCode && (
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Ticket className="w-4 h-4 text-neon-green" />
+                    <span className="text-xs font-semibold text-neon-green">Mã vé của bạn:</span>
+                  </div>
+                  <p className="text-lg font-black text-neon-green font-mono tracking-wider">
+                    {ticketCode}
+                  </p>
+                </div>
+              )}
+              {qrImage && (
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <QrCode className="w-4 h-4 text-neon-green" />
+                    <span className="text-xs font-semibold text-neon-green">Ảnh mã QR:</span>
+                  </div>
+                  <div className="relative w-full aspect-square rounded-lg overflow-hidden border-2 border-neon-green/30 bg-dark-card">
+                    <Image
+                      src={qrImage}
+                      alt="Mã QR vé"
+                      fill
+                      className="object-contain p-2"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

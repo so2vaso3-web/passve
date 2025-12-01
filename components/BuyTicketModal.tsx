@@ -104,17 +104,10 @@ export function BuyTicketModal({ ticket, onClose }: BuyTicketModalProps) {
         throw new Error(data.error || "Có lỗi xảy ra khi mua vé");
       }
 
-      // Show success message with ticket code if available
-      if (data.ticket?.ticketCode) {
-        toast.success(
-          `Đã mua vé thành công! Mã vé: ${data.ticket.ticketCode}`,
-          { duration: 8000 }
-        );
-      } else {
-        toast.success("Đã giữ vé thành công! Vui lòng thanh toán trong 15 phút", {
-          duration: 5000,
-        });
-      }
+      // Show success message
+      toast.success("Đã mua vé thành công! Vui lòng chờ người bán gửi mã vé và ảnh QR code.", {
+        duration: 8000,
+      });
 
       // Đóng modal và refresh
       onClose();
@@ -268,12 +261,8 @@ export function BuyTicketModal({ ticket, onClose }: BuyTicketModalProps) {
               <div className="text-sm text-dark-text2">
                 <p className="font-semibold text-dark-text mb-1">Hệ thống Escrow</p>
                 <p>
-                  Tiền sẽ được giữ trong hệ thống escrow. Sau khi người bán gửi mã vé và bạn xác nhận nhận được, tiền mới được chuyển cho người bán.
+                  Tiền sẽ được giữ trong hệ thống escrow. Sau khi bạn thanh toán thành công, người bán sẽ gửi mã vé và ảnh QR code. Sau khi bạn xác nhận nhận được, tiền mới được chuyển cho người bán.
                 </p>
-                <div className="mt-2 flex items-center gap-2 font-semibold text-orange-400">
-                  <Clock className="w-4 h-4" />
-                  <p>Bạn có 15 phút để hoàn tất thanh toán sau khi giữ vé.</p>
-                </div>
               </div>
             </div>
           </div>
