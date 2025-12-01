@@ -55,7 +55,8 @@ export async function POST(
     }
 
     // Kiểm tra quyền
-    const isBuyer = ticket.buyer._id.toString() === user._id.toString();
+    const buyerId = (ticket.buyer as any)?._id?.toString() || ticket.buyer?.toString();
+    const isBuyer = buyerId === user._id.toString();
     const isAdmin = user.role === "admin";
 
     if (!isBuyer && !isAdmin) {
@@ -82,10 +83,11 @@ export async function POST(
     const sellerReceives = Math.round(ticket.sellingPrice * 0.93);
 
     // Get wallets
-    let buyerWallet = await Wallet.findOne({ user: ticket.buyer._id });
+    const buyerId = (ticket.buyer as any)?._id || ticket.buyer;
+    let buyerWallet = await Wallet.findOne({ user: buyerId });
     if (!buyerWallet) {
       buyerWallet = await Wallet.create({
-        user: ticket.buyer._id,
+        user: buyerId,
         balance: 0,
         escrow: 0,
         totalEarned: 0,
@@ -129,10 +131,11 @@ export async function POST(
         await ticket.save({ session: dbSession });
 
         // Tạo transactions
+        const buyerId = (ticket.buyer as any)?._id || ticket.buyer;
         await Transaction.create(
           [
             {
-              user: ticket.buyer._id,
+              user: buyerId,
               type: "refund",
               amount: totalPaid,
               status: "completed",
@@ -144,7 +147,7 @@ export async function POST(
               type: "refund",
               amount: -sellerReceives,
               status: "completed",
-              description: `Hoàn tiền vé ${ticket.movieTitle} cho ${(ticket.buyer as any).name || "Người mua"}`,
+              description: `Hoàn tiền vé ${ticket.movieTitle} cho ${(ticket.buyer as any)?.name || "Người mua"}`,
               ticket: ticket._id,
             },
           ],

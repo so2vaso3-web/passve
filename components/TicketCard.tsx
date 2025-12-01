@@ -185,7 +185,7 @@ export function TicketCard({
     <>
       <div
         className={`group relative bg-dark-card border border-dark-border rounded-xl sm:rounded-2xl overflow-hidden shadow-card transition-all duration-300 w-full max-w-md ${
-          isExpired || isSold
+          isExpired
             ? "opacity-60 grayscale"
             : "hover:scale-[1.03] hover:shadow-neon hover:border-neon-green"
         }`}
@@ -207,7 +207,7 @@ export function TicketCard({
             )}
 
             {/* Gradient overlay on hover */}
-            {!isExpired && !isSold && (
+            {!isExpired && (
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
                 <p className="text-white text-lg font-bold">{title}</p>
               </div>
@@ -227,9 +227,13 @@ export function TicketCard({
                 <span className="bg-dark-text2 text-white px-3 py-1 rounded-full text-xs font-bold shadow-neon-sm">
                   Đã hết hạn
                 </span>
-              ) : isSold ? (
+              ) : isSold && !isMyPurchase ? (
                 <span className="bg-gray-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-neon-sm">
                   Đã bán
+                </span>
+              ) : isSold && isMyPurchase ? (
+                <span className="bg-neon-green text-white px-3 py-1 rounded-full text-xs font-bold shadow-neon-sm">
+                  Đã mua
                 </span>
               ) : timeLeft ? (
                 <span className={`text-white px-3 py-1 rounded-full text-xs font-bold shadow-neon-sm ${
@@ -242,7 +246,7 @@ export function TicketCard({
               ) : null}
             </div>
 
-            {discount > 0 && !isExpired && !isSold && (
+            {discount > 0 && !isExpired && (
               <div className="absolute top-3 right-3 z-10">
                 <span className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-neon-sm">
                   -{discount}%
@@ -256,7 +260,7 @@ export function TicketCard({
         <div className="p-3 sm:p-4">
           <Link href={`/tickets/${id}`}>
             <h3 className={`font-bold mb-2 sm:mb-3 line-clamp-2 text-base sm:text-lg leading-snug transition-colors ${
-              isExpired || isSold ? "text-dark-text2" : "text-dark-text group-hover:text-neon-green"
+              isExpired ? "text-dark-text2" : "text-dark-text group-hover:text-neon-green"
             }`}>
               {title}
             </h3>
@@ -282,11 +286,11 @@ export function TicketCard({
             <div className="flex-1">
               <div className="flex items-baseline gap-2">
                 <p className={`text-xl sm:text-2xl font-black text-glow ${
-                  isExpired || isSold ? "text-dark-text2" : "text-neon-green-light"
+                  isExpired ? "text-dark-text2" : "text-neon-green-light"
                 }`}>
                   {formatPrice(price)} đ
                 </p>
-                {originalPrice && !isExpired && !isSold && (
+                {originalPrice && !isExpired && (
                   <p className="text-sm text-dark-text2 line-through">
                     {formatPrice(originalPrice)} đ
                   </p>
