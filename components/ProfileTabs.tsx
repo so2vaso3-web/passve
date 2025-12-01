@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { TicketCard } from "@/components/TicketCard";
+import { SellingPostCard } from "@/components/SellingPostCard";
 import { WalletBox } from "@/components/WalletBox";
 import { BankAccountForm } from "@/components/BankAccountForm";
 import { DepositForm } from "@/components/DepositForm";
@@ -379,9 +380,13 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
                   </div>
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                  {tickets.map((ticket) => (
-                    <TicketCard key={ticket.id} {...ticket} />
-                  ))}
+                  {tickets.map((ticket) =>
+                    activeTab === "selling" ? (
+                      <SellingPostCard key={ticket.id} ticket={ticket} onUpdate={loadData} />
+                    ) : (
+                      <TicketCard key={ticket.id} {...ticket} />
+                    )
+                  )}
                 </div>
               </>
             )}
