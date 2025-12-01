@@ -27,7 +27,7 @@ export function Header() {
   }, []);
 
   return (
-    <header className="hidden md:block bg-dark-card border-b border-dark-border sticky top-0 z-50 shadow-card backdrop-blur-sm">
+    <header className="hidden md:block glass-strong border-b border-dark-border/50 sticky top-0 z-50 shadow-glass backdrop-blur-xl">
       <div className="container mx-auto px-3 sm:px-4">
         <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Logo */}
@@ -124,9 +124,10 @@ export function Header() {
                 </Link>
                 <Link
                   href="/signup"
-                  className="flex items-center gap-2 bg-neon-green hover:bg-neon-green-light text-white px-5 py-2.5 rounded-xl font-semibold text-base transition-all hover:shadow-neon hover:scale-105 active:scale-95"
+                  className="flex items-center gap-2 bg-gradient-primary hover:bg-gradient-primary-dark text-white px-5 py-2.5 rounded-xl font-semibold text-base transition-all hover:shadow-neon hover:scale-105 active:scale-95 relative overflow-hidden group"
                 >
-                  Đăng ký
+                  <span className="relative z-10">Đăng ký</span>
+                  <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent"></span>
                 </Link>
               </div>
             )}
@@ -134,10 +135,13 @@ export function Header() {
             {/* Post button */}
             <Link
               href="/sell"
-              className="bg-neon-green hover:bg-neon-green-light text-white px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm md:text-base transition-all hover:shadow-neon hover:scale-105 active:scale-95 whitespace-nowrap"
+              className="bg-gradient-primary hover:bg-gradient-primary-dark text-white px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm md:text-base transition-all hover:shadow-neon hover:scale-105 active:scale-95 whitespace-nowrap relative overflow-hidden group"
             >
-              <span className="hidden sm:inline">Đăng tin miễn phí</span>
-              <span className="sm:hidden">Đăng tin</span>
+              <span className="relative z-10">
+                <span className="hidden sm:inline">Đăng tin miễn phí</span>
+                <span className="sm:hidden">Đăng tin</span>
+              </span>
+              <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent"></span>
             </Link>
 
             {/* Mobile menu button */}

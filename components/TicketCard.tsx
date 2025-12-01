@@ -196,10 +196,10 @@ export function TicketCard({
       <div
         data-ticket-card
         data-ticket-card-id={id}
-        className={`group relative bg-dark-card border border-dark-border rounded-xl sm:rounded-2xl overflow-hidden shadow-card transition-all duration-300 w-full max-w-md ${
+        className={`group relative bg-dark-card/90 backdrop-blur-sm border border-dark-border/50 rounded-2xl sm:rounded-3xl overflow-hidden shadow-card transition-all duration-500 w-full max-w-md ${
           isExpired
             ? "opacity-60 grayscale"
-            : "hover:scale-[1.03] hover:shadow-neon hover:border-neon-green"
+            : "hover:scale-[1.02] hover:shadow-card-hover hover:border-neon-green/50 hover:bg-dark-card-hover cursor-pointer"
         }`}
       >
         {/* Image */}
@@ -414,11 +414,15 @@ export function TicketCard({
             <div className="flex gap-2 mt-3 sm:mt-4">
               <Link
                 href={`/tickets/${id}`}
-                className="flex-1 bg-neon-green hover:bg-neon-green-light text-white py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm transition-all hover:shadow-neon-sm hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-1.5 sm:gap-2"
+                className="flex-1 bg-gradient-primary hover:bg-gradient-primary-dark text-white py-2.5 sm:py-3 px-4 sm:px-5 rounded-xl sm:rounded-2xl font-bold text-xs sm:text-sm transition-all duration-300 hover:shadow-neon hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-1.5 sm:gap-2 group relative overflow-hidden"
               >
-                <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span className="hidden xs:inline">Xem chi tiết</span>
-                <span className="xs:hidden">Chi tiết</span>
+                <span className="relative z-10 flex items-center gap-1.5 sm:gap-2">
+                  <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform group-hover:scale-110" />
+                  <span className="hidden xs:inline">Xem chi tiết</span>
+                  <span className="xs:hidden">Chi tiết</span>
+                </span>
+                {/* Shimmer effect on hover */}
+                <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent"></span>
               </Link>
             </div>
           )}
