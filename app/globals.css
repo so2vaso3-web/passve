@@ -123,6 +123,37 @@ body {
   max-width: 100%;
 }
 
+/* Allow horizontal scroll for tab navigation and specific elements */
+.overflow-x-auto,
+[class*="overflow-x-auto"] {
+  overflow-x: auto !important;
+  touch-action: pan-x pan-y !important;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #334155 #1E293B;
+}
+
+.overflow-x-auto::-webkit-scrollbar,
+[class*="overflow-x-auto"]::-webkit-scrollbar {
+  height: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track,
+[class*="overflow-x-auto"]::-webkit-scrollbar-track {
+  background: #1E293B;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb,
+[class*="overflow-x-auto"]::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 3px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover,
+[class*="overflow-x-auto"]::-webkit-scrollbar-thumb:hover {
+  background: #10B981;
+}
+
 /* Allow text selection for inputs and textareas */
 input, textarea, [contenteditable] {
   -webkit-user-select: text;

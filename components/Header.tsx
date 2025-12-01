@@ -27,7 +27,7 @@ export function Header() {
   }, []);
 
   return (
-    <header className="bg-dark-card border-b border-dark-border sticky top-0 z-50 shadow-card backdrop-blur-sm">
+    <header className="hidden md:block bg-dark-card border-b border-dark-border sticky top-0 z-50 shadow-card backdrop-blur-sm">
       <div className="container mx-auto px-3 sm:px-4">
         <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Logo */}
