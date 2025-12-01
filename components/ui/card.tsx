@@ -10,8 +10,8 @@ export function Card({ className = "", hover = false, children, ...props }: Card
   return (
     <div
       className={`
-        bg-white dark:bg-dark-800
-        rounded-xl border border-dark-200 dark:border-dark-700
+        bg-dark-800
+        rounded-xl border border-dark-700
         shadow-sm
         ${hover ? "hover:shadow-lg transition-shadow duration-200 cursor-pointer" : ""}
         ${className}

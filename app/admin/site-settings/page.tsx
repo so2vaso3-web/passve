@@ -164,7 +164,7 @@ export default function SiteSettingsPage() {
           </div>
         </div>
 
-        <Card className="p-6 space-y-6 bg-dark-card border-dark-border">
+        <Card className="p-6 space-y-6">
           {/* Site Name & Description */}
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-dark-text">Thông tin cơ bản</h2>
@@ -175,7 +175,7 @@ export default function SiteSettingsPage() {
               placeholder="VD: Pass Vé Phim"
             />
             <div>
-              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+              <label className="block text-sm font-medium text-dark-300 mb-2">
                 Mô tả website
               </label>
               <textarea
@@ -194,7 +194,7 @@ export default function SiteSettingsPage() {
             
             {/* Logo */}
             <div>
-              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-3">
+              <label className="block text-sm font-medium text-dark-300 mb-3">
                 Logo Website
               </label>
               <div className="flex items-start gap-4">
@@ -246,7 +246,7 @@ export default function SiteSettingsPage() {
 
             {/* Favicon */}
             <div>
-              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-3">
+              <label className="block text-sm font-medium text-dark-300 mb-3">
                 Favicon (Icon tab trình duyệt)
               </label>
               <div className="flex items-start gap-4">
@@ -298,7 +298,7 @@ export default function SiteSettingsPage() {
 
             {/* OG Image */}
             <div>
-              <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-3">
+              <label className="block text-sm font-medium text-dark-300 mb-3">
                 Open Graph Image (Ảnh chia sẻ mạng xã hội)
               </label>
               <div className="flex items-start gap-4">
@@ -354,7 +354,7 @@ export default function SiteSettingsPage() {
             <h2 className="text-xl font-semibold text-dark-text">Màu sắc</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                <label className="block text-sm font-medium text-dark-300 mb-2">
                   Theme Color
                 </label>
                 <div className="flex items-center gap-3">
@@ -376,7 +376,7 @@ export default function SiteSettingsPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+                <label className="block text-sm font-medium text-dark-300 mb-2">
                   Primary Color
                 </label>
                 <div className="flex items-center gap-3">
