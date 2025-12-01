@@ -116,10 +116,44 @@ async function getCities() {
       expireAt: { $gt: new Date() },
     });
 
-    // Merge với danh sách mặc định và sort
+    // Merge với danh sách mặc định
     const defaultCities = getDefaultCities();
     const allCities = [...new Set([...cities, ...defaultCities])];
-    return allCities.sort();
+    
+    // Normalize và deduplicate: loại bỏ trùng lặp case-insensitive
+    const normalizedMap = new Map<string, string>();
+    
+    // Ưu tiên format từ defaultCities (có dấu, viết hoa đúng)
+    defaultCities.forEach(city => {
+      const normalized = city.toLowerCase().trim();
+      if (!normalizedMap.has(normalized)) {
+        normalizedMap.set(normalized, city);
+      }
+    });
+    
+    // Thêm cities từ database, giữ format tốt nhất
+    cities.forEach(city => {
+      if (!city) return;
+      const normalized = city.toLowerCase().trim();
+      if (!normalizedMap.has(normalized)) {
+        // Nếu chưa có, thêm vào
+        normalizedMap.set(normalized, city);
+      } else {
+        // Nếu đã có, ưu tiên format có dấu và viết hoa đúng
+        const existing = normalizedMap.get(normalized)!;
+        // Nếu city mới có format tốt hơn (có dấu, viết hoa), thay thế
+        if (city !== existing && /[àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ]/i.test(city)) {
+          // Nếu city mới có dấu tiếng Việt, ưu tiên nó
+          if (!/[àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ]/i.test(existing)) {
+            normalizedMap.set(normalized, city);
+          }
+        }
+      }
+    });
+    
+    // Chuyển về array và sort
+    const uniqueCities = Array.from(normalizedMap.values());
+    return uniqueCities.sort();
   } catch (error) {
     console.error("Error fetching cities:", error);
     return getDefaultCities();
