@@ -350,11 +350,26 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
                 <p className="text-white/70">Chưa có vé nào</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {tickets.map((ticket) => (
-                  <TicketCard key={ticket.id} {...ticket} />
-                ))}
-              </div>
+              <>
+                {activeTab === "purchased" && tickets.some((t: any) => t.status === "on_hold") && (
+                  <div className="mb-6 p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/30 rounded-xl">
+                    <div className="flex items-start gap-3">
+                      <Clock className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-white mb-1">Vé đang giữ - Cần thanh toán</h4>
+                        <p className="text-sm text-white/70">
+                          Bạn có vé đang được giữ. Vui lòng chờ người bán gửi mã vé và xác nhận nhận được trong vòng 15 phút để hoàn tất giao dịch.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {tickets.map((ticket) => (
+                    <TicketCard key={ticket.id} {...ticket} />
+                  ))}
+                </div>
+              </>
             )}
           </div>
         )}
