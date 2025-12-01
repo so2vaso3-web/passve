@@ -198,7 +198,6 @@ function getDefaultCities() {
 
 export const dynamic = "force-dynamic";
 export const revalidate = 30; // Cache 30 giây (giảm từ 60s)
-export const fetchCache = "default";
 
 export default async function HomePage({
   searchParams,
