@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card";
+import { Lock, Zap, MessageCircle, CheckCircle } from "lucide-react";
 
 export const metadata = {
   title: "Giới thiệu - Pass Vé Phim",
@@ -50,25 +51,45 @@ export default function AboutPage() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-4 bg-dark-800 rounded-lg border border-dark-border">
-                <h3 className="font-semibold text-dark-text mb-2">🔒 An toàn tuyệt đối</h3>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 bg-neon-green/20 rounded-lg flex items-center justify-center">
+                    <Lock className="w-5 h-5 text-neon-green" />
+                  </div>
+                  <h3 className="font-semibold text-dark-text">An toàn tuyệt đối</h3>
+                </div>
                 <p className="text-sm text-dark-text2">
                   Hệ thống escrow tự động, tiền được giữ an toàn cho đến khi giao dịch hoàn tất
                 </p>
               </div>
               <div className="p-4 bg-dark-800 rounded-lg border border-dark-border">
-                <h3 className="font-semibold text-dark-text mb-2">⚡ Giao dịch nhanh chóng</h3>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 bg-neon-green/20 rounded-lg flex items-center justify-center">
+                    <Zap className="w-5 h-5 text-neon-green" />
+                  </div>
+                  <h3 className="font-semibold text-dark-text">Giao dịch nhanh chóng</h3>
+                </div>
                 <p className="text-sm text-dark-text2">
                   Quy trình đơn giản, thanh toán và nhận vé chỉ trong vài phút
                 </p>
               </div>
               <div className="p-4 bg-dark-800 rounded-lg border border-dark-border">
-                <h3 className="font-semibold text-dark-text mb-2">💬 Hỗ trợ trực tiếp</h3>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 bg-neon-green/20 rounded-lg flex items-center justify-center">
+                    <MessageCircle className="w-5 h-5 text-neon-green" />
+                  </div>
+                  <h3 className="font-semibold text-dark-text">Hỗ trợ trực tiếp</h3>
+                </div>
                 <p className="text-sm text-dark-text2">
                   Chat trực tiếp với người bán, trao đổi thông tin nhanh chóng
                 </p>
               </div>
               <div className="p-4 bg-dark-800 rounded-lg border border-dark-border">
-                <h3 className="font-semibold text-dark-text mb-2">✅ Xác thực vé</h3>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 bg-neon-green/20 rounded-lg flex items-center justify-center">
+                    <CheckCircle className="w-5 h-5 text-neon-green" />
+                  </div>
+                  <h3 className="font-semibold text-dark-text">Xác thực vé</h3>
+                </div>
                 <p className="text-sm text-dark-text2">
                   Hệ thống kiểm tra và xác thực vé trước khi giao dịch hoàn tất
                 </p>

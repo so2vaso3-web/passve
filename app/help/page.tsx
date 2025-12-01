@@ -2,7 +2,7 @@
 
 import { Card } from "@/components/ui/card";
 import { useState } from "react";
-import { ChevronDown, ChevronUp, ShoppingCart, Upload, MessageCircle, Shield, CreditCard, HelpCircle } from "lucide-react";
+import { ChevronDown, ChevronUp, ShoppingCart, Upload, MessageCircle, Shield, CreditCard, HelpCircle, Mail, Phone } from "lucide-react";
 
 export default function HelpPage() {
   const [openSection, setOpenSection] = useState<string | null>(null);
@@ -245,19 +245,28 @@ export default function HelpPage() {
           <p className="text-dark-text2 mb-4">
             Nếu bạn vẫn còn thắc mắc, vui lòng liên hệ với chúng tôi:
           </p>
-          <div className="space-y-2 text-dark-text2">
-            <p>📧 Email: support@passvephim.vn</p>
-            <p>📞 Hotline: 1900 1234</p>
-            <p>
-              💬 Hoặc truy cập{" "}
-              <a href="/contact" className="text-neon-green hover:underline">
-                trang Liên hệ
-              </a>{" "}
-              hoặc{" "}
-              <a href="/faq" className="text-neon-green hover:underline">
-                FAQ
-              </a>
-            </p>
+          <div className="space-y-3 text-dark-text2">
+            <div className="flex items-center gap-3">
+              <Mail className="w-5 h-5 text-neon-green" />
+              <p>Email: <a href="mailto:support@passvephim.vn" className="text-neon-green hover:underline">support@passvephim.vn</a></p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Phone className="w-5 h-5 text-neon-green" />
+              <p>Hotline: <a href="tel:19001234" className="text-neon-green hover:underline">1900 1234</a></p>
+            </div>
+            <div className="flex items-center gap-3">
+              <MessageCircle className="w-5 h-5 text-neon-green" />
+              <p>
+                Hoặc truy cập{" "}
+                <a href="/contact" className="text-neon-green hover:underline">
+                  trang Liên hệ
+                </a>{" "}
+                hoặc{" "}
+                <a href="/faq" className="text-neon-green hover:underline">
+                  FAQ
+                </a>
+              </p>
+            </div>
           </div>
         </Card>
       </div>
