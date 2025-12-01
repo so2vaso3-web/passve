@@ -63,22 +63,62 @@ export async function PATCH(
     const body = await request.json();
     const { status, ...updateData } = body;
 
-    // Chỉ cho phép cập nhật status nếu là seller (admin có thể cập nhật mọi thứ)
-    if (status && isSeller && !isAdmin) {
-      // Seller chỉ có thể toggle giữa pending và approved
-      if (status === "pending" || status === "approved") {
-        ticket.status = status;
+    // Nếu có updateData (không chỉ status), cho phép seller cập nhật
+    if (Object.keys(updateData).length > 0) {
+      // Seller hoặc admin có thể cập nhật thông tin
+      if (isSeller || isAdmin) {
+        // Cập nhật các trường được phép
+        if (updateData.movieTitle) ticket.movieTitle = updateData.movieTitle;
+        if (updateData.showDate) ticket.showDate = new Date(updateData.showDate);
+        if (updateData.showTime) ticket.showTime = updateData.showTime;
+        if (updateData.cinema) ticket.cinema = updateData.cinema;
+        if (updateData.city) ticket.city = updateData.city;
+        if (updateData.seats) ticket.seats = updateData.seats;
+        if (updateData.quantity) ticket.quantity = updateData.quantity;
+        if (updateData.originalPrice) ticket.originalPrice = updateData.originalPrice;
+        if (updateData.sellingPrice) ticket.sellingPrice = updateData.sellingPrice;
+        if (updateData.images) ticket.images = updateData.images;
+        if (updateData.qrImage !== undefined) ticket.qrImage = updateData.qrImage;
+        if (updateData.reason !== undefined) ticket.reason = updateData.reason;
+        if (updateData.description !== undefined) ticket.description = updateData.description;
+
+        // Cập nhật title dựa trên category và movieTitle
+        if (updateData.category || updateData.movieTitle || updateData.seats) {
+          const category = updateData.category || ticket.category;
+          const movieTitle = updateData.movieTitle || ticket.movieTitle;
+          const seats = updateData.seats || ticket.seats;
+          ticket.title =
+            category === "movie"
+              ? `Vé xem phim ${movieTitle} - ${seats}`
+              : category === "concert"
+              ? `Vé concert ${movieTitle} - ${seats}`
+              : `Vé sự kiện ${movieTitle} - ${seats}`;
+        }
+
+        // Recalculate expireAt nếu showDate hoặc showTime thay đổi
+        if (updateData.showDate || updateData.showTime) {
+          const showDate = updateData.showDate ? new Date(updateData.showDate) : ticket.showDate;
+          const showTime = updateData.showTime || ticket.showTime;
+          const [hours, minutes] = showTime.split(":").map(Number);
+          const showDateTime = new Date(showDate);
+          showDateTime.setHours(hours, minutes, 0, 0);
+          ticket.expireAt = new Date(showDateTime.getTime() + 3 * 60 * 60 * 1000);
+          ticket.isExpired = ticket.expireAt < new Date();
+        }
       }
-    } else if (isAdmin) {
-      // Admin có thể cập nhật mọi thứ
-      if (status) ticket.status = status;
-      Object.assign(ticket, updateData);
-    } else if (Object.keys(updateData).length > 0) {
-      // Seller muốn cập nhật thông tin khác -> cần redirect đến edit page
-      return NextResponse.json(
-        { error: "Vui lòng sử dụng trang chỉnh sửa để cập nhật thông tin" },
-        { status: 400 }
-      );
+    }
+
+    // Xử lý status update
+    if (status) {
+      if (isAdmin) {
+        // Admin có thể cập nhật mọi status
+        ticket.status = status;
+      } else if (isSeller) {
+        // Seller chỉ có thể toggle giữa pending và approved
+        if (status === "pending" || status === "approved") {
+          ticket.status = status;
+        }
+      }
     }
 
     await ticket.save();
