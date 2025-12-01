@@ -122,87 +122,47 @@ export async function POST(
     const db = (await import("mongoose")).connection;
     const dbSession = await db.startSession();
     
-    // Check if ticket has code or QR image - if yes, auto-complete sale
-    const hasTicketCode = ticket.ticketCode && ticket.ticketCode.trim().length > 0;
-    const hasQrImage = ticket.qrImage && ticket.qrImage.trim().length > 0;
-    const canAutoComplete = hasTicketCode || hasQrImage;
-    
+    // Luôn hoàn tất giao dịch ngay (không còn logic giữ vé)
     try {
       await dbSession.withTransaction(async () => {
         // Deduct from buyer balance
         buyerWallet.balance -= total;
         await buyerWallet.save({ session: dbSession });
 
-        if (canAutoComplete) {
-          // If ticket has code, complete sale immediately
-          // Seller receives money (minus 7% fee)
-          sellerWallet.balance += sellerReceives;
-          sellerWallet.totalEarned += sellerReceives;
-          await sellerWallet.save({ session: dbSession });
+        // Seller receives money (minus 7% fee)
+        sellerWallet.balance += sellerReceives;
+        sellerWallet.totalEarned += sellerReceives;
+        await sellerWallet.save({ session: dbSession });
 
-          // Update ticket status to sold
-          ticket.status = "sold";
-          ticket.buyer = buyer._id;
-          ticket.soldAt = new Date();
-          await ticket.save({ session: dbSession });
+        // Update ticket status to sold
+        ticket.status = "sold";
+        ticket.buyer = buyer._id;
+        ticket.soldAt = new Date();
+        await ticket.save({ session: dbSession });
 
-          // Create transactions for completed sale
-          await Transaction.create(
-            [
-              {
-                user: buyer._id,
-                type: "purchase",
-                amount: total,
-                status: "completed",
-                description: `Mua vé ${ticket.movieTitle} - ${ticket.cinema} (Mã vé: ${ticket.ticketCode})`,
-                ticket: ticket._id,
-              },
-              {
-                user: ticket.seller._id,
-                type: "sale",
-                amount: sellerReceives,
-                status: "completed",
-                description: `Bán vé ${ticket.movieTitle} cho ${buyer.name}`,
-                ticket: ticket._id,
-              },
-            ],
-            { session: dbSession, ordered: true }
-          );
-        } else {
-          // If no code and no QR image, use escrow flow (original flow)
-          // Add to seller escrow (full amount, will deduct 7% on release)
-          sellerWallet.escrow += ticket.sellingPrice;
-          await sellerWallet.save({ session: dbSession });
-
-          // Update ticket status
-          ticket.status = "on_hold";
-          ticket.onHoldBy = buyer._id;
-          ticket.onHoldAt = new Date();
-          await ticket.save({ session: dbSession });
-
-          // Create transactions
-          await Transaction.create(
-            [
-              {
-                user: buyer._id,
-                type: "escrow_hold",
-                amount: total,
-                status: "completed",
-                description: `Giữ vé ${ticket.movieTitle} - ${ticket.cinema}`,
-                ticket: ticket._id,
-              },
-              {
-                user: ticket.seller._id,
-                type: "escrow_hold",
-                amount: ticket.sellingPrice,
-                status: "completed",
-                description: `Vé ${ticket.movieTitle} được giữ bởi ${buyer.name}`,
-                ticket: ticket._id,
-              },
-            ],
-            { session: dbSession, ordered: true }
-          );
-        }
+        // Create transactions for completed sale
+        const hasTicketCode = ticket.ticketCode && ticket.ticketCode.trim().length > 0;
+        await Transaction.create(
+          [
+            {
+              user: buyer._id,
+              type: "purchase",
+              amount: total,
+              status: "completed",
+              description: `Mua vé ${ticket.movieTitle} - ${ticket.cinema}${hasTicketCode ? ` (Mã vé: ${ticket.ticketCode})` : ""}`,
+              ticket: ticket._id,
+            },
+            {
+              user: ticket.seller._id,
+              type: "sale",
+              amount: sellerReceives,
+              status: "completed",
+              description: `Bán vé ${ticket.movieTitle} cho ${buyer.name}`,
+              ticket: ticket._id,
+            },
+          ],
+          { session: dbSession, ordered: true }
+        );
       });
 
       // Revalidate
@@ -213,16 +173,17 @@ export async function POST(
       revalidateTag("wallet");
       revalidateTag("stats");
 
+      const hasTicketCode = ticket.ticketCode && ticket.ticketCode.trim().length > 0;
+      const hasQrImage = ticket.qrImage && ticket.qrImage.trim().length > 0;
+
       return NextResponse.json({
         success: true,
-        message: canAutoComplete 
-          ? "Đã mua vé thành công! Mã vé và ảnh QR code đã được hiển thị."
-          : "Đã thanh toán thành công! Vui lòng chờ người bán gửi mã vé qua chat.",
+        message: "Đã mua vé thành công! Mã vé và ảnh QR code đã được hiển thị.",
         ticket: {
           id: ticket._id.toString(),
           status: ticket.status,
-          ticketCode: (canAutoComplete && hasTicketCode) ? ticket.ticketCode : undefined,
-          qrImage: (canAutoComplete && hasQrImage) ? ticket.qrImage : undefined,
+          ticketCode: hasTicketCode ? ticket.ticketCode : undefined,
+          qrImage: hasQrImage ? ticket.qrImage : undefined,
         },
       });
     } finally {

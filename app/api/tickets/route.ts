@@ -267,21 +267,13 @@ export async function GET(request: NextRequest) {
         query.seller = userObjectId || userId;
         query.status = "sold";
       } else if (statusFilter === "purchased") {
-        // Include both purchased (sold) and on_hold tickets
+        // Chỉ lấy vé đã mua (sold)
         if (userObjectId) {
-          query.$or = [
-            { buyer: userObjectId, status: "sold" },
-            { onHoldBy: userObjectId, status: "on_hold" }
-          ];
+          query.buyer = userObjectId;
         } else {
-          query.$or = [
-            { buyer: userId, status: "sold" },
-            { onHoldBy: userId, status: "on_hold" }
-          ];
+          query.buyer = userId;
         }
-      } else if (statusFilter === "on_hold") {
-        query.onHoldBy = userObjectId || userId;
-        query.status = "on_hold";
+        query.status = "sold";
       }
     }
 
@@ -344,8 +336,8 @@ export async function GET(request: NextRequest) {
         onHoldBy: ticket.onHoldBy?.toString(),
         onHoldAt: ticket.onHoldAt,
         ticketCode: ticket.ticketCode,
-        // Hiển thị QR code cho người mua nếu đã thanh toán (sold hoặc on_hold)
-        qrImage: ((ticket.status === "sold" && ticket.buyer) || (ticket.status === "on_hold" && ticket.onHoldBy)) ? ticket.qrImage : undefined,
+        // Hiển thị QR code cho người mua nếu đã mua (sold)
+        qrImage: (ticket.status === "sold" && ticket.buyer) ? ticket.qrImage : undefined,
         buyer: ticket.buyer?._id?.toString(),
         buyerEmail: ticket.buyer?.email,
         seller: {

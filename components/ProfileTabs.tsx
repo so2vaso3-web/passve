@@ -62,22 +62,13 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
     setLoading(true);
     try {
       if (activeTab === "selling" || activeTab === "sold" || activeTab === "purchased") {
-        // For purchased tab, get both on_hold and purchased tickets
+        // For purchased tab, get sold tickets
         if (activeTab === "purchased") {
-          // Tự động fix các vé on_hold có QR image (chỉ chạy 1 lần khi load)
-          try {
-            await fetch("/api/tickets/fix-onhold", { method: "POST", cache: "no-store" });
-          } catch (error) {
-            // Ignore errors - chỉ admin mới có thể fix
-          }
-
-          const [onHoldRes, purchasedRes] = await Promise.all([
-            fetch(`/api/tickets?user=${userId}&status=on_hold`, { cache: "no-store" }),
-            fetch(`/api/tickets?user=${userId}&status=purchased`, { cache: "no-store" }),
-          ]);
-          const onHoldData = await onHoldRes.json();
-          const purchasedData = await purchasedRes.json();
-          setTickets([...(onHoldData.tickets || []), ...(purchasedData.tickets || [])]);
+          const res = await fetch(`/api/tickets?user=${userId}&status=purchased`, {
+            cache: "no-store",
+          });
+          const data = await res.json();
+          setTickets(data.tickets || []);
         } else {
           const status = activeTab === "selling" ? "active" : "sold";
           const res = await fetch(`/api/tickets?user=${userId}&status=${status}`, {
@@ -360,19 +351,6 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
               </div>
             ) : (
               <>
-                {activeTab === "purchased" && tickets.some((t: any) => t.status === "on_hold" && !t.qrImage && !t.ticketCode) && (
-                  <div className="mb-6 p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/30 rounded-xl">
-                    <div className="flex items-start gap-3">
-                      <Clock className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <h4 className="font-semibold text-white mb-1">Vé đang giữ - Chờ người bán gửi mã vé</h4>
-                        <p className="text-sm text-white/70">
-                          Bạn đã thanh toán. Vui lòng chờ người bán gửi mã vé và ảnh QR code qua chat.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
                 {activeTab === "purchased" && tickets.some((t: any) => t.status === "sold" && t.ticketCode) && (
                   <div className="mb-6 p-4 bg-gradient-to-r from-neon-green/10 to-emerald-500/10 border border-neon-green/30 rounded-xl">
                     <div className="flex items-start gap-3">

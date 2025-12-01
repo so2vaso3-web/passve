@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { BuyTicketModal } from "./BuyTicketModal";
 import { ChatModal } from "./ChatModal";
+import toast from "react-hot-toast";
 
 interface TicketCardProps {
   id: string;
@@ -174,12 +175,11 @@ export function TicketCard({
     setShowChat(true);
   };
 
-  const canBuy = session && status === "approved" && !isExpired && !isHeldByMe;
+  const canBuy = session && status === "approved" && !isExpired;
   const isSold = status === "sold";
-  const isOnHold = status === "on_hold";
   
-  // Check if this is my purchase (sold to me or held by me)
-  const isMyPurchase = (isSold || isOnHold) && (buyerEmail === session?.user?.email || (buyer && session?.user?.email) || (onHoldBy && session?.user?.email));
+  // Check if this is my purchase (sold to me)
+  const isMyPurchase = isSold && (buyerEmail === session?.user?.email || (buyer && session?.user?.email));
 
   return (
     <>
@@ -230,18 +230,6 @@ export function TicketCard({
               ) : isSold ? (
                 <span className="bg-gray-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-neon-sm">
                   Đã bán
-                </span>
-              ) : isOnHold && isMyPurchase && (qrImage || ticketCode) ? (
-                <span className="bg-neon-green text-white px-3 py-1 rounded-full text-xs font-bold shadow-neon-sm">
-                  Đã mua
-                </span>
-              ) : isOnHold && isHeldByMe ? (
-                <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-neon-sm">
-                  Đã được giữ bởi bạn
-                </span>
-              ) : isOnHold ? (
-                <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-neon-sm">
-                  Đang được giữ
                 </span>
               ) : timeLeft ? (
                 <span className={`text-white px-3 py-1 rounded-full text-xs font-bold shadow-neon-sm ${
@@ -355,6 +343,40 @@ export function TicketCard({
             </div>
           )}
 
+          {/* Cancel/Refund button for purchased tickets */}
+          {isMyPurchase && status === "sold" && (
+            <div className="mb-4">
+              <button
+                onClick={async (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (!confirm("Bạn có chắc muốn hủy vé này? Tiền sẽ được hoàn về tài khoản của bạn.")) {
+                    return;
+                  }
+                  try {
+                    const res = await fetch(`/api/tickets/${id}/cancel`, {
+                      method: "POST",
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                      toast.success("Đã hủy vé và hoàn tiền thành công!");
+                      setTimeout(() => {
+                        window.location.reload();
+                      }, 1500);
+                    } else {
+                      toast.error(data.error || "Có lỗi xảy ra");
+                    }
+                  } catch (error: any) {
+                    toast.error("Có lỗi xảy ra khi hủy vé");
+                  }
+                }}
+                className="w-full bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-400 py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold text-center transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                Hủy vé / Trả vé
+              </button>
+            </div>
+          )}
+
           {/* Action Buttons */}
           {!isExpired && !isSold && (
             <div className="flex gap-2 mt-3 sm:mt-4">
@@ -378,18 +400,6 @@ export function TicketCard({
                     </button>
                   )}
                 </>
-              ) : isOnHold && isMyPurchase && (qrImage || ticketCode) ? (
-                <div className="w-full bg-neon-green/20 border border-neon-green text-neon-green py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold text-center">
-                  Đã mua thành công
-                </div>
-              ) : isOnHold && isHeldByMe ? (
-                <div className="w-full bg-blue-500/20 border border-blue-500 text-blue-400 py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold text-center">
-                  Đang chờ người bán gửi mã vé
-                </div>
-              ) : isOnHold ? (
-                <div className="w-full bg-orange-500/20 border border-orange-500 text-orange-400 py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold text-center">
-                  Đang được giữ
-                </div>
               ) : (
                 <Link
                   href={`/tickets/${id}`}
