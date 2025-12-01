@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, password } = body;
+    const { name, username, email, password } = body;
 
     // Validation
     if (!name || !email || !password) {
@@ -15,6 +15,38 @@ export async function POST(request: NextRequest) {
         { error: "Vui lòng điền đầy đủ thông tin" },
         { status: 400 }
       );
+    }
+
+    // Username validation (nếu có)
+    if (username) {
+      const usernameRegex = /^[a-z0-9]+$/;
+      if (!usernameRegex.test(username.toLowerCase())) {
+        return NextResponse.json(
+          { error: "Tên người dùng chỉ được chứa chữ cái thường và số (a-z, 0-9)" },
+          { status: 400 }
+        );
+      }
+      if (username.length < 3) {
+        return NextResponse.json(
+          { error: "Tên người dùng phải có ít nhất 3 ký tự" },
+          { status: 400 }
+        );
+      }
+      if (username.length > 20) {
+        return NextResponse.json(
+          { error: "Tên người dùng không được quá 20 ký tự" },
+          { status: 400 }
+        );
+      }
+
+      // Check if username already exists
+      const existingUsername = await User.findOne({ username: username.toLowerCase() }).maxTimeMS(5000);
+      if (existingUsername) {
+        return NextResponse.json(
+          { error: "Tên người dùng này đã được sử dụng. Vui lòng chọn tên khác." },
+          { status: 400 }
+        );
+      }
     }
 
     if (password.length < 6) {
@@ -83,6 +115,7 @@ export async function POST(request: NextRequest) {
     try {
       user = await User.create({
         name: name.trim(),
+        username: username ? username.toLowerCase().trim() : undefined,
         email: email.toLowerCase().trim(),
         password: hashedPassword, // Lưu password đã hash
         role: isAdmin ? "admin" : "user",
@@ -106,6 +139,7 @@ export async function POST(request: NextRequest) {
         user: {
           id: user._id.toString(),
           name: user.name,
+          username: user.username,
           email: user.email,
           role: user.role,
         },

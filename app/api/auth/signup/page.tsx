@@ -14,6 +14,7 @@ export default function SignUpPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
+    username: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -28,6 +29,26 @@ export default function SignUpPage() {
       toast.error("Vui lòng điền đầy đủ thông tin");
       setIsLoading(false);
       return;
+    }
+
+    // Username validation (nếu có)
+    if (formData.username) {
+      const usernameRegex = /^[a-z0-9]+$/;
+      if (!usernameRegex.test(formData.username.toLowerCase())) {
+        toast.error("Tên người dùng chỉ được chứa chữ cái thường và số (a-z, 0-9)");
+        setIsLoading(false);
+        return;
+      }
+      if (formData.username.length < 3) {
+        toast.error("Tên người dùng phải có ít nhất 3 ký tự");
+        setIsLoading(false);
+        return;
+      }
+      if (formData.username.length > 20) {
+        toast.error("Tên người dùng không được quá 20 ký tự");
+        setIsLoading(false);
+        return;
+      }
     }
 
     if (formData.password.length < 6) {
@@ -48,6 +69,7 @@ export default function SignUpPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: formData.name.trim(),
+          username: formData.username.trim().toLowerCase() || undefined,
           email: formData.email.trim().toLowerCase(),
           password: formData.password,
         }),
@@ -142,6 +164,29 @@ export default function SignUpPage() {
                 required
                 disabled={isLoading}
               />
+            </div>
+
+            {/* Username */}
+            <div>
+              <label className="block text-sm font-semibold text-dark-text mb-2">
+                Tên người dùng <span className="text-dark-text2 text-xs">(Tùy chọn)</span>
+              </label>
+              <input
+                type="text"
+                value={formData.username}
+                onChange={(e) => {
+                  // Chỉ cho phép nhập chữ thường và số
+                  const value = e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '');
+                  setFormData({ ...formData, username: value });
+                }}
+                placeholder="username (chỉ a-z, 0-9)"
+                maxLength={20}
+                className="w-full px-4 py-3 border-2 border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-green focus:border-neon-green transition-all text-dark-text placeholder:text-dark-text2 bg-dark-card-bright"
+                disabled={isLoading}
+              />
+              <p className="text-xs text-dark-text2 mt-1">
+                Chỉ chứa chữ cái thường và số, 3-20 ký tự
+              </p>
             </div>
 
             {/* Email */}

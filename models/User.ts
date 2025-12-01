@@ -10,6 +10,7 @@ export interface IBankAccount {
 
 export interface IUser extends Document {
   name: string;
+  username?: string; // Username unique, chỉ chứa a-z, 0-9, không có ký tự đặc biệt
   email: string;
   password?: string; // Password hash (chỉ dùng cho email/password login)
   phone?: string;
@@ -29,6 +30,16 @@ const UserSchema = new Schema<IUser>(
     name: {
       type: String,
       required: true,
+    },
+    username: {
+      type: String,
+      unique: true,
+      sparse: true, // Cho phép null/undefined nhưng unique nếu có giá trị
+      lowercase: true,
+      trim: true,
+      match: /^[a-z0-9]+$/, // Chỉ cho phép chữ thường và số
+      minlength: 3,
+      maxlength: 20,
     },
     email: {
       type: String,
