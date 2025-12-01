@@ -27,9 +27,9 @@ export function Header() {
   }, []);
 
   return (
-    <header className="hidden md:block bg-dark-card border-b border-dark-border sticky top-0 z-50 shadow-card backdrop-blur-sm">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+    <header className="bg-dark-card border-b border-dark-border sticky top-0 z-50 shadow-card backdrop-blur-sm">
+      <div className="container mx-auto px-3 sm:px-4">
+        <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 flex-shrink-0 group">
             {siteLogo && (
@@ -42,7 +42,7 @@ export function Header() {
                 />
               </div>
             )}
-            <span className="text-xl font-heading font-black text-dark-text hidden sm:block">
+            <span className="text-lg sm:text-xl font-heading font-black text-dark-text hidden xs:block">
               Pass Vé Phim
             </span>
           </Link>
@@ -134,25 +134,26 @@ export function Header() {
             {/* Post button */}
             <Link
               href="/sell"
-              className="bg-neon-green hover:bg-neon-green-light text-white px-5 py-2.5 rounded-xl font-semibold text-base transition-all hover:shadow-neon hover:scale-105 active:scale-95 whitespace-nowrap"
+              className="bg-neon-green hover:bg-neon-green-light text-white px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm md:text-base transition-all hover:shadow-neon hover:scale-105 active:scale-95 whitespace-nowrap"
             >
-              Đăng tin miễn phí
+              <span className="hidden sm:inline">Đăng tin miễn phí</span>
+              <span className="sm:hidden">Đăng tin</span>
             </Link>
 
             {/* Mobile menu button */}
             <button
-              className="md:hidden p-2 rounded-xl hover:bg-dark-border transition-colors text-dark-text"
+              className="lg:hidden p-2 rounded-xl hover:bg-dark-border transition-colors text-dark-text"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle mobile menu"
             >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              {mobileMenuOpen ? <X size={20} className="sm:w-6 sm:h-6" /> : <Menu size={20} className="sm:w-6 sm:h-6" />}
             </button>
           </div>
         </div>
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-dark-card border-t border-dark-border py-4 px-4">
+          <div className="lg:hidden bg-dark-card border-t border-dark-border py-3 sm:py-4 px-3 sm:px-4">
             <Link
               href="/"
               className="block py-3 text-dark-text2 hover:text-neon-green transition-colors font-semibold"

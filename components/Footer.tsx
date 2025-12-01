@@ -33,7 +33,7 @@ export function Footer() {
   return (
     <footer className={`bg-dark-card border-t border-dark-border mt-24 py-12 ${hideOnMobile ? "hidden md:block" : ""}`}>
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-6 sm:mb-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
               {siteLogo && (

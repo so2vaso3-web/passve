@@ -184,7 +184,7 @@ export function TicketCard({
   return (
     <>
       <div
-        className={`group relative bg-dark-card border border-dark-border rounded-2xl overflow-hidden shadow-card transition-all duration-300 max-w-md ${
+        className={`group relative bg-dark-card border border-dark-border rounded-xl sm:rounded-2xl overflow-hidden shadow-card transition-all duration-300 w-full max-w-md ${
           isExpired || isSold
             ? "opacity-60 grayscale"
             : "hover:scale-[1.03] hover:shadow-neon hover:border-neon-green"
@@ -192,7 +192,7 @@ export function TicketCard({
       >
         {/* Image */}
         <Link href={`/tickets/${id}`} className="block">
-          <div className="relative w-full h-48 bg-dark-border overflow-hidden rounded-t-2xl">
+          <div className="relative w-full h-40 sm:h-48 bg-dark-border overflow-hidden rounded-t-xl sm:rounded-t-2xl">
             {image ? (
               <Image
                 src={image}
