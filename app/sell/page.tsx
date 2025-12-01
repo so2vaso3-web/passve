@@ -11,7 +11,7 @@ export default async function SellPage() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-bg py-8">
+    <div className="min-h-screen bg-dark-bg py-4 sm:py-6 md:py-8">
       <PostForm />
     </div>
   );

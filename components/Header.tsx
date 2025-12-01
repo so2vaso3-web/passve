@@ -48,7 +48,7 @@ export function Header() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden lg:flex items-center gap-4 xl:gap-6">
             <Link
               href="/"
               className="text-dark-text2 hover:text-neon-green transition-colors font-semibold text-base"

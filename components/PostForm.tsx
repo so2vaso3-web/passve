@@ -327,24 +327,24 @@ export function PostForm() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="mb-6">
+    <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
+      <div className="mb-4 sm:mb-6">
         <BackButton href="/" label="Quay lại Trang chủ" />
       </div>
-      <div className="bg-dark-card border border-dark-border rounded-2xl shadow-card p-6 md:p-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-heading font-black text-dark-text mb-2">
+      <div className="bg-dark-card border border-dark-border rounded-xl sm:rounded-2xl shadow-card p-4 sm:p-6 md:p-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
+          <div className="flex-1">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-heading font-black text-dark-text mb-1 sm:mb-2">
               Đăng bán vé
             </h1>
-            <p className="text-dark-text2">
+            <p className="text-sm sm:text-base text-dark-text2">
               Điền thông tin vé của bạn để bắt đầu bán
             </p>
           </div>
           <button
             type="button"
             onClick={() => setPreviewMode(!previewMode)}
-            className="px-5 py-2.5 border border-dark-border text-dark-text rounded-xl font-semibold text-sm hover:bg-dark-border hover:border-neon-green transition-colors"
+            className="w-full sm:w-auto px-4 sm:px-5 py-2 sm:py-2.5 border border-dark-border text-dark-text rounded-xl font-semibold text-xs sm:text-sm hover:bg-dark-border hover:border-neon-green transition-colors whitespace-nowrap"
           >
             {previewMode ? "Chỉnh sửa" : "Xem trước tin"}
           </button>
@@ -449,17 +449,17 @@ export function PostForm() {
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {/* Loại vé */}
             <div>
-              <label className="block text-sm font-semibold text-dark-text mb-3">
+              <label className="block text-sm font-semibold text-dark-text mb-2 sm:mb-3">
                 Loại vé <span className="text-red-500">*</span>
               </label>
-              <div className="flex gap-4">
+              <div className="flex flex-wrap gap-2 sm:gap-4">
                 {(["movie", "concert", "event"] as const).map((cat) => (
                   <label
                     key={cat}
-                    className={`flex items-center gap-2 px-5 py-2.5 border-2 rounded-xl cursor-pointer transition-all ${
+                    className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-2.5 border-2 rounded-lg sm:rounded-xl cursor-pointer transition-all text-xs sm:text-base ${
                       formData.category === cat
                         ? "border-neon-green bg-neon-green/20 text-neon-green"
                         : "border-dark-border hover:border-neon-green text-dark-text2"
@@ -493,7 +493,7 @@ export function PostForm() {
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 placeholder={formData.category === "movie" ? "VD: Dune 2, Avatar 2, Oppenheimer..." : formData.category === "concert" ? "VD: BlackPink Concert, Taylor Swift..." : "VD: Marathon TP.HCM, Triển lãm..."}
-                className="w-full px-4 py-3 border-2 border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-green focus:border-neon-green transition-all text-dark-text placeholder:text-dark-text2 font-medium bg-dark-card-bright"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-green focus:border-neon-green transition-all text-sm sm:text-base text-dark-text placeholder:text-dark-text2 font-medium bg-dark-card-bright"
                 required
               />
             </div>
@@ -510,7 +510,7 @@ export function PostForm() {
                   value={formData.showDate}
                   onChange={(e) => setFormData({ ...formData, showDate: e.target.value })}
                   min={getMinDate()}
-                  className="w-full px-4 py-3 border-2 border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-green focus:border-neon-green transition-all text-dark-text bg-dark-card-bright"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-green focus:border-neon-green transition-all text-sm sm:text-base text-dark-text bg-dark-card-bright"
                   required
                 />
               </div>
@@ -523,7 +523,7 @@ export function PostForm() {
                 <select
                   value={formData.showTime}
                   onChange={(e) => setFormData({ ...formData, showTime: e.target.value })}
-                  className="w-full px-4 py-3 border border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-green focus:border-neon-green transition-all text-dark-text bg-dark-bg font-medium"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-green focus:border-neon-green transition-all text-sm sm:text-base text-dark-text bg-dark-bg font-medium"
                   required
                 >
                   <option value="">{formData.category === "movie" ? "Chọn giờ chiếu" : formData.category === "concert" ? "Chọn giờ diễn" : "Chọn giờ bắt đầu"}</option>
@@ -538,7 +538,7 @@ export function PostForm() {
 
             {/* Địa điểm/Rạp - Khác nhau theo loại vé */}
             {formData.category === "movie" ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                 <label className="block text-sm font-semibold text-dark-text mb-2">
                     <MapPin className="w-4 h-4 inline mr-1" />
@@ -549,7 +549,7 @@ export function PostForm() {
                     value={formData.cinema}
                     onChange={(e) => setFormData({ ...formData, cinema: e.target.value })}
                     placeholder="VD: CGV Vincom, Lotte Cinema, Galaxy Cinema..."
-                    className="w-full px-4 py-3 border-2 border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-green focus:border-neon-green transition-all text-dark-text placeholder:text-dark-text2 font-medium bg-dark-card-bright"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-green focus:border-neon-green transition-all text-sm sm:text-base text-dark-text placeholder:text-dark-text2 font-medium bg-dark-card-bright"
                     required
                   />
                 </div>
@@ -563,13 +563,13 @@ export function PostForm() {
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                     placeholder="VD: Hà Nội, TP.HCM, Đà Nẵng..."
-                    className="w-full px-4 py-3 border-2 border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-green focus:border-neon-green transition-all text-dark-text placeholder:text-dark-text2 font-medium bg-dark-card-bright"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-green focus:border-neon-green transition-all text-sm sm:text-base text-dark-text placeholder:text-dark-text2 font-medium bg-dark-card-bright"
                     required
                   />
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                 <label className="block text-sm font-semibold text-dark-text mb-2">
                     <MapPin className="w-4 h-4 inline mr-1" />
@@ -580,7 +580,7 @@ export function PostForm() {
                     value={formData.cinema}
                     onChange={(e) => setFormData({ ...formData, cinema: e.target.value })}
                     placeholder={formData.category === "concert" ? "VD: Sân vận động Mỹ Đình, Nhà thi đấu Quân khu 7..." : "VD: Phố đi bộ Nguyễn Huệ, Công viên Lê Văn Tám..."}
-                    className="w-full px-4 py-3 border-2 border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-green focus:border-neon-green transition-all text-dark-text placeholder:text-dark-text2 font-medium bg-dark-card-bright"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-green focus:border-neon-green transition-all text-sm sm:text-base text-dark-text placeholder:text-dark-text2 font-medium bg-dark-card-bright"
                     required
                   />
                 </div>
@@ -594,7 +594,7 @@ export function PostForm() {
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                     placeholder="VD: Hà Nội, TP.HCM, Đà Nẵng..."
-                    className="w-full px-4 py-3 border-2 border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-green focus:border-neon-green transition-all text-dark-text placeholder:text-dark-text2 font-medium bg-dark-card-bright"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-green focus:border-neon-green transition-all text-sm sm:text-base text-dark-text placeholder:text-dark-text2 font-medium bg-dark-card-bright"
                     required
                   />
                 </div>
@@ -612,7 +612,7 @@ export function PostForm() {
                 value={formData.seats}
                 onChange={(e) => setFormData({ ...formData, seats: e.target.value })}
                 placeholder={formData.category === "movie" ? "VD: G12, G13 hoặc VIP 05" : formData.category === "concert" ? "VD: Khu vực Standing, Hàng A Ghế 10, VIP 01-05" : "VD: Khu vực VIP, Cổng A, Vị trí số 15"}
-                className="w-full px-4 py-3 border-2 border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-green focus:border-neon-green transition-all text-dark-text placeholder:text-dark-text2 font-medium bg-dark-card-bright"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-green focus:border-neon-green transition-all text-sm sm:text-base text-dark-text placeholder:text-dark-text2 font-medium bg-dark-card-bright"
                 required
               />
               <p className="text-xs text-dark-text2 mt-1">
@@ -642,35 +642,37 @@ export function PostForm() {
             </div>
 
             {/* Giá gốc và Giá bán lại */}
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Price Mode Toggle */}
-              <div className="flex items-center gap-4 p-3 bg-dark-bg rounded-xl border border-dark-border">
-                <span className="text-sm font-semibold text-dark-text">Cách nhập giá:</span>
-                <button
-                  type="button"
-                  onClick={() => setPriceMode("desired")}
-                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                    priceMode === "desired"
-                      ? "bg-neon-green text-white"
-                      : "bg-dark-card text-dark-text2 hover:bg-dark-border"
-                  }`}
-                >
-                  Giá mong muốn nhận về
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPriceMode("selling")}
-                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                    priceMode === "selling"
-                      ? "bg-neon-green text-white"
-                      : "bg-dark-card text-dark-text2 hover:bg-dark-border"
-                  }`}
-                >
-                  Giá bán cho khách
-                </button>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-3 bg-dark-bg rounded-xl border border-dark-border">
+                <span className="text-xs sm:text-sm font-semibold text-dark-text whitespace-nowrap">Cách nhập giá:</span>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPriceMode("desired")}
+                    className={`flex-1 sm:flex-none px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
+                      priceMode === "desired"
+                        ? "bg-neon-green text-white"
+                        : "bg-dark-card text-dark-text2 hover:bg-dark-border"
+                    }`}
+                  >
+                    Giá mong muốn nhận về
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPriceMode("selling")}
+                    className={`flex-1 sm:flex-none px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
+                      priceMode === "selling"
+                        ? "bg-neon-green text-white"
+                        : "bg-dark-card text-dark-text2 hover:bg-dark-border"
+                    }`}
+                  >
+                    Giá bán cho khách
+                  </button>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className="block text-sm font-semibold text-dark-text mb-2">
                     <DollarSign className="w-4 h-4 inline mr-1" />
@@ -682,7 +684,7 @@ export function PostForm() {
                     onChange={(e) => setFormData({ ...formData, originalPrice: e.target.value })}
                     placeholder="500000"
                     min="0"
-                    className="w-full px-4 py-3 border-2 border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-green focus:border-neon-green transition-all text-dark-text placeholder:text-dark-text2 font-medium bg-dark-card-bright"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-green focus:border-neon-green transition-all text-sm sm:text-base text-dark-text placeholder:text-dark-text2 font-medium bg-dark-card-bright"
                     required
                   />
                 </div>
@@ -701,7 +703,7 @@ export function PostForm() {
                     }}
                     placeholder={priceMode === "desired" ? "1000000" : "1075000"}
                     min="50000"
-                    className="w-full px-4 py-3 border-2 border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-green focus:border-neon-green transition-all text-dark-text placeholder:text-dark-text2 font-medium bg-dark-card-bright"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-green focus:border-neon-green transition-all text-sm sm:text-base text-dark-text placeholder:text-dark-text2 font-medium bg-dark-card-bright"
                     required
                   />
                   {priceMode === "desired" && formData.sellingPrice && formData.originalPrice && (
@@ -777,7 +779,7 @@ export function PostForm() {
                   htmlFor="image-upload"
                   onDragOver={handleDragOver}
                   onDrop={handleDrop}
-                  className={`block border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${
+                  className={`block border-2 border-dashed rounded-xl p-4 sm:p-6 md:p-8 text-center cursor-pointer transition-all ${
                     uploading
                       ? "border-neon-green bg-neon-green/20"
                       : "border-dark-border hover:border-neon-green hover:bg-neon-green/10"
@@ -785,16 +787,16 @@ export function PostForm() {
                 >
                   {uploading ? (
                     <div className="flex flex-col items-center">
-                      <Loader2 className="w-12 h-12 text-primary mb-4 animate-spin" />
-                      <p className="text-primary font-medium">Đang upload...</p>
+                      <Loader2 className="w-8 h-8 sm:w-12 sm:h-12 text-primary mb-2 sm:mb-4 animate-spin" />
+                      <p className="text-xs sm:text-sm text-primary font-medium">Đang upload...</p>
                     </div>
                   ) : (
                     <>
-                      <Upload className="w-12 h-12 text-dark-text2 mx-auto mb-4" />
-                      <p className="text-dark-text2 mb-2 font-medium">
+                      <Upload className="w-8 h-8 sm:w-12 sm:h-12 text-dark-text2 mx-auto mb-2 sm:mb-4" />
+                      <p className="text-xs sm:text-sm text-dark-text2 mb-1 sm:mb-2 font-medium">
                         Kéo thả ảnh vào đây hoặc click để chọn
                       </p>
-                      <p className="text-sm text-dark-text2">
+                      <p className="text-xs text-dark-text2">
                         Tối đa 5 ảnh, mỗi ảnh tối đa 5MB
                       </p>
                     </>
@@ -941,15 +943,15 @@ export function PostForm() {
             )}
 
             {/* Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-3 sm:pt-4">
               <button
                 type="submit"
                 disabled={loading || uploading}
-                className="flex-1 bg-neon-green hover:bg-neon-green-light text-white px-7 py-3 rounded-xl font-semibold text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:shadow-neon"
+                className="flex-1 bg-neon-green hover:bg-neon-green-light text-white px-5 sm:px-7 py-2.5 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:shadow-neon"
               >
                 {loading ? (
                   <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                     <span>Đang đăng...</span>
                   </>
                 ) : (
@@ -959,7 +961,7 @@ export function PostForm() {
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="px-7 py-3 border border-dark-border text-dark-text2 rounded-xl font-semibold hover:bg-dark-border hover:text-neon-green transition-all"
+                className="w-full sm:w-auto px-5 sm:px-7 py-2.5 sm:py-3 border border-dark-border text-dark-text2 rounded-xl font-semibold text-sm sm:text-base hover:bg-dark-border hover:text-neon-green transition-all"
               >
                 Hủy
               </button>
