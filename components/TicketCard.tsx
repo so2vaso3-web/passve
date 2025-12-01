@@ -469,16 +469,6 @@ export function TicketCard({
   );
 }
 
-import Link from "next/link";
-import Image from "next/image";
-import { MapPin, Clock, Ticket, Sparkles, ShoppingCart, MessageCircle, QrCode } from "lucide-react";
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { BuyTicketModal } from "./BuyTicketModal";
-import { ChatModal } from "./ChatModal";
-import toast from "react-hot-toast";
-
 interface TicketCardProps {
   id: string;
   title: string;
