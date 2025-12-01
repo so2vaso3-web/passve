@@ -6,6 +6,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { BottomNav } from "@/components/BottomNav";
 import { Inter } from "next/font/google";
+import { SiteSettingsLoader } from "@/components/SiteSettingsLoader";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -45,6 +46,7 @@ export default function RootLayout({
   return (
     <html lang="vi" className={`${inter.variable}`}>
       <body className="bg-dark-bg text-dark-text min-h-screen font-body antialiased">
+        <SiteSettingsLoader />
         <Providers>
           <Header />
           <main className="min-h-screen">

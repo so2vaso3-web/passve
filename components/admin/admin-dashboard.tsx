@@ -1,11 +1,28 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs } from "@/components/ui/tabs";
+import { Settings, Users, Ticket, DollarSign, FileText } from "lucide-react";
+import Link from "next/link";
 
-export function AdminDashboard() {
+interface AdminDashboardProps {
+  stats: {
+    totalTickets: number;
+    activeTickets: number;
+    soldTickets: number;
+    pendingWithdrawals: number;
+    totalUsers: number;
+    activeUsers: number;
+    totalRevenue: number;
+    totalWithdrawals: number;
+  };
+}
+
+export function AdminDashboard({ stats }: AdminDashboardProps) {
+  const router = useRouter();
   const [tickets, setTickets] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("tickets");
@@ -65,12 +82,89 @@ export function AdminDashboard() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-dark-900 dark:text-dark-100 mb-8">
-        Admin Dashboard
-      </h1>
+    <div className="min-h-screen bg-dark-bg p-4 md:p-8">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl font-bold text-dark-text mb-8">Admin Dashboard</h1>
 
-      <Tabs
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <Link href="/admin/site-settings">
+            <Card className="p-6 hover:bg-dark-border transition-colors cursor-pointer">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-neon-green/20 rounded-lg">
+                  <Settings className="w-6 h-6 text-neon-green" />
+                </div>
+                <div>
+                  <p className="text-sm text-dark-text2">Quản lý</p>
+                  <p className="font-semibold text-dark-text">Trang chủ</p>
+                </div>
+              </div>
+            </Card>
+          </Link>
+          <Link href="/admin/tickets">
+            <Card className="p-6 hover:bg-dark-border transition-colors cursor-pointer">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-blue-500/20 rounded-lg">
+                  <Ticket className="w-6 h-6 text-blue-500" />
+                </div>
+                <div>
+                  <p className="text-sm text-dark-text2">Vé chờ duyệt</p>
+                  <p className="font-semibold text-dark-text">{stats.activeTickets}</p>
+                </div>
+              </div>
+            </Card>
+          </Link>
+          <Link href="/admin/users">
+            <Card className="p-6 hover:bg-dark-border transition-colors cursor-pointer">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-purple-500/20 rounded-lg">
+                  <Users className="w-6 h-6 text-purple-500" />
+                </div>
+                <div>
+                  <p className="text-sm text-dark-text2">Tổng users</p>
+                  <p className="font-semibold text-dark-text">{stats.totalUsers}</p>
+                </div>
+              </div>
+            </Card>
+          </Link>
+          <Link href="/admin/withdrawals">
+            <Card className="p-6 hover:bg-dark-border transition-colors cursor-pointer">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-yellow-500/20 rounded-lg">
+                  <DollarSign className="w-6 h-6 text-yellow-500" />
+                </div>
+                <div>
+                  <p className="text-sm text-dark-text2">Rút tiền chờ</p>
+                  <p className="font-semibold text-dark-text">{stats.pendingWithdrawals}</p>
+                </div>
+              </div>
+            </Card>
+          </Link>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <Card className="p-6">
+            <p className="text-sm text-dark-text2 mb-2">Tổng vé</p>
+            <p className="text-2xl font-bold text-dark-text">{stats.totalTickets}</p>
+          </Card>
+          <Card className="p-6">
+            <p className="text-sm text-dark-text2 mb-2">Vé đã bán</p>
+            <p className="text-2xl font-bold text-neon-green">{stats.soldTickets}</p>
+          </Card>
+          <Card className="p-6">
+            <p className="text-sm text-dark-text2 mb-2">Doanh thu</p>
+            <p className="text-2xl font-bold text-neon-green">
+              {new Intl.NumberFormat("vi-VN").format(stats.totalRevenue)} đ
+            </p>
+          </Card>
+          <Card className="p-6">
+            <p className="text-sm text-dark-text2 mb-2">Users hoạt động</p>
+            <p className="text-2xl font-bold text-dark-text">{stats.activeUsers}</p>
+          </Card>
+        </div>
+
+        <Tabs
         tabs={[
           { id: "tickets", label: "Duyệt vé" },
           { id: "transactions", label: "Giao dịch" },

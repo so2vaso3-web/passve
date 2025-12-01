@@ -150,6 +150,19 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
               Quản lý logo cho dropdown user
             </p>
           </Link>
+
+          <Link
+            href="/admin/site-settings"
+            className="bg-dark-card border border-dark-border rounded-2xl p-5 shadow-card hover:shadow-neon hover:scale-[1.03] transition-all"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <Image className="w-6 h-6 text-neon-green" />
+              <h3 className="font-heading font-bold text-dark-text">Quản lý Trang chủ</h3>
+            </div>
+            <p className="text-sm text-dark-text2">
+              Logo, Favicon, SEO & Cấu hình
+            </p>
+          </Link>
         </div>
       </div>
     </div>
