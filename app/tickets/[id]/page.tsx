@@ -31,3 +31,5 @@ export default async function TicketDetailPage({ params }: { params: { id: strin
   return <TicketDetails ticket={ticket as any} />;
 }
 
+
+

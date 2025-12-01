@@ -77,3 +77,5 @@ Sau khi cấu hình xong:
 2. Kiểm tra logs trong Vercel/Server để xem có nhận được request không
 3. Kiểm tra database xem transaction có được cập nhật không
 
+
+

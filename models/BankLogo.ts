@@ -52,3 +52,5 @@ const BankLogo: Model<IBankLogo> =
 
 export default BankLogo;
 
+
+

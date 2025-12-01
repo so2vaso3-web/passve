@@ -59,3 +59,5 @@ mongodb+srv://admin:MyPass123!@cluster0.xxxxx.mongodb.net/pass-ve-phim?retryWrit
 - Cluster mất ~3-5 phút để tạo xong
 - Nếu quên password, phải tạo user mới
 
+
+

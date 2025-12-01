@@ -42,3 +42,5 @@ const Wallet: Model<IWallet> = mongoose.models.Wallet || mongoose.model<IWallet>
 
 export default Wallet;
 
+
+

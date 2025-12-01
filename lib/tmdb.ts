@@ -63,3 +63,5 @@ export function getPosterUrl(posterPath: string | null, size: "w500" | "original
   return `https://image.tmdb.org/t/p/${size}${posterPath}`;
 }
 
+
+

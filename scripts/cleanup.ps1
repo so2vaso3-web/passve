@@ -24,3 +24,5 @@ if ($mainProcess) {
 Write-Host "`nThông tin process hiện tại:" -ForegroundColor Cyan
 Get-Process -Name node -ErrorAction SilentlyContinue | Select-Object Id, @{Name="Memory(MB)";Expression={[math]::Round($_.WorkingSet/1MB,2)}}, CPU | Format-Table -AutoSize
 
+
+

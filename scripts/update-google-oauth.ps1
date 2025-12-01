@@ -57,3 +57,5 @@ Write-Host "  GOOGLE_CLIENT_ID=$clientId" -ForegroundColor White
 Write-Host "  GOOGLE_CLIENT_SECRET=$($clientSecret.Substring(0, [Math]::Min(10, $clientSecret.Length)))..." -ForegroundColor White
 Write-Host "`n💡 Bây giờ restart server: npm run dev`n" -ForegroundColor Yellow
 
+
+
