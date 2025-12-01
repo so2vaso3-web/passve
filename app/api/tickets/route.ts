@@ -344,7 +344,7 @@ export async function GET(request: NextRequest) {
         onHoldBy: ticket.onHoldBy?.toString(),
         onHoldAt: ticket.onHoldAt,
         ticketCode: ticket.ticketCode,
-        qrImage: ticket.status === "sold" && ticket.buyer ? ticket.qrImage : undefined, // Chỉ trả về nếu người mua đã mua
+        qrImage: (ticket.status === "sold" && ticket.buyer) ? ticket.qrImage : undefined, // Chỉ trả về nếu người mua đã mua thành công
         buyer: ticket.buyer?._id?.toString(),
         buyerEmail: ticket.buyer?.email,
         seller: {

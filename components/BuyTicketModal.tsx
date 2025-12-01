@@ -105,8 +105,8 @@ export function BuyTicketModal({ ticket, onClose }: BuyTicketModalProps) {
       }
 
       // Show success message
-      toast.success("Đã mua vé thành công! Vui lòng chờ người bán gửi mã vé và ảnh QR code.", {
-        duration: 8000,
+      toast.success("Đã mua vé thành công! Mã vé và ảnh QR code đã được hiển thị.", {
+        duration: 5000,
       });
 
       // Đóng modal và refresh
@@ -261,7 +261,7 @@ export function BuyTicketModal({ ticket, onClose }: BuyTicketModalProps) {
               <div className="text-sm text-dark-text2">
                 <p className="font-semibold text-dark-text mb-1">Hệ thống Escrow</p>
                 <p>
-                  Tiền sẽ được giữ trong hệ thống escrow. Sau khi bạn thanh toán thành công, người bán sẽ gửi mã vé và ảnh QR code. Sau khi bạn xác nhận nhận được, tiền mới được chuyển cho người bán.
+                  Tiền sẽ được giữ trong hệ thống escrow. Sau khi bạn thanh toán thành công, mã vé và ảnh QR code sẽ tự động hiển thị cho bạn. Sau khi bạn xác nhận nhận được, tiền mới được chuyển cho người bán.
                 </p>
               </div>
             </div>

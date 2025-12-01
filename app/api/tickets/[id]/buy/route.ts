@@ -122,8 +122,10 @@ export async function POST(
     const db = (await import("mongoose")).connection;
     const dbSession = await db.startSession();
     
-    // Check if ticket has code - if yes, auto-complete sale
+    // Check if ticket has code or QR image - if yes, auto-complete sale
     const hasTicketCode = ticket.ticketCode && ticket.ticketCode.trim().length > 0;
+    const hasQrImage = ticket.qrImage && ticket.qrImage.trim().length > 0;
+    const canAutoComplete = hasTicketCode || hasQrImage;
     
     try {
       await dbSession.withTransaction(async () => {
@@ -131,7 +133,7 @@ export async function POST(
         buyerWallet.balance -= total;
         await buyerWallet.save({ session: dbSession });
 
-        if (hasTicketCode) {
+        if (canAutoComplete) {
           // If ticket has code, complete sale immediately
           // Seller receives money (minus 7% fee)
           sellerWallet.balance += sellerReceives;
@@ -213,13 +215,14 @@ export async function POST(
 
       return NextResponse.json({
         success: true,
-        message: hasTicketCode 
-          ? `Đã mua vé thành công! Mã vé: ${ticket.ticketCode}`
-          : "Đã giữ vé thành công! Vui lòng thanh toán trong 15 phút",
+        message: canAutoComplete 
+          ? "Đã mua vé thành công! Mã vé và ảnh QR code đã được hiển thị."
+          : "Đã giữ vé thành công! Vui lòng chờ người bán gửi mã vé.",
         ticket: {
           id: ticket._id.toString(),
           status: ticket.status,
           ticketCode: hasTicketCode ? ticket.ticketCode : undefined,
+          qrImage: hasQrImage ? ticket.qrImage : undefined,
         },
       });
     } finally {
