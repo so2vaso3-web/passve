@@ -212,9 +212,9 @@ export function TicketFilters({ currentCategory, currentCity, currentDistrict, c
   };
 
   return (
-    <div className="mb-10 space-y-4">
+    <div className="mb-6 sm:mb-8 md:mb-10 space-y-3 sm:space-y-4">
       {/* Category Filters */}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-2 sm:gap-3">
         <Button
           variant={currentCategory === "all" ? "primary" : "secondary"}
           size="sm"
@@ -266,9 +266,9 @@ export function TicketFilters({ currentCategory, currentCity, currentDistrict, c
       </div>
 
       {/* Location Filters */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex items-center gap-2 text-dark-text2 font-semibold">
-          <MapPin className="w-5 h-5" />
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2 text-dark-text2 font-semibold text-sm sm:text-base">
+          <MapPin className="w-4 h-4 sm:w-5 sm:h-5" />
           <span>Địa điểm:</span>
         </div>
         <select
@@ -277,7 +277,7 @@ export function TicketFilters({ currentCategory, currentCity, currentDistrict, c
             e.preventDefault();
             updateFilter("city", e.target.value);
           }}
-          className="px-4 py-2.5 bg-dark-card border border-dark-border rounded-xl text-dark-text font-semibold focus:outline-none focus:border-neon-green focus:ring-2 focus:ring-neon-green/20 transition-all cursor-pointer min-w-[200px]"
+          className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-dark-card border border-dark-border rounded-xl text-sm sm:text-base text-dark-text font-semibold focus:outline-none focus:border-neon-green focus:ring-2 focus:ring-neon-green/20 transition-all cursor-pointer min-w-0 sm:min-w-[200px]"
         >
           <option value="all">Tất cả thành phố</option>
           {cities.map((city) => (
@@ -295,7 +295,7 @@ export function TicketFilters({ currentCategory, currentCity, currentDistrict, c
               e.preventDefault();
               updateFilter("district", e.target.value);
             }}
-            className="px-4 py-2.5 bg-dark-card border border-dark-border rounded-xl text-dark-text font-semibold focus:outline-none focus:border-neon-green focus:ring-2 focus:ring-neon-green/20 transition-all cursor-pointer min-w-[200px]"
+            className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-2.5 bg-dark-card border border-dark-border rounded-xl text-sm sm:text-base text-dark-text font-semibold focus:outline-none focus:border-neon-green focus:ring-2 focus:ring-neon-green/20 transition-all cursor-pointer min-w-0 sm:min-w-[200px]"
           >
             {availableDistricts.map((district) => (
               <option key={district} value={district === "Tất cả quận/huyện" ? "all" : district}>
