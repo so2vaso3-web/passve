@@ -35,8 +35,9 @@ export async function POST(request: NextRequest) {
 
     const db = await connectDB();
     if (!db) {
+      console.error("❌ Database connection failed in signup route");
       return NextResponse.json(
-        { error: "Database not connected" },
+        { error: "Không thể kết nối đến cơ sở dữ liệu. Vui lòng kiểm tra cấu hình MongoDB trong .env.local" },
         { status: 503 }
       );
     }

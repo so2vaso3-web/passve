@@ -51,9 +51,19 @@ async function connectDB() {
         setTimeout(() => reject(new Error("MongoDB connection timeout")), 10000)
       ),
     ]) as typeof mongoose;
-  } catch (e) {
+  } catch (e: any) {
     cached.promise = null;
     console.error("MongoDB connection error:", e);
+    
+    // Log specific error for debugging
+    if (e.message?.includes("authentication failed") || e.message?.includes("bad auth")) {
+      console.error("❌ MongoDB Authentication Failed - Please check your username and password in .env.local");
+    } else if (e.message?.includes("timeout")) {
+      console.error("❌ MongoDB Connection Timeout - Please check your network and MongoDB Atlas IP whitelist");
+    } else {
+      console.error("❌ MongoDB Connection Error:", e.message || e);
+    }
+    
     return null;
   }
 
