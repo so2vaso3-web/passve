@@ -169,16 +169,52 @@ export async function POST(
             { session: dbSession, ordered: true }
           );
         } else {
-          // If no code, use escrow flow (original flow)
-          // Add to seller escrow (full amount, will deduct 7% on release)
-          sellerWallet.escrow += ticket.sellingPrice;
-          await sellerWallet.save({ session: dbSession });
+          // If no code but has QR image, still auto-complete (QR image is enough)
+          if (hasQrImage) {
+            // Seller receives money (minus 7% fee)
+            sellerWallet.balance += sellerReceives;
+            sellerWallet.totalEarned += sellerReceives;
+            await sellerWallet.save({ session: dbSession });
 
-          // Update ticket status
-          ticket.status = "on_hold";
-          ticket.onHoldBy = buyer._id;
-          ticket.onHoldAt = new Date();
-          await ticket.save({ session: dbSession });
+            // Update ticket status to sold
+            ticket.status = "sold";
+            ticket.buyer = buyer._id;
+            ticket.soldAt = new Date();
+            await ticket.save({ session: dbSession });
+
+            // Create transactions for completed sale
+            await Transaction.create(
+              [
+                {
+                  user: buyer._id,
+                  type: "purchase",
+                  amount: total,
+                  status: "completed",
+                  description: `Mua vé ${ticket.movieTitle} - ${ticket.cinema}`,
+                  ticket: ticket._id,
+                },
+                {
+                  user: ticket.seller._id,
+                  type: "sale",
+                  amount: sellerReceives,
+                  status: "completed",
+                  description: `Bán vé ${ticket.movieTitle} cho ${buyer.name}`,
+                  ticket: ticket._id,
+                },
+              ],
+              { session: dbSession, ordered: true }
+            );
+          } else {
+            // If no code and no QR image, use escrow flow (original flow)
+            // Add to seller escrow (full amount, will deduct 7% on release)
+            sellerWallet.escrow += ticket.sellingPrice;
+            await sellerWallet.save({ session: dbSession });
+
+            // Update ticket status
+            ticket.status = "on_hold";
+            ticket.onHoldBy = buyer._id;
+            ticket.onHoldAt = new Date();
+            await ticket.save({ session: dbSession });
 
           // Create transactions
           await Transaction.create(

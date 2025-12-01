@@ -178,8 +178,8 @@ export function TicketCard({
   const isSold = status === "sold";
   const isOnHold = status === "on_hold";
   
-  // Check if this is my purchase (sold to me)
-  const isMyPurchase = isSold && (buyerEmail === session?.user?.email || (buyer && session?.user?.email));
+  // Check if this is my purchase (sold to me or held by me)
+  const isMyPurchase = (isSold || isOnHold) && (buyerEmail === session?.user?.email || (buyer && session?.user?.email) || (onHoldBy && session?.user?.email));
 
   return (
     <>
