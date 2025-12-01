@@ -26,6 +26,7 @@ const ticketSchema = z.object({
   sellingPrice: z.number().min(1, "Vui lòng nhập giá bán"),
   category: z.enum(["movie", "concert", "event"]),
   description: z.string().optional(),
+  ticketCode: z.string().optional(), // Mã vé (nếu có, người mua sẽ nhận ngay)
 });
 
 type TicketFormData = z.infer<typeof ticketSchema>;
@@ -299,6 +300,21 @@ export function SellTicketForm() {
             {...register("sellingPrice", { valueAsNumber: true })}
             error={errors.sellingPrice?.message}
           />
+        </div>
+
+        {/* Ticket Code (Optional) */}
+        <div>
+          <label className="block text-sm font-medium text-dark-700 dark:text-dark-300 mb-2">
+            Mã vé <span className="text-dark-400 dark:text-dark-500 text-xs">(tùy chọn)</span>
+          </label>
+          <Input
+            {...register("ticketCode")}
+            error={errors.ticketCode?.message}
+            placeholder="VD: ABC123XYZ hoặc để trống nếu chưa có mã"
+          />
+          <p className="mt-1.5 text-xs text-dark-500 dark:text-dark-400">
+            💡 Nếu bạn đã có mã vé, nhập vào đây. Người mua sẽ nhận mã vé ngay sau khi thanh toán. Nếu để trống, bạn sẽ gửi mã vé qua chat sau khi có người mua.
+          </p>
         </div>
 
         {/* Images */}

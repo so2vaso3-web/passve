@@ -37,6 +37,9 @@ interface TicketCardProps {
   seats?: string;
   status?: string;
   onHoldBy?: string;
+  ticketCode?: string;
+  buyer?: string;
+  buyerEmail?: string;
 }
 
 export function TicketCard({
@@ -59,6 +62,9 @@ export function TicketCard({
   seats,
   status,
   onHoldBy,
+  ticketCode,
+  buyer,
+  buyerEmail,
 }: TicketCardProps) {
   const { data: session } = useSession();
   const router = useRouter();
@@ -85,6 +91,9 @@ export function TicketCard({
       setIsHeldByMe(false); // Will be set properly after API call
     }
   }, [status, onHoldBy, session]);
+
+  // Check if this is my purchase (sold to me)
+  const isMyPurchase = isSold && buyer && session?.user?.email;
 
   useEffect(() => {
     if (!expireAt) return;
@@ -306,6 +315,19 @@ export function TicketCard({
               </div>
             )}
           </div>
+
+          {/* Show ticket code if purchased */}
+          {isMyPurchase && ticketCode && (
+            <div className="mb-4 p-3 bg-neon-green/10 border border-neon-green/30 rounded-xl">
+              <div className="flex items-center gap-2 mb-1">
+                <Ticket className="w-4 h-4 text-neon-green" />
+                <span className="text-xs font-semibold text-neon-green">Mã vé của bạn:</span>
+              </div>
+              <p className="text-lg font-black text-neon-green font-mono tracking-wider">
+                {ticketCode}
+              </p>
+            </div>
+          )}
 
           {/* Action Buttons */}
           {!isExpired && !isSold && (

@@ -20,7 +20,8 @@ import {
   ArrowUp,
   ArrowDown,
   Clock,
-  MessageCircle
+  MessageCircle,
+  Ticket
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -359,6 +360,19 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
                         <h4 className="font-semibold text-white mb-1">Vé đang giữ - Cần thanh toán</h4>
                         <p className="text-sm text-white/70">
                           Bạn có vé đang được giữ. Vui lòng chờ người bán gửi mã vé và xác nhận nhận được trong vòng 15 phút để hoàn tất giao dịch.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {activeTab === "purchased" && tickets.some((t: any) => t.status === "sold" && t.ticketCode) && (
+                  <div className="mb-6 p-4 bg-gradient-to-r from-neon-green/10 to-emerald-500/10 border border-neon-green/30 rounded-xl">
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-neon-green flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-white mb-1">Vé đã mua thành công!</h4>
+                        <p className="text-sm text-white/70">
+                          Bạn đã nhận được mã vé. Vui lòng kiểm tra thông tin mã vé trong từng vé đã mua.
                         </p>
                       </div>
                     </div>

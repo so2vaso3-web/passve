@@ -17,6 +17,7 @@ export interface ITicket extends Document {
   images: string[]; // URLs ảnh vé từ Cloudinary
   reason?: string; // Lý do bán
   description?: string;
+  ticketCode?: string; // Mã vé (nếu có sẵn, người mua sẽ nhận ngay)
   status: "pending" | "approved" | "sold" | "cancelled" | "rejected" | "expired" | "on_hold";
   onHoldBy?: mongoose.Types.ObjectId; // Người đang giữ vé
   onHoldAt?: Date; // Thời gian giữ vé
@@ -99,6 +100,10 @@ const TicketSchema = new Schema<ITicket>(
     },
     description: {
       type: String,
+    },
+    ticketCode: {
+      type: String,
+      // Optional: Nếu có mã vé, người mua sẽ nhận ngay sau khi mua
     },
     status: {
       type: String,

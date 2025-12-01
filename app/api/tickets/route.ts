@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
       images,
       reason,
       description,
+      ticketCode,
     } = body;
 
     // Validate required fields
@@ -171,6 +172,7 @@ export async function POST(request: NextRequest) {
       images,
       reason: reason || undefined,
       description: description || undefined,
+      ticketCode: ticketCode?.trim() || undefined,
       category,
       status: isExpired ? "expired" : "approved", // Tự động approve để hiển thị ngay
       isExpired,
@@ -290,6 +292,10 @@ export async function GET(request: NextRequest) {
         path: "seller",
         match: { isActive: { $ne: false } },
         select: "name email image isActive",
+      })
+      .populate({
+        path: "buyer",
+        select: "email",
       })
       .sort({ createdAt: -1 }) // Mới nhất trước
       .limit(limit)

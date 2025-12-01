@@ -104,15 +104,23 @@ export function BuyTicketModal({ ticket, onClose }: BuyTicketModalProps) {
         throw new Error(data.error || "Có lỗi xảy ra khi mua vé");
       }
 
-      toast.success("Đã giữ vé thành công! Vui lòng thanh toán trong 15 phút", {
-        duration: 5000,
-      });
+      // Show success message with ticket code if available
+      if (data.ticket?.ticketCode) {
+        toast.success(
+          `Đã mua vé thành công! Mã vé: ${data.ticket.ticketCode}`,
+          { duration: 8000 }
+        );
+      } else {
+        toast.success("Đã giữ vé thành công! Vui lòng thanh toán trong 15 phút", {
+          duration: 5000,
+        });
+      }
 
       // Đóng modal và refresh
       onClose();
       router.refresh();
       
-      // Redirect đến trang profile tab "Vé đã mua" để xem vé đang giữ
+      // Redirect đến trang profile tab "Vé đã mua"
       setTimeout(() => {
         router.push("/profile?tab=purchased");
       }, 1000);
