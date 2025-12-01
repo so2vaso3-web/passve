@@ -61,14 +61,6 @@ export async function POST(
       );
     }
 
-    // Check if ticket is already on hold or sold
-    if (ticket.status === "on_hold" || ticket.status === "sold") {
-      return NextResponse.json(
-        { error: "Vé đã được giữ hoặc đã bán" },
-        { status: 400 }
-      );
-    }
-
     // Check if expired
     if (ticket.isExpired || new Date(ticket.expireAt) < new Date()) {
       return NextResponse.json(
