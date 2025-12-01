@@ -161,8 +161,8 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
 
   return (
     <div className="bg-[#111827] border border-[#1F2937] rounded-2xl overflow-hidden">
-      {/* Tabs */}
-      <div className="border-b border-[#1F2937] bg-[#0B0F19]">
+      {/* Tabs - Ẩn trên mobile, chỉ hiển thị trên desktop */}
+      <div className="hidden md:block border-b border-[#1F2937] bg-[#0B0F19]">
         <div className="flex overflow-x-auto">
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -182,6 +182,20 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
             );
           })}
         </div>
+      </div>
+
+      {/* Mobile: Hiển thị title của tab hiện tại */}
+      <div className="md:hidden border-b border-[#1F2937] bg-[#0B0F19] px-4 py-3">
+        {(() => {
+          const currentTab = tabs.find(t => t.id === activeTab);
+          const Icon = currentTab?.icon || Package;
+          return (
+            <div className="flex items-center gap-3">
+              <Icon className="w-5 h-5 text-[#10B981]" />
+              <h2 className="text-lg font-bold text-white">{currentTab?.label || "Tin đang bán"}</h2>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Tab Content */}
