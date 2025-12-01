@@ -19,7 +19,11 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { formatPrice } from "@/lib/utils";
+
+const formatPrice = (price: number | string) => {
+  const numPrice = typeof price === "string" ? parseFloat(price) : price;
+  return new Intl.NumberFormat("vi-VN").format(numPrice);
+};
 
 interface SellingPostCardProps {
   ticket: {
