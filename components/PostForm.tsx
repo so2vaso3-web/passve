@@ -144,7 +144,7 @@ export function PostForm() {
     if (!files || files.length === 0) return;
 
     // Kiểm tra số lượng ảnh
-    if (formData.qrImage.length + files.length > 5) {
+    if ((formData.qrImage?.length || 0) + files.length > 5) {
       toast.error("Tối đa 5 ảnh mã QR");
       return;
     }

@@ -37,8 +37,8 @@ export async function POST(request: NextRequest) {
         const tickets = await Ticket.find({
           status: "on_hold",
           $or: [
-            { qrImage: { $exists: true, $ne: null, $ne: "" } },
-            { ticketCode: { $exists: true, $ne: null, $ne: "" } },
+            { qrImage: { $exists: true, $nin: [null, ""] } },
+            { ticketCode: { $exists: true, $nin: [null, ""] } },
           ],
         })
           .populate("seller onHoldBy")
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
           // Lấy wallet của seller
           let sellerWallet = await Wallet.findOne({ user: ticket.seller._id }).session(dbSession);
           if (!sellerWallet) {
-            sellerWallet = await Wallet.create(
+            const createdWallets = await Wallet.create(
               [
                 {
                   user: ticket.seller._id,
@@ -68,7 +68,8 @@ export async function POST(request: NextRequest) {
                 },
               ],
               { session: dbSession }
-            )[0];
+            );
+            sellerWallet = createdWallets[0];
           }
 
           // Chuyển từ escrow sang balance

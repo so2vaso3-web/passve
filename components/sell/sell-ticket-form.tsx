@@ -38,7 +38,7 @@ export function SellTicketForm() {
   const [movieResults, setMovieResults] = useState<TMDBMovie[]>([]);
   const [selectedMovie, setSelectedMovie] = useState<TMDBMovie | null>(null);
   const [images, setImages] = useState<string[]>([]);
-  const [qrImage, setQrImage] = useState<string | null>(null);
+  const [qrImage, setQrImage] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadingQR, setUploadingQR] = useState(false);
 
@@ -122,6 +122,39 @@ export function SellTicketForm() {
       toast.error("Lỗi upload ảnh");
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleQRImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    if (qrImage.length + files.length > 5) {
+      toast.error("Tối đa 5 ảnh mã QR");
+      return;
+    }
+
+    setUploadingQR(true);
+    try {
+      const formData = new FormData();
+      Array.from(files).forEach((file) => {
+        formData.append("files", file);
+      });
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (data.urls) {
+        setQrImage([...qrImage, ...data.urls]);
+        toast.success("Upload ảnh mã QR thành công");
+      }
+    } catch (error) {
+      toast.error("Lỗi upload ảnh mã QR");
+    } finally {
+      setUploadingQR(false);
     }
   };
 
@@ -369,17 +402,17 @@ export function SellTicketForm() {
             📷 Chụp màn hình hoặc forward tin nhắn/email chứa mã QR. Ảnh này sẽ được ẩn và chỉ hiển thị cho người mua sau khi họ thanh toán.
           </p>
           <div className="flex items-start gap-4">
-            {qrImage ? (
+            {qrImage && qrImage.length > 0 ? (
               <div className="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-dark-border bg-dark-card">
                 <Image
-                  src={qrImage}
+                  src={qrImage[0]}
                   alt="Mã QR"
                   fill
                   className="object-contain p-2"
                 />
                 <button
                   type="button"
-                  onClick={() => setQrImage(null)}
+                  onClick={() => setQrImage([])}
                   className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
                   title="Xóa ảnh QR"
                 >
@@ -400,7 +433,7 @@ export function SellTicketForm() {
                     <Loader2 className="w-5 h-5 animate-spin" />
                     <span>Đang upload...</span>
                   </div>
-                ) : qrImage ? (
+                ) : qrImage && qrImage.length > 0 ? (
                   "Thay đổi ảnh QR"
                 ) : (
                   "Tải lên ảnh mã QR"

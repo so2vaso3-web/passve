@@ -231,7 +231,7 @@ export function EditPostForm({ ticketId, initialData }: EditPostFormProps) {
 
   const removeQRImage = (index: number) => {
     const currentQrImages = Array.isArray(watch("qrImage")) ? watch("qrImage") : (watch("qrImage") ? [watch("qrImage")] : []);
-    const newQrImages = currentQrImages.filter((_, i) => i !== index);
+    const newQrImages = currentQrImages.filter((_, i) => i !== index).filter((img): img is string => typeof img === 'string');
     setValue("qrImage", newQrImages.length > 0 ? newQrImages : []);
   };
 

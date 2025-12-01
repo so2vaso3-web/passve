@@ -34,8 +34,8 @@ export async function PUT(
     }
 
     // Get old account to preserve _id
-    const oldAccount = dbUser.bankAccounts[accountIndex];
-    const oldId = oldAccount._id;
+    const oldAccount = dbUser.bankAccounts[accountIndex] as any;
+    const oldId = oldAccount?._id;
 
     // Nếu đặt làm mặc định, bỏ mặc định của các tài khoản khác
     if (isDefault) {
@@ -80,7 +80,7 @@ export async function PUT(
     return NextResponse.json({ 
       success: true,
       bankAccount: updatedAccount ? {
-        _id: updatedAccount._id?.toString() || updatedAccount.accountNumber,
+        _id: (updatedAccount as any)?._id?.toString() || updatedAccount.accountNumber,
         bankName: updatedAccount.bankName,
         accountNumber: updatedAccount.accountNumber,
         accountHolder: updatedAccount.accountHolder,

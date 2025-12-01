@@ -25,6 +25,7 @@ export interface ITicket extends Document {
   category: "movie" | "concert" | "event";
   buyer?: mongoose.Types.ObjectId;
   soldAt?: Date;
+  autoDeleteAt?: Date; // Tự động xóa sau 10 ngày kể từ khi mua
   expireAt: Date; // Tự động = showDate + showTime + 3 giờ (dùng cho TTL Index)
   isExpired: boolean; // Tính tự động
   createdAt: Date;
@@ -176,10 +177,10 @@ TicketSchema.pre('save', function(next) {
           const parsed = JSON.parse(this.qrImage);
           this.qrImage = Array.isArray(parsed) ? parsed : [parsed];
         } catch {
-          this.qrImage = [this.qrImage];
+          this.qrImage = Array.isArray(this.qrImage) ? this.qrImage : (this.qrImage ? [this.qrImage] : []);
         }
       } else {
-        this.qrImage = [this.qrImage];
+        this.qrImage = Array.isArray(this.qrImage) ? this.qrImage : (this.qrImage ? [this.qrImage] : []);
       }
     }
     // Đảm bảo tất cả phần tử là string

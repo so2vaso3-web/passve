@@ -89,8 +89,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       success: true, 
       bankAccount: savedAccount ? {
-        _id: savedAccount._id?.toString() || savedAccount.accountNumber,
-        ...savedAccount.toObject ? savedAccount.toObject() : savedAccount,
+        _id: (savedAccount as any)?._id?.toString() || savedAccount.accountNumber,
+        ...(savedAccount as any).toObject ? (savedAccount as any).toObject() : savedAccount,
       } : newAccount 
     });
   } catch (error: any) {

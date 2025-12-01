@@ -35,14 +35,12 @@ export async function GET(
         totalEarned: 0,
       });
       // Fetch the newly created wallet with lean() for type consistency
-      wallet = await Wallet.findOne({ user: params.id }).lean();
-      if (!wallet) {
-        // Fallback: create default wallet object if fetch fails
-        wallet = {
-          balance: 0,
-          escrow: 0,
-          totalEarned: 0,
-        } as typeof wallet;
+      const createdWallet = await Wallet.findOne({ user: params.id }).lean();
+      if (createdWallet) {
+        wallet = createdWallet;
+      } else {
+        // This should never happen, but TypeScript requires handling
+        throw new Error("Failed to create wallet");
       }
     }
 
