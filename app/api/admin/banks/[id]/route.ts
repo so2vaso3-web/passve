@@ -3,9 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import connectDB from "@/lib/mongodb";
 import AdminBank from "@/models/AdminBank";
-import { revalidatePath } from "next/cache";
-import { revalidatePath } from "next/cache";
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 // PUT: Cập nhật tài khoản ngân hàng
 export async function PUT(
