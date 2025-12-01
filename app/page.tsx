@@ -217,7 +217,7 @@ export default async function HomePage({
       <Hero />
 
       {/* Tickets Section */}
-      <section id="tickets" className="container mx-auto px-4 py-16 md:py-24">
+      <section id="tickets" className="container mx-auto px-3 sm:px-4 py-8 sm:py-12 md:py-16 lg:py-24">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10 gap-4">
           <div>
             <h2 className="text-3xl md:text-4xl font-heading font-black text-dark-text mb-2">
@@ -248,7 +248,7 @@ export default async function HomePage({
 
         {/* Tickets Grid */}
         {tickets.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {tickets.map((ticket) => (
               <TicketCard key={ticket.id} {...ticket} />
             ))}
@@ -281,12 +281,12 @@ export default async function HomePage({
       </section>
 
       {/* Features Section */}
-      <section className="bg-dark-card border-t border-dark-border py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-heading font-black text-dark-text text-center mb-12">
+      <section className="bg-dark-card border-t border-dark-border py-8 sm:py-12 md:py-16">
+        <div className="container mx-auto px-3 sm:px-4">
+          <h2 className="text-2xl sm:text-3xl font-heading font-black text-dark-text text-center mb-8 sm:mb-12">
             Tại sao chọn Pass Vé Phim?
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
             <div className="text-center bg-dark-bg border border-dark-border p-6 rounded-2xl shadow-card hover:shadow-neon hover:scale-[1.03] transition-all">
               <div className="w-16 h-16 bg-neon-green rounded-xl flex items-center justify-center mx-auto mb-4 shadow-neon-sm">
                 <Shield className="w-8 h-8 text-white" />

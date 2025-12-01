@@ -261,9 +261,9 @@ export function TicketCard({
         </Link>
 
         {/* Content */}
-        <div className="p-4">
+        <div className="p-3 sm:p-4">
           <Link href={`/tickets/${id}`}>
-            <h3 className={`font-bold mb-3 line-clamp-2 text-lg leading-snug transition-colors ${
+            <h3 className={`font-bold mb-2 sm:mb-3 line-clamp-2 text-base sm:text-lg leading-snug transition-colors ${
               isExpired || isSold ? "text-dark-text2" : "text-dark-text group-hover:text-neon-green"
             }`}>
               {title}
@@ -289,7 +289,7 @@ export function TicketCard({
           <div className="flex items-end justify-between gap-2 mb-4">
             <div className="flex-1">
               <div className="flex items-baseline gap-2">
-                <p className={`text-2xl font-black text-glow ${
+                <p className={`text-xl sm:text-2xl font-black text-glow ${
                   isExpired || isSold ? "text-dark-text2" : "text-neon-green-light"
                 }`}>
                   {formatPrice(price)} đ
@@ -333,38 +333,39 @@ export function TicketCard({
 
           {/* Action Buttons */}
           {!isExpired && !isSold && (
-            <div className="flex gap-2 mt-4">
+            <div className="flex gap-2 mt-3 sm:mt-4">
               {canBuy ? (
                 <>
                   <button
                     onClick={handleBuyClick}
-                    className="flex-1 bg-neon-green hover:bg-neon-green-light text-white py-2.5 px-4 rounded-xl font-bold text-sm transition-all hover:shadow-neon-sm hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                    className="flex-1 bg-neon-green hover:bg-neon-green-light text-white py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm transition-all hover:shadow-neon-sm hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-1.5 sm:gap-2"
                   >
-                    <ShoppingCart className="w-4 h-4" />
-                    Mua ngay
+                    <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <span className="hidden xs:inline">Mua ngay</span>
+                    <span className="xs:hidden">Mua</span>
                   </button>
                   {seller?._id && (
                     <button
                       onClick={handleChatClick}
-                      className="flex-1 bg-dark-bg border-2 border-neon-green text-neon-green hover:bg-neon-green/10 py-2.5 px-4 rounded-xl font-bold text-sm transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                      className="flex-1 bg-dark-bg border-2 border-neon-green text-neon-green hover:bg-neon-green/10 py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-1.5 sm:gap-2"
                     >
-                      <MessageCircle className="w-4 h-4" />
-                      Chat
+                      <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      <span className="hidden xs:inline">Chat</span>
                     </button>
                   )}
                 </>
               ) : isOnHold && isHeldByMe ? (
-                <div className="w-full bg-blue-500/20 border border-blue-500 text-blue-400 py-2.5 px-4 rounded-xl text-sm font-semibold text-center">
+                <div className="w-full bg-blue-500/20 border border-blue-500 text-blue-400 py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold text-center">
                   Đang chờ thanh toán
                 </div>
               ) : isOnHold ? (
-                <div className="w-full bg-orange-500/20 border border-orange-500 text-orange-400 py-2.5 px-4 rounded-xl text-sm font-semibold text-center">
+                <div className="w-full bg-orange-500/20 border border-orange-500 text-orange-400 py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold text-center">
                   Đang được giữ
                 </div>
               ) : (
                 <Link
                   href={`/tickets/${id}`}
-                  className="flex-1 bg-dark-bg border-2 border-dark-border hover:border-neon-green text-dark-text hover:text-neon-green py-2.5 px-4 rounded-xl font-bold text-sm transition-all hover:scale-[1.02] text-center"
+                  className="flex-1 bg-dark-bg border-2 border-dark-border hover:border-neon-green text-dark-text hover:text-neon-green py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm transition-all hover:scale-[1.02] text-center"
                 >
                   Xem chi tiết
                 </Link>
