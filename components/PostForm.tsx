@@ -806,41 +806,48 @@ export function PostForm() {
             </div>
 
             {/* Upload ảnh QR */}
-            <div>
+            <div className="bg-dark-bg border border-dark-border rounded-xl p-4">
               <label className="block text-sm font-semibold text-dark-text mb-2">
                 <ImageIcon className="w-4 h-4 inline mr-1" />
-                Ảnh mã QR <span className="text-dark-text2 text-xs font-normal">(tùy chọn - ẩn, chỉ hiển thị khi khách mua)</span>
+                Ảnh mã QR <span className="text-dark-text2 text-xs font-normal">(tùy chọn)</span>
               </label>
-              <p className="text-xs text-dark-text2 mb-3">
-                📷 Chụp màn hình hoặc forward tin nhắn/email chứa mã QR. Ảnh này sẽ được ẩn và chỉ hiển thị cho người mua sau khi họ thanh toán.
-              </p>
-              <div className="flex items-start gap-4">
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mb-3">
+                <p className="text-xs text-yellow-400 font-medium mb-1">
+                  ⚠️ Lưu ý quan trọng:
+                </p>
+                <ul className="text-xs text-yellow-300/80 space-y-1 list-disc list-inside">
+                  <li>Ảnh mã QR sẽ được <strong>ẩn hoàn toàn</strong> trên bài đăng công khai</li>
+                  <li>Chỉ hiển thị cho <strong>người mua sau khi họ đã thanh toán</strong></li>
+                  <li>Chụp màn hình hoặc forward tin nhắn/email chứa mã QR</li>
+                </ul>
+              </div>
+              <div className="flex items-start gap-3">
                 {formData.qrImage ? (
-                  <div className="relative w-32 h-32 rounded-lg overflow-hidden border-2 border-neon-green/30 bg-dark-card">
+                  <div className="relative w-24 h-24 rounded-lg overflow-hidden border-2 border-neon-green/30 bg-dark-card flex-shrink-0">
                     <Image
                       src={formData.qrImage}
                       alt="Mã QR"
                       fill
-                      className="object-contain p-2"
+                      className="object-contain p-1.5"
                     />
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, qrImage: undefined })}
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                      className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
                       title="Xóa ảnh QR"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-3 h-3" />
                     </button>
                   </div>
                 ) : (
-                  <div className="w-32 h-32 border-2 border-dashed border-dark-border rounded-lg flex items-center justify-center bg-dark-card">
-                    <ImageIcon className="w-8 h-8 text-dark-text2" />
+                  <div className="w-24 h-24 border-2 border-dashed border-dark-border rounded-lg flex items-center justify-center bg-dark-card flex-shrink-0">
+                    <ImageIcon className="w-6 h-6 text-dark-text2" />
                   </div>
                 )}
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <label
                     htmlFor="qr-image-upload"
-                    className={`inline-block px-6 py-3 rounded-lg font-semibold cursor-pointer transition-all ${
+                    className={`inline-block px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all ${
                       uploadingQR
                         ? "bg-dark-border text-dark-text2 cursor-not-allowed"
                         : "bg-neon-green hover:bg-neon-green-light text-white hover:shadow-neon-sm"
@@ -848,7 +855,7 @@ export function PostForm() {
                   >
                     {uploadingQR ? (
                       <div className="flex items-center gap-2">
-                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <Loader2 className="w-4 h-4 animate-spin" />
                         <span>Đang upload...</span>
                       </div>
                     ) : formData.qrImage ? (
@@ -871,6 +878,9 @@ export function PostForm() {
                       ✓ Đã tải lên ảnh mã QR
                     </p>
                   )}
+                  <p className="text-xs text-dark-text2 mt-2">
+                    Tối đa 5MB
+                  </p>
                 </div>
               </div>
             </div>
