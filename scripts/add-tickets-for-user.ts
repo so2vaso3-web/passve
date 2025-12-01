@@ -2,7 +2,21 @@ import connectDB from "../lib/mongodb";
 import User from "../models/User";
 import Ticket from "../models/Ticket";
 
-const sampleTickets = [
+type SampleTicket = {
+  movieTitle: string;
+  cinema: string;
+  city: string;
+  showDate: Date;
+  showTime: string;
+  seats: string;
+  originalPrice: number;
+  sellingPrice: number;
+  category: "movie" | "concert" | "event";
+  description: string;
+  images: string[];
+};
+
+const sampleTickets: SampleTicket[] = [
   {
     movieTitle: "Quỷ Ăn Tạng 3",
     cinema: "CGV Vincom Center",

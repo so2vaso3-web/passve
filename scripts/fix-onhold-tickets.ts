@@ -20,8 +20,8 @@ async function fixOnHoldTickets() {
     const tickets = await Ticket.find({
       status: "on_hold",
       $or: [
-        { qrImage: { $exists: true, $ne: null, $ne: "" } },
-        { ticketCode: { $exists: true, $ne: null, $ne: "" } },
+        { qrImage: { $exists: true, $nin: [null, ""] } },
+        { ticketCode: { $exists: true, $nin: [null, ""] } },
       ],
     }).populate("seller onHoldBy");
 
@@ -38,8 +38,8 @@ async function fixOnHoldTickets() {
     try {
       await dbSession.withTransaction(async () => {
         for (const ticket of tickets) {
-          const hasQrImage = ticket.qrImage && ticket.qrImage.trim().length > 0;
-          const hasTicketCode = ticket.ticketCode && ticket.ticketCode.trim().length > 0;
+          const hasQrImage = ticket.qrImage && Array.isArray(ticket.qrImage) && ticket.qrImage.length > 0 && ticket.qrImage.some(img => img && img.trim().length > 0);
+          const hasTicketCode = ticket.ticketCode && typeof ticket.ticketCode === 'string' && ticket.ticketCode.trim().length > 0;
 
           if (!hasQrImage && !hasTicketCode) {
             continue;
