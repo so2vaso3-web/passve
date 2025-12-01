@@ -60,12 +60,23 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
     setLoading(true);
     try {
       if (activeTab === "selling" || activeTab === "sold" || activeTab === "purchased") {
-        const status = activeTab === "selling" ? "active" : activeTab === "sold" ? "sold" : "purchased";
-        const res = await fetch(`/api/tickets?user=${userId}&status=${status}`, {
-          cache: "no-store",
-        });
-        const data = await res.json();
-        setTickets(data.tickets || []);
+        // For purchased tab, get both on_hold and purchased tickets
+        if (activeTab === "purchased") {
+          const [onHoldRes, purchasedRes] = await Promise.all([
+            fetch(`/api/tickets?user=${userId}&status=on_hold`, { cache: "no-store" }),
+            fetch(`/api/tickets?user=${userId}&status=purchased`, { cache: "no-store" }),
+          ]);
+          const onHoldData = await onHoldRes.json();
+          const purchasedData = await purchasedRes.json();
+          setTickets([...(onHoldData.tickets || []), ...(purchasedData.tickets || [])]);
+        } else {
+          const status = activeTab === "selling" ? "active" : "sold";
+          const res = await fetch(`/api/tickets?user=${userId}&status=${status}`, {
+            cache: "no-store",
+          });
+          const data = await res.json();
+          setTickets(data.tickets || []);
+        }
       } else if (activeTab === "messages") {
         const res = await fetch(`/api/chat/rooms`, {
           cache: "no-store",

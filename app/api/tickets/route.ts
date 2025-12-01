@@ -248,8 +248,14 @@ export async function GET(request: NextRequest) {
         query.seller = userId;
         query.status = "sold";
       } else if (statusFilter === "purchased") {
-        query.buyer = userId;
-        query.status = "sold";
+        // Include both purchased (sold) and on_hold tickets
+        query.$or = [
+          { buyer: userId, status: "sold" },
+          { onHoldBy: userId, status: "on_hold" }
+        ];
+      } else if (statusFilter === "on_hold") {
+        query.onHoldBy = userId;
+        query.status = "on_hold";
       }
     }
 
@@ -289,6 +295,9 @@ export async function GET(request: NextRequest) {
         showTime: ticket.showTime,
         expireAt: ticket.expireAt,
         isExpired: ticket.isExpired,
+        status: ticket.status,
+        onHoldBy: ticket.onHoldBy?.toString(),
+        onHoldAt: ticket.onHoldAt,
         seller: {
           name: ticket.seller?.name || "Unknown",
           avatar: ticket.seller?.image,

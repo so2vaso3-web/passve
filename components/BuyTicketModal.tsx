@@ -112,9 +112,9 @@ export function BuyTicketModal({ ticket, onClose }: BuyTicketModalProps) {
       onClose();
       router.refresh();
       
-      // Redirect về trang chủ sau 1 giây
+      // Redirect đến trang profile tab "Vé đã mua" để xem vé đang giữ
       setTimeout(() => {
-        router.push("/");
+        router.push("/profile?tab=purchased");
       }, 1000);
     } catch (error: any) {
       console.error("Error buying ticket:", error);
