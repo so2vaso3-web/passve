@@ -99,6 +99,10 @@ const TicketSchema = new Schema<ITicket>(
       type: [String],
       required: true,
     },
+    qrImage: {
+      type: String,
+      // Optional: Ảnh mã QR, chỉ hiển thị khi người mua đã mua
+    },
     description: {
       type: String,
     },
