@@ -113,19 +113,20 @@ export async function POST(request: NextRequest) {
 
     if (username && user.role === "admin") {
       // Admin có thể thêm vé cho user khác
-      targetUser = await User.findOne({
+      const foundUser = await User.findOne({
         $or: [
           { name: username },
           { email: { $regex: new RegExp(username, "i") } }
         ]
       });
 
-      if (!targetUser) {
+      if (!foundUser) {
         return NextResponse.json(
           { error: `Không tìm thấy user "${username}"` },
           { status: 404 }
         );
       }
+      targetUser = foundUser;
     } else if (username) {
       // User thường chỉ có thể thêm cho chính mình
       targetUser = user;
@@ -146,21 +147,22 @@ export async function POST(request: NextRequest) {
       const isExpired = expireAt < new Date();
 
       // Tạo title
+      const sampleAny = sample as any;
       const title = sample.category === "movie" 
-        ? `Vé xem phim ${sample.movieTitle} - ${sample.seats}`
+        ? `Vé xem phim ${sampleAny.movieTitle} - ${sampleAny.seats}`
         : sample.category === "concert"
-        ? `Vé concert ${sample.movieTitle} - ${sample.seats}`
-        : `Vé sự kiện ${sample.movieTitle} - ${sample.seats}`;
+        ? `Vé concert ${sampleAny.movieTitle} - ${sampleAny.seats}`
+        : `Vé sự kiện ${sampleAny.movieTitle} - ${sampleAny.seats}`;
 
       const ticket = await Ticket.create({
         seller: targetUser._id,
         title,
-        movieTitle: sample.movieTitle,
-        cinema: sample.cinema,
-        city: sample.city,
-        showDate: new Date(sample.showDate.getTime() + i * 2 * 24 * 60 * 60 * 1000),
-        showTime: sample.showTime,
-        seats: sample.seats,
+        movieTitle: sampleAny.movieTitle,
+        cinema: sampleAny.cinema,
+        city: sampleAny.city,
+        showDate: new Date(sampleAny.showDate.getTime() + i * 2 * 24 * 60 * 60 * 1000),
+        showTime: sampleAny.showTime,
+        seats: sampleAny.seats,
         quantity: 1,
         originalPrice: sample.originalPrice,
         sellingPrice: sample.sellingPrice,

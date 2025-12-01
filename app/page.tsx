@@ -7,6 +7,9 @@ import connectDB from "@/lib/mongodb";
 import Ticket from "@/models/Ticket";
 import { Button } from "@/components/Button";
 import { TicketFilters } from "@/components/TicketFilters";
+import { MaintenanceMode } from "@/components/MaintenanceMode";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 async function getTickets(category?: string, city?: string, district?: string, sellerId?: string) {
   try {

@@ -17,6 +17,7 @@ import {
   TrendingUp,
   MessageCircle,
   ShoppingCart,
+  Ticket,
 } from "lucide-react";
 import toast from "react-hot-toast";
 

@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Ticket } from "@/types/ticket";
+import { Lightbulb } from "lucide-react";
 import toast from "react-hot-toast";
 
 interface BuyTicketModalProps {
