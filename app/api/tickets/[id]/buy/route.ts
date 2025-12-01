@@ -158,7 +158,7 @@ export async function POST(
               ticket: ticket._id,
             },
           ],
-          { session: dbSession }
+          { session: dbSession, ordered: true }
         );
       });
 
