@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { Plus, Edit, Trash2, Building2, CheckCircle, X } from "lucide-react";
+import { Plus, Edit, Trash2, Building2, CheckCircle, X, Pin } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { BankIcon } from "./BankIcon";
@@ -161,8 +161,10 @@ export function AdminBanksManagement({ initialBanks }: AdminBanksManagementProps
           </div>
           
           <div className="mb-6 p-4 bg-neon-green/10 border border-neon-green/30 rounded-xl">
-            <p className="text-sm text-dark-text2">
-              <strong className="text-dark-text">📌 Lưu ý:</strong> Đây là tài khoản ngân hàng/ví điện tử của <strong className="text-neon-green">HỆ THỐNG</strong> (không phải của user). 
+            <div className="flex items-start gap-2 text-sm text-dark-text2">
+              <Pin className="w-4 h-4 text-neon-green flex-shrink-0 mt-0.5" />
+              <p>
+                <strong className="text-dark-text">Lưu ý:</strong> Đây là tài khoản ngân hàng/ví điện tử của <strong className="text-neon-green">HỆ THỐNG</strong> (không phải của user). 
               Bao gồm: <strong>Số tài khoản</strong>, <strong>Chủ tài khoản</strong>, <strong>QR code</strong> (nếu có), và <strong>Logo ngân hàng</strong> để hiển thị trong form nạp tiền.
             </p>
           </div>

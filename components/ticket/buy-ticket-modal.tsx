@@ -105,9 +105,12 @@ export function BuyTicketModal({ ticket, onClose }: BuyTicketModalProps) {
         </div>
 
         <div className="bg-primary-50 dark:bg-primary-900/20 p-4 rounded-lg">
-          <p className="text-sm text-dark-600 dark:text-dark-400">
-            💡 Tiền sẽ được giữ trong hệ thống escrow. Sau khi người bán gửi mã vé và bạn xác nhận nhận được, tiền mới được chuyển cho người bán.
-          </p>
+          <div className="flex items-start gap-2">
+            <Lightbulb className="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-dark-600 dark:text-dark-400">
+              Tiền sẽ được giữ trong hệ thống escrow. Sau khi người bán gửi mã vé và bạn xác nhận nhận được, tiền mới được chuyển cho người bán.
+            </p>
+          </div>
         </div>
 
         <div className="flex gap-3">

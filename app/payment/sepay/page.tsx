@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2, Copy, CheckCircle, Building2 } from "lucide-react";
+import { Loader2, Copy, CheckCircle, Building2, AlertTriangle } from "lucide-react";
 import Image from "next/image";
 import toast from "react-hot-toast";
 
@@ -149,9 +149,12 @@ export default function SePayPaymentPage() {
         )}
 
         <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 mb-6">
-          <p className="text-sm text-yellow-400">
-            ⚠️ Vui lòng chuyển khoản đúng số tiền và nội dung. Tiền sẽ được cộng vào ví tự động sau khi thanh toán thành công.
-          </p>
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-yellow-400">
+              Vui lòng chuyển khoản đúng số tiền và nội dung. Tiền sẽ được cộng vào ví tự động sau khi thanh toán thành công.
+            </p>
+          </div>
         </div>
 
         <div className="space-y-3">

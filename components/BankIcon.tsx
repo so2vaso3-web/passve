@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { Building2 } from "lucide-react";
 
 interface BankIconProps {
   bankName: string;
@@ -43,39 +44,7 @@ const BANK_LOGOS: Record<string, string> = {
   "Woori Bank": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Woori_Bank_logo.svg/200px-Woori_Bank_logo.svg.png",
 };
 
-// Emoji fallback cho các ngân hàng không có logo
-const BANK_EMOJIS: Record<string, string> = {
-  "Vietcombank": "🏦",
-  "Vietinbank": "🏛️",
-  "BIDV": "🏢",
-  "Agribank": "🌾",
-  "Techcombank": "💻",
-  "MBBank": "📱",
-  "VPBank": "💳",
-  "ACB": "🏪",
-  "TPBank": "🏬",
-  "HDBank": "🏗️",
-  "Sacombank": "🏦",
-  "Eximbank": "🌍",
-  "MSB": "🏛️",
-  "VIB": "💼",
-  "SHB": "🏦",
-  "OCB": "🏢",
-  "VietABank": "🏛️",
-  "NamABank": "🏦",
-  "PGBank": "🏪",
-  "ABBank": "🏬",
-  "BacABank": "🏗️",
-  "SeABank": "🌊",
-  "Kienlongbank": "🏦",
-  "PVcomBank": "⚡",
-  "PublicBank": "🌐",
-  "Hong Leong Bank": "🏦",
-  "Standard Chartered": "🌍",
-  "HSBC": "🏛️",
-  "ANZ": "🏢",
-  "Woori Bank": "🏦",
-};
+// Icon fallback component cho các ngân hàng không có logo
 
 export function BankIcon({ bankName, size = 24, className = "" }: BankIconProps) {
   // Tìm tên ngân hàng trong bankName (có thể có format "Vietcombank (VCB)")
@@ -86,7 +55,6 @@ export function BankIcon({ bankName, size = 24, className = "" }: BankIconProps)
 
   const bankKey = getBankKey(bankName);
   const logoUrl = BANK_LOGOS[bankKey];
-  const emoji = BANK_EMOJIS[bankKey] || "🏦";
 
   // Nếu có logo URL, dùng Image component với fallback
   if (logoUrl) {
@@ -98,10 +66,10 @@ export function BankIcon({ bankName, size = 24, className = "" }: BankIconProps)
           fill
           className="object-contain"
           onError={(e) => {
-            // Fallback to emoji if image fails to load
+            // Fallback to icon if image fails to load
             const target = e.target as HTMLImageElement;
             if (target.parentElement) {
-              target.parentElement.innerHTML = `<span style="font-size: ${size}px">${emoji}</span>`;
+              target.parentElement.innerHTML = `<div style="width: ${size}px; height: ${size}px; display: flex; align-items: center; justify-content: center; color: #10B981;"><svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12h12"/><path d="M6 12h12"/></svg></div>`;
             }
           }}
           unoptimized
@@ -110,10 +78,8 @@ export function BankIcon({ bankName, size = 24, className = "" }: BankIconProps)
     );
   }
 
-  // Dùng emoji làm fallback
+  // Dùng icon làm fallback
   return (
-    <span className={className} style={{ fontSize: size }}>
-      {emoji}
-    </span>
+    <Building2 className={className} size={size} style={{ color: "#10B981" }} />
   );
 }

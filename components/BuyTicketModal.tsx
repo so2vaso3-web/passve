@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { X, Wallet, AlertCircle, CheckCircle } from "lucide-react";
+import { X, Wallet, AlertCircle, CheckCircle, Clock } from "lucide-react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
@@ -106,7 +106,6 @@ export function BuyTicketModal({ ticket, onClose }: BuyTicketModalProps) {
 
       toast.success("Đã giữ vé thành công! Vui lòng thanh toán trong 15 phút", {
         duration: 5000,
-        icon: "✅",
       });
 
       // Đóng modal và refresh
@@ -263,9 +262,10 @@ export function BuyTicketModal({ ticket, onClose }: BuyTicketModalProps) {
                 <p>
                   Tiền sẽ được giữ trong hệ thống escrow. Sau khi người bán gửi mã vé và bạn xác nhận nhận được, tiền mới được chuyển cho người bán.
                 </p>
-                <p className="mt-2 font-semibold text-orange-400">
-                  ⏰ Bạn có 15 phút để hoàn tất thanh toán sau khi giữ vé.
-                </p>
+                <div className="mt-2 flex items-center gap-2 font-semibold text-orange-400">
+                  <Clock className="w-4 h-4" />
+                  <p>Bạn có 15 phút để hoàn tất thanh toán sau khi giữ vé.</p>
+                </div>
               </div>
             </div>
           </div>

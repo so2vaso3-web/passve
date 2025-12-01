@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Flame } from "lucide-react";
 
 const hotTickets = [
   {
@@ -60,7 +61,10 @@ export function HeroBanner() {
       {/* Hot tickets carousel */}
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-dark-900/80 to-transparent p-8">
         <div className="container mx-auto">
-          <h2 className="text-white text-xl font-semibold mb-4">Vé đang cháy 🔥</h2>
+          <div className="flex items-center gap-2 mb-4">
+            <Flame className="w-5 h-5 text-orange-400" />
+            <h2 className="text-white text-xl font-semibold">Vé đang cháy</h2>
+          </div>
           <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
             {hotTickets.map((ticket) => (
               <Link

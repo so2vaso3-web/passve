@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { Plus, Edit, Trash2, Image as ImageIcon, X, Save } from "lucide-react";
+import { Plus, Edit, Trash2, Image as ImageIcon, X, Save, Pin } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { BANKS } from "@/lib/banks";
@@ -152,9 +152,12 @@ export function AdminBankLogosManagement({ initialBankLogos }: AdminBankLogosMan
           </div>
           
           <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
-            <p className="text-sm text-dark-text2">
-              <strong className="text-dark-text">📌 Lưu ý:</strong> Logo này sẽ hiển thị trong dropdown "Chọn ngân hàng" của user khi họ thêm tài khoản ngân hàng của mình.
-            </p>
+            <div className="flex items-start gap-2 text-sm text-dark-text2">
+              <Pin className="w-4 h-4 text-neon-green flex-shrink-0 mt-0.5" />
+              <p>
+                <strong className="text-dark-text">Lưu ý:</strong> Logo này sẽ hiển thị trong dropdown "Chọn ngân hàng" của user khi họ thêm tài khoản ngân hàng của mình.
+              </p>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">

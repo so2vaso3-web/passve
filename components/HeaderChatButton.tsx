@@ -45,7 +45,7 @@ export function HeaderChatButton() {
               if (latestRoom && latestRoom.unreadCount > 0) {
                 toast.success(
                   `Bạn có tin nhắn mới từ ${latestRoom.otherUser.name} – ${latestRoom.ticket.movieTitle}`,
-                  { duration: 5000, icon: "💬" }
+                  { duration: 5000 }
                 );
               }
             }
