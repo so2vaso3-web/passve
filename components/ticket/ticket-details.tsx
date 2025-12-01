@@ -144,7 +144,7 @@ export function TicketDetails({ ticket }: TicketDetailsProps) {
                         <span className="text-yellow-500">★</span>
                         <span className="text-sm text-dark-text2">
                           {ticket.seller?.rating?.toFixed(1) || "0.0"} (
-                          {ticket.seller?.totalReviews || 0} đánh giá)
+                          {(ticket.seller as any)?.totalReviews || 0} đánh giá)
                         </span>
                       </div>
                     </div>
