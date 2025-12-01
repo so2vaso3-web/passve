@@ -241,20 +241,42 @@ export async function GET(request: NextRequest) {
     const userId = searchParams.get("user");
     if (userId) {
       const statusFilter = searchParams.get("status");
+      
+      // Get user ObjectId from email
+      let userObjectId = null;
+      if (userId.includes("@")) {
+        // userId is email, need to find user ObjectId
+        const User = (await import("@/models/User")).default;
+        const user = await User.findOne({ email: userId }).select("_id").lean();
+        if (user) {
+          userObjectId = user._id;
+        }
+      } else {
+        // userId is already ObjectId
+        userObjectId = userId;
+      }
+      
       if (statusFilter === "active") {
-        query.seller = userId;
+        query.seller = userObjectId || userId;
         query.status = { $in: ["pending", "approved"] };
       } else if (statusFilter === "sold") {
-        query.seller = userId;
+        query.seller = userObjectId || userId;
         query.status = "sold";
       } else if (statusFilter === "purchased") {
         // Include both purchased (sold) and on_hold tickets
-        query.$or = [
-          { buyer: userId, status: "sold" },
-          { onHoldBy: userId, status: "on_hold" }
-        ];
+        if (userObjectId) {
+          query.$or = [
+            { buyer: userObjectId, status: "sold" },
+            { onHoldBy: userObjectId, status: "on_hold" }
+          ];
+        } else {
+          query.$or = [
+            { buyer: userId, status: "sold" },
+            { onHoldBy: userId, status: "on_hold" }
+          ];
+        }
       } else if (statusFilter === "on_hold") {
-        query.onHoldBy = userId;
+        query.onHoldBy = userObjectId || userId;
         query.status = "on_hold";
       }
     }
