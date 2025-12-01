@@ -738,9 +738,14 @@ export function PostForm() {
                 )}{" "}
                 <span className="text-red-500">*</span>
               </label>
-              <p className="text-xs text-dark-text2 mb-3">
-                💡 Nên tải ảnh thông tin vé (mặt trước, mặt sau, thông tin ghế, v.v.)
-              </p>
+              <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-3">
+                <p className="text-xs text-red-400 font-semibold mb-1">
+                  ⚠️ Lưu ý quan trọng:
+                </p>
+                <p className="text-xs text-red-300/90">
+                  <strong>KHÔNG NÊN</strong> tải ảnh chứa thông tin cá nhân, mã vé, hoặc thông tin nhạy cảm. Chỉ tải <strong>ảnh vé</strong> (hình ảnh vé vật lý, không có thông tin chi tiết).
+                </p>
+              </div>
 
               {formData.images.length > 0 && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-4">
