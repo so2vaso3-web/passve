@@ -217,12 +217,12 @@ export async function POST(
         success: true,
         message: canAutoComplete 
           ? "Đã mua vé thành công! Mã vé và ảnh QR code đã được hiển thị."
-          : "Đã giữ vé thành công! Vui lòng chờ người bán gửi mã vé.",
+          : "Đã thanh toán thành công! Vui lòng chờ người bán gửi mã vé qua chat.",
         ticket: {
           id: ticket._id.toString(),
           status: ticket.status,
-          ticketCode: hasTicketCode ? ticket.ticketCode : undefined,
-          qrImage: hasQrImage ? ticket.qrImage : undefined,
+          ticketCode: (canAutoComplete && hasTicketCode) ? ticket.ticketCode : undefined,
+          qrImage: (canAutoComplete && hasQrImage) ? ticket.qrImage : undefined,
         },
       });
     } finally {

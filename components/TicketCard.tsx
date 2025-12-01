@@ -231,6 +231,10 @@ export function TicketCard({
                 <span className="bg-gray-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-neon-sm">
                   Đã bán
                 </span>
+              ) : isOnHold && isMyPurchase && (qrImage || ticketCode) ? (
+                <span className="bg-neon-green text-white px-3 py-1 rounded-full text-xs font-bold shadow-neon-sm">
+                  Đã mua
+                </span>
               ) : isOnHold && isHeldByMe ? (
                 <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-neon-sm">
                   Đã được giữ bởi bạn
@@ -374,9 +378,13 @@ export function TicketCard({
                     </button>
                   )}
                 </>
+              ) : isOnHold && isMyPurchase && (qrImage || ticketCode) ? (
+                <div className="w-full bg-neon-green/20 border border-neon-green text-neon-green py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold text-center">
+                  Đã mua thành công
+                </div>
               ) : isOnHold && isHeldByMe ? (
                 <div className="w-full bg-blue-500/20 border border-blue-500 text-blue-400 py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold text-center">
-                  Đang chờ thanh toán
+                  Đang chờ người bán gửi mã vé
                 </div>
               ) : isOnHold ? (
                 <div className="w-full bg-orange-500/20 border border-orange-500 text-orange-400 py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg sm:rounded-xl text-xs sm:text-sm font-semibold text-center">
