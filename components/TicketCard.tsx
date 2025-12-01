@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin, Clock, Ticket, Sparkles, ShoppingCart, MessageCircle } from "lucide-react";
+import { MapPin, Clock, Ticket, Sparkles, ShoppingCart, MessageCircle, QrCode } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";

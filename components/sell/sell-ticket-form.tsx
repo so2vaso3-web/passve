@@ -141,6 +141,7 @@ export function SellTicketForm() {
           ...data,
           seats,
           images,
+          qrImage: qrImage || undefined,
           movieId: selectedMovie?.id || undefined,
           moviePoster: selectedMovie ? getPosterUrl(selectedMovie.poster_path) : undefined,
         }),
