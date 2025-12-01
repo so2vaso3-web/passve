@@ -26,7 +26,8 @@ export function TicketDetails({ ticket }: TicketDetailsProps) {
     }).format(price);
   };
 
-  const isOwner = session?.user?.email && ticket.seller?.email === session.user.email;
+  const isOwner = ticket.seller?._id && session?.user?.email ? 
+    (ticket.seller as any).email === session.user.email : false;
   const canBuy = session && !isOwner && ticket.status === "approved";
 
   return (
