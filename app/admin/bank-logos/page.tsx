@@ -21,7 +21,10 @@ async function getBankLogos() {
       .lean()
       .maxTimeMS(5000);
 
-    return bankLogos;
+    return bankLogos.map((logo) => ({
+      ...logo,
+      _id: logo._id.toString(),
+    })) as any;
   } catch (error) {
     console.error("Error fetching bank logos:", error);
     return [];

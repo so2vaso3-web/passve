@@ -21,7 +21,11 @@ async function getAdminBanks() {
       .lean()
       .maxTimeMS(5000);
 
-    return banks;
+    return banks.map((bank) => ({
+      ...bank,
+      _id: bank._id.toString(),
+      type: "bank" as const,
+    })) as any;
   } catch (error) {
     console.error("Error fetching admin banks:", error);
     return [];

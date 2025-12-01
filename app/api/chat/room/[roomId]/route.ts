@@ -57,20 +57,25 @@ export async function GET(
         : { unreadCountSeller: 0 },
     });
 
+    const ticket = room.ticket as any;
+    const ticketData = ticket && typeof ticket === 'object' && '_id' in ticket
+      ? {
+          _id: ticket._id.toString(),
+          movieTitle: ticket.movieTitle,
+          images: ticket.images || [],
+          sellingPrice: ticket.sellingPrice,
+          cinema: ticket.cinema,
+          city: ticket.city,
+          showDate: ticket.showDate,
+          showTime: ticket.showTime,
+          seats: ticket.seats,
+        }
+      : null;
+
     return NextResponse.json({
       room: {
         _id: room._id.toString(),
-        ticket: {
-          _id: room.ticket._id.toString(),
-          movieTitle: room.ticket.movieTitle,
-          images: room.ticket.images || [],
-          sellingPrice: room.ticket.sellingPrice,
-          cinema: room.ticket.cinema,
-          city: room.ticket.city,
-          showDate: room.ticket.showDate,
-          showTime: room.ticket.showTime,
-          seats: room.ticket.seats,
-        },
+        ticket: ticketData,
         otherUser: {
           _id: otherUser._id.toString(),
           name: otherUser.name,
