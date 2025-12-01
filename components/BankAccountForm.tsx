@@ -182,8 +182,6 @@ export function BankAccountForm({ account, onClose, onSuccess }: BankAccountForm
         </div>
       </div>
     </div>
-      </div>
-    </div>
   );
 }
 
