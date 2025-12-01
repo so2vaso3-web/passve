@@ -55,6 +55,7 @@ export default function ProfilePage() {
     }
 
     if (status === "authenticated" && session?.user?.email) {
+      // Load data ngay lập tức, không block UI
       loadData();
     }
   }, [status, session, router]);
@@ -63,35 +64,55 @@ export default function ProfilePage() {
     try {
       setLoading(true);
 
-      // Load wallet
-      const walletRes = await fetch("/api/wallet/balance");
-      if (walletRes.ok) {
-        const walletData = await walletRes.json();
+      // Load tất cả data từ 1 API duy nhất (nhanh hơn)
+      const res = await fetch("/api/profile/data", { 
+        cache: "default",
+        next: { revalidate: 10 } // Cache 10 giây
+      });
+
+      if (res.ok) {
+        const data = await res.json();
         setWallet({
-          balance: walletData.balance || 0,
-          escrow: walletData.escrow || 0,
-          totalEarned: walletData.totalEarned || 0,
+          balance: data.wallet?.balance || 0,
+          escrow: data.wallet?.escrow || 0,
+          totalEarned: data.wallet?.totalEarned || 0,
+        });
+        setStats({
+          selling: data.stats?.selling || 0,
+          sold: data.stats?.sold || 0,
+          purchased: data.stats?.purchased || 0,
+        });
+      } else {
+        // Fallback: load từng API riêng nếu API tổng hợp fail
+        const [walletRes, sellingRes, soldRes, purchasedRes] = await Promise.all([
+          fetch("/api/wallet/balance", { cache: "default" }),
+          fetch(`/api/tickets?user=${session?.user?.email}&status=active&limit=1`, { cache: "default" }),
+          fetch(`/api/tickets?user=${session?.user?.email}&status=sold&limit=1`, { cache: "default" }),
+          fetch(`/api/tickets?user=${session?.user?.email}&status=purchased&limit=1`, { cache: "default" }),
+        ]);
+
+        if (walletRes.ok) {
+          const walletData = await walletRes.json();
+          setWallet({
+            balance: walletData.balance || 0,
+            escrow: walletData.escrow || 0,
+            totalEarned: walletData.totalEarned || 0,
+          });
+        }
+
+        const sellingData = sellingRes.ok ? await sellingRes.json() : { tickets: [] };
+        const soldData = soldRes.ok ? await soldRes.json() : { tickets: [] };
+        const purchasedData = purchasedRes.ok ? await purchasedRes.json() : { tickets: [] };
+
+        setStats({
+          selling: sellingData.tickets?.length || 0,
+          sold: soldData.tickets?.length || 0,
+          purchased: purchasedData.tickets?.length || 0,
         });
       }
-
-      // Load stats
-      const [sellingRes, soldRes, purchasedRes] = await Promise.all([
-        fetch(`/api/tickets?user=${session?.user?.email}&status=active`),
-        fetch(`/api/tickets?user=${session?.user?.email}&status=sold`),
-        fetch(`/api/tickets?user=${session?.user?.email}&status=purchased`),
-      ]);
-
-      const sellingData = sellingRes.ok ? await sellingRes.json() : { tickets: [] };
-      const soldData = soldRes.ok ? await soldRes.json() : { tickets: [] };
-      const purchasedData = purchasedRes.ok ? await purchasedRes.json() : { tickets: [] };
-
-      setStats({
-        selling: sellingData.tickets?.length || 0,
-        sold: soldData.tickets?.length || 0,
-        purchased: purchasedData.tickets?.length || 0,
-      });
     } catch (error) {
       console.error("Error loading data:", error);
+      // Không hiển thị error, chỉ log để không làm gián đoạn UX
     } finally {
       setLoading(false);
     }
@@ -107,11 +128,21 @@ export default function ProfilePage() {
     return new Intl.NumberFormat("vi-VN").format(price);
   };
 
-  if (status === "loading" || loading) {
+  // Hiển thị UI ngay lập tức, không đợi loading
+  if (status === "loading") {
     return (
       <div className="min-h-screen bg-[#0B0F19] pb-20">
-        <div className="flex items-center justify-center h-screen">
-          <div className="text-white">Đang tải...</div>
+        <div className="container mx-auto px-4 py-8">
+          {/* Loading Skeleton */}
+          <div className="animate-pulse space-y-6">
+            <div className="h-8 bg-dark-card rounded w-1/3"></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="h-24 bg-dark-card rounded-xl"></div>
+              <div className="h-24 bg-dark-card rounded-xl"></div>
+              <div className="h-24 bg-dark-card rounded-xl"></div>
+            </div>
+            <div className="h-64 bg-dark-card rounded-xl"></div>
+          </div>
         </div>
       </div>
     );

@@ -1,7 +1,6 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 export default function SignInPage() {
@@ -18,31 +17,30 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 dark:from-dark-900 dark:to-dark-800 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-dark-bg px-4">
       <div className="max-w-md w-full">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-neon-green rounded-2xl mb-4 shadow-neon">
             <span className="text-white font-bold text-2xl">P</span>
           </div>
-          <h1 className="text-3xl font-bold text-dark-900 dark:text-dark-100 mb-2">
+          <h1 className="text-3xl font-bold text-dark-text mb-2">
             Chào mừng đến
           </h1>
-          <h2 className="text-2xl font-bold text-primary-600 dark:text-primary-400 mb-2">
+          <h2 className="text-2xl font-bold text-neon-green mb-2">
             Pass Vé Phim
           </h2>
-          <p className="text-dark-600 dark:text-dark-400">
+          <p className="text-dark-text2">
             Đăng nhập để tiếp tục
           </p>
         </div>
 
         {/* Sign In Card */}
-        <div className="bg-white dark:bg-dark-800 rounded-2xl shadow-xl p-8 border border-dark-200 dark:border-dark-700">
-          <Button
+        <div className="bg-dark-card rounded-2xl shadow-card p-8 border border-dark-border">
+          <button
             onClick={handleGoogleSignIn}
             disabled={isLoading}
-            className="w-full bg-white dark:bg-dark-700 text-dark-900 dark:text-dark-100 border-2 border-dark-300 dark:border-dark-600 hover:bg-dark-50 dark:hover:bg-dark-600 hover:border-primary-500 dark:hover:border-primary-500 transition-all duration-200"
-            size="lg"
+            className="w-full flex items-center justify-center px-6 py-3 bg-dark-card-bright text-dark-text border-2 border-dark-border rounded-xl hover:bg-dark-border hover:border-neon-green transition-all duration-200 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <>
@@ -75,36 +73,20 @@ export default function SignInPage() {
                 Đăng nhập với Google
               </>
             )}
-          </Button>
+          </button>
 
-          <div className="mt-6 pt-6 border-t border-dark-200 dark:border-dark-700">
-            <p className="text-xs text-dark-500 dark:text-dark-400 text-center leading-relaxed">
+          <div className="mt-6 pt-6 border-t border-dark-border">
+            <p className="text-xs text-dark-text2 text-center leading-relaxed">
               Bằng cách đăng nhập, bạn đồng ý với{" "}
-              <a href="/terms" className="text-primary-500 hover:underline font-medium">
+              <a href="/terms" className="text-neon-green hover:underline font-medium">
                 Điều khoản sử dụng
               </a>{" "}
               và{" "}
-              <a href="/privacy" className="text-primary-500 hover:underline font-medium">
+              <a href="/privacy" className="text-neon-green hover:underline font-medium">
                 Chính sách bảo mật
               </a>{" "}
               của chúng tôi.
             </p>
-          </div>
-        </div>
-
-        {/* Features */}
-        <div className="mt-6 grid grid-cols-3 gap-4 text-center">
-          <div className="text-dark-600 dark:text-dark-400">
-            <div className="text-2xl mb-1">🔒</div>
-            <div className="text-xs font-medium">An toàn</div>
-          </div>
-          <div className="text-dark-600 dark:text-dark-400">
-            <div className="text-2xl mb-1">⚡</div>
-            <div className="text-xs font-medium">Nhanh chóng</div>
-          </div>
-          <div className="text-dark-600 dark:text-dark-400">
-            <div className="text-2xl mb-1">✅</div>
-            <div className="text-xs font-medium">Đáng tin cậy</div>
           </div>
         </div>
       </div>

@@ -6,6 +6,9 @@ import { revalidateTag } from "next/cache";
 import connectDB from "@/lib/mongodb";
 import Ticket from "@/models/Ticket";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 30; // Cache 30 giây
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -263,6 +266,7 @@ export async function GET(request: NextRequest) {
       .sort({ createdAt: -1 }) // Mới nhất trước
       .limit(limit)
       .skip(skip)
+      .maxTimeMS(3000) // Timeout 3 giây (giảm từ 5s)
       .lean();
 
     const formattedTickets = tickets

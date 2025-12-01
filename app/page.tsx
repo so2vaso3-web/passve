@@ -55,7 +55,7 @@ async function getTickets(category?: string, city?: string, district?: string, s
       })
       .sort({ createdAt: -1 })
       .limit(20)
-      .maxTimeMS(10000)
+      .maxTimeMS(3000) // Timeout 3 giây
       .lean();
 
     return tickets
@@ -197,8 +197,8 @@ function getDefaultCities() {
 }
 
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
-export const fetchCache = "force-no-store";
+export const revalidate = 30; // Cache 30 giây (giảm từ 60s)
+export const fetchCache = "default";
 
 export default async function HomePage({
   searchParams,

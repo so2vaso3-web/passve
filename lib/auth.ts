@@ -34,26 +34,41 @@ export const authOptions: NextAuthOptions = {
         // Nếu có MongoDB, lấy role từ database
         try {
           await connectDB();
+          const isAdmin = user.email === "admpcv3@gmail.com";
           const dbUser = await User.findOne({ email: user.email });
           if (dbUser) {
-            token.role = dbUser.role;
+            // Update role nếu là admin email
+            if (isAdmin && dbUser.role !== "admin") {
+              await User.findByIdAndUpdate(dbUser._id, { role: "admin" });
+              token.role = "admin";
+            } else {
+              token.role = dbUser.role;
+            }
           } else if (user.email) {
+            // Set admin cho email admpcv3@gmail.com
             // Tạo user mới nếu chưa có
             try {
               await User.create({
                 name: user.name,
                 email: user.email,
                 image: user.image,
-                role: "user",
+                role: isAdmin ? "admin" : "user",
               });
+              token.role = isAdmin ? "admin" : "user";
             } catch (error) {
               // Ignore nếu MongoDB không chạy
               console.log("MongoDB not available, using JWT only");
+              // Vẫn set role cho JWT
+              token.role = isAdmin ? "admin" : "user";
             }
           }
         } catch (error) {
           // Ignore nếu MongoDB không chạy
           console.log("MongoDB not available, using JWT only");
+          // Set admin cho email admpcv3@gmail.com ngay cả khi không có DB
+          if (user.email === "admpcv3@gmail.com") {
+            token.role = "admin";
+          }
         }
       }
       return token;

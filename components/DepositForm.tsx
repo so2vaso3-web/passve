@@ -17,8 +17,15 @@ export function DepositForm({ userId, onClose, onSuccess }: DepositFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!amount || parseFloat(amount) < 10000) {
-      toast.error("Số tiền tối thiểu là 10,000 VNĐ");
+    // Prevent multiple submissions
+    if (loading) return;
+
+    // Parse amount (remove formatting)
+    const numericAmount = parseFloat(amount.replace(/\D/g, ""));
+
+    // Validate: phải là số hợp lệ và >= 10000
+    if (!amount || isNaN(numericAmount) || numericAmount < 10000) {
+      toast.error("Số tiền tối thiểu là 10,000 VNĐ", { id: "min-amount-error" });
       return;
     }
 
@@ -29,8 +36,8 @@ export function DepositForm({ userId, onClose, onSuccess }: DepositFormProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount: parseFloat(amount.replace(/\D/g, "")), // Remove formatting
-          description: `Nạp tiền ${amount} đ vào ví`,
+          amount: numericAmount, // Use parsed numeric amount
+          description: `Nạp tiền ${new Intl.NumberFormat("vi-VN").format(numericAmount)} đ vào ví`,
         }),
       });
 
