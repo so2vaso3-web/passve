@@ -39,16 +39,21 @@ export async function GET(
     }
 
     // Check if user is part of this room
-    if (
-      room.buyer._id.toString() !== user._id.toString() &&
-      room.seller._id.toString() !== user._id.toString()
-    ) {
+    const buyerId = typeof room.buyer === 'object' && '_id' in room.buyer 
+      ? room.buyer._id.toString() 
+      : room.buyer.toString();
+    const sellerId = typeof room.seller === 'object' && '_id' in room.seller 
+      ? room.seller._id.toString() 
+      : room.seller.toString();
+    
+    if (buyerId !== user._id.toString() && sellerId !== user._id.toString()) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
     // Determine other user
-    const isBuyer = room.buyer._id.toString() === user._id.toString();
-    const otherUser = isBuyer ? room.seller : room.buyer;
+    const isBuyer = buyerId === user._id.toString();
+    const otherUserRaw = isBuyer ? room.seller : room.buyer;
+    const otherUser = otherUserRaw as any;
 
     // Mark messages as read
     await ChatRoom.findByIdAndUpdate(roomId, {
@@ -77,9 +82,15 @@ export async function GET(
         _id: room._id.toString(),
         ticket: ticketData,
         otherUser: {
-          _id: otherUser._id.toString(),
-          name: otherUser.name,
-          image: otherUser.image,
+          _id: typeof otherUser === 'object' && '_id' in otherUser 
+            ? otherUser._id.toString() 
+            : otherUser.toString(),
+          name: typeof otherUser === 'object' && 'name' in otherUser 
+            ? otherUser.name 
+            : '',
+          image: typeof otherUser === 'object' && 'image' in otherUser 
+            ? otherUser.image 
+            : '',
           isOnline: false,
         },
       },
