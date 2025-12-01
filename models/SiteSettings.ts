@@ -79,23 +79,43 @@ const SiteSettingsSchema = new Schema<ISiteSettings>(
   }
 );
 
-// Helper function để lấy settings
-export async function getSiteSettings() {
-  let settings = await SiteSettings.findOne();
-  if (!settings) {
-    // Tạo settings mặc định nếu chưa có
-    const User = mongoose.model("User");
-    const admin = await User.findOne({ role: "admin" });
-    settings = await SiteSettings.create({
-      updatedBy: admin?._id || new mongoose.Types.ObjectId(),
-    });
-  }
-  return settings;
-}
-
 const SiteSettings =
   mongoose.models.SiteSettings ||
   mongoose.model<ISiteSettings>("SiteSettings", SiteSettingsSchema);
+
+// Helper function để lấy settings (phải đặt sau khi định nghĩa SiteSettings)
+export async function getSiteSettings() {
+  try {
+    let settings = await SiteSettings.findOne();
+    if (!settings) {
+      // Tạo settings mặc định nếu chưa có
+      const User = mongoose.model("User");
+      let admin;
+      try {
+        admin = await User.findOne({ role: "admin" });
+      } catch (error) {
+        // Nếu không tìm thấy User model, tạo với ObjectId mặc định
+        console.warn("Could not find admin user, using default ObjectId");
+      }
+      settings = await SiteSettings.create({
+        updatedBy: admin?._id || new mongoose.Types.ObjectId(),
+      });
+    }
+    return settings;
+  } catch (error: any) {
+    console.error("Error in getSiteSettings:", error);
+    // Trả về object mặc định nếu có lỗi
+    return {
+      siteName: "Pass Vé Phim",
+      siteDescription: "Chợ sang nhượng vé xem phim & sự kiện uy tín, an toàn",
+      logo: "/icon-192.png",
+      favicon: "/icon-192.png",
+      themeColor: "#0F172A",
+      primaryColor: "#10B981",
+      maintenanceMode: false,
+    } as any;
+  }
+}
 
 export default SiteSettings;
 

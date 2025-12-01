@@ -11,18 +11,18 @@ export async function GET() {
     
     // Chỉ trả về thông tin public, không trả về updatedBy
     const publicSettings = {
-      siteName: settings.siteName,
-      siteDescription: settings.siteDescription,
-      logo: settings.logo,
-      favicon: settings.favicon,
-      ogImage: settings.ogImage,
-      themeColor: settings.themeColor,
-      primaryColor: settings.primaryColor,
-      contactEmail: settings.contactEmail,
-      contactPhone: settings.contactPhone,
-      socialLinks: settings.socialLinks,
-      seoKeywords: settings.seoKeywords,
-      maintenanceMode: settings.maintenanceMode,
+      siteName: settings?.siteName || "Pass Vé Phim",
+      siteDescription: settings?.siteDescription || "Chợ sang nhượng vé xem phim & sự kiện uy tín, an toàn",
+      logo: settings?.logo || "/icon-192.png",
+      favicon: settings?.favicon || "/icon-192.png",
+      ogImage: settings?.ogImage,
+      themeColor: settings?.themeColor || "#0F172A",
+      primaryColor: settings?.primaryColor || "#10B981",
+      contactEmail: settings?.contactEmail,
+      contactPhone: settings?.contactPhone,
+      socialLinks: settings?.socialLinks,
+      seoKeywords: settings?.seoKeywords,
+      maintenanceMode: settings?.maintenanceMode || false,
     };
     
     return NextResponse.json({ settings: publicSettings });

@@ -8,9 +8,13 @@ export function SiteSettingsLoader() {
     const loadSettings = async () => {
       try {
         const res = await fetch("/api/site-settings", { cache: "no-store" });
+        if (!res.ok) {
+          // Nếu API lỗi, bỏ qua (không làm crash app)
+          return;
+        }
         const data = await res.json();
         
-        if (data.settings) {
+        if (data?.settings) {
           const { siteName, favicon, logo, themeColor } = data.settings;
           
           // Cập nhật favicon
