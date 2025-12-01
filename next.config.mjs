@@ -44,6 +44,14 @@ const nextConfig = {
       config.watchOptions = {
         poll: 1000,
         aggregateTimeout: 300,
+        ignored: [
+          '**/node_modules/**',
+          '**/.next/**',
+          '**/C:/DumpStack.log.tmp',
+          '**/C:/pagefile.sys',
+          '**/C:/hiberfil.sys',
+          '**/C:/swapfile.sys',
+        ],
       };
     }
     return config;

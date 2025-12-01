@@ -51,8 +51,8 @@ export function WithdrawForm({ balance, onClose, onSuccess }: WithdrawFormProps)
     }
 
     const amountNum = parseFloat(amount);
-    if (!amountNum || amountNum < 50000) {
-      toast.error("Số tiền tối thiểu là 50,000 VNĐ");
+    if (!amountNum || amountNum <= 50000) {
+      toast.error("Số tiền phải lớn hơn 50,000 VNĐ");
       return;
     }
 
@@ -86,12 +86,12 @@ export function WithdrawForm({ balance, onClose, onSuccess }: WithdrawFormProps)
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-dark-card border border-dark-border max-w-md w-full p-6 rounded-2xl shadow-card">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold text-dark-text">Rút tiền</h3>
-          <button onClick={onClose} className="text-dark-text2 hover:text-dark-text">
-            <X className="w-5 h-5" />
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4 overflow-y-auto">
+      <div className="bg-dark-card border border-dark-border max-w-md w-full p-4 sm:p-6 rounded-xl sm:rounded-2xl shadow-card my-4 sm:my-8 max-h-[95vh] flex flex-col">
+        <div className="flex items-center justify-between mb-4 sm:mb-6 flex-shrink-0">
+          <h3 className="text-lg sm:text-xl font-bold text-dark-text pr-2">Rút tiền</h3>
+          <button onClick={onClose} className="text-dark-text2 hover:text-dark-text flex-shrink-0">
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
 
@@ -107,7 +107,7 @@ export function WithdrawForm({ balance, onClose, onSuccess }: WithdrawFormProps)
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 flex-1 overflow-y-auto pr-1">
             <div>
               <label className="block text-sm font-heading font-bold text-dark-text mb-2">
                 Số tiền (VNĐ) <span className="text-red-500">*</span>
@@ -116,15 +116,14 @@ export function WithdrawForm({ balance, onClose, onSuccess }: WithdrawFormProps)
                 type="number"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                placeholder="50000"
-                min="50000"
+                placeholder="50001"
+                min="50001"
                 max={balance}
-                step="1000"
                 className="w-full px-4 py-3 border-2 border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-green focus:border-neon-green bg-dark-card-bright text-dark-text"
                 required
               />
               <p className="text-xs text-dark-text2 mt-1">
-                Tối thiểu 50,000 VNĐ. Số dư khả dụng: {new Intl.NumberFormat("vi-VN").format(balance)} đ
+                Phải lớn hơn 50,000 VNĐ. Số dư khả dụng: {new Intl.NumberFormat("vi-VN").format(balance)} đ
               </p>
             </div>
 
@@ -173,19 +172,19 @@ export function WithdrawForm({ balance, onClose, onSuccess }: WithdrawFormProps)
               </div>
             )}
 
-            <div className="flex gap-3 pt-4">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-3 sm:pt-4 flex-shrink-0">
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-2 hover:shadow-neon"
+                className="w-full sm:flex-1 bg-orange-500 hover:bg-orange-600 text-white px-4 sm:px-6 py-3 rounded-xl font-semibold text-sm sm:text-base transition-all disabled:opacity-50 flex items-center justify-center gap-2 hover:shadow-neon"
               >
-                <ArrowDown className="w-4 h-4" />
-                <span className="font-bold">{loading ? "Đang xử lý..." : "Gửi yêu cầu rút tiền"}</span>
+                <ArrowDown className="w-4 h-4 flex-shrink-0" />
+                <span className="font-bold whitespace-nowrap">{loading ? "Đang xử lý..." : "Gửi yêu cầu rút tiền"}</span>
               </button>
               <button
                 type="button"
                 onClick={onClose}
-                className="px-6 py-3 border-2 border-dark-border text-dark-text2 rounded-xl font-semibold hover:bg-dark-border hover:text-neon-green transition-all"
+                className="w-full sm:w-auto px-4 sm:px-6 py-3 border-2 border-dark-border text-dark-text2 rounded-xl font-semibold text-sm sm:text-base hover:bg-dark-border hover:text-neon-green transition-all"
               >
                 Hủy
               </button>

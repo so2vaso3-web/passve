@@ -9,6 +9,7 @@ import { BankAccountForm } from "@/components/BankAccountForm";
 import { DepositForm } from "@/components/DepositForm";
 import { WithdrawForm } from "@/components/WithdrawForm";
 import { ChatRoomCard } from "@/components/ChatRoomCard";
+import { PurchasedTicketsTab } from "@/components/PurchasedTicketsTab";
 import { 
   Package, 
   CheckCircle, 
@@ -61,21 +62,25 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
   const loadData = async () => {
     setLoading(true);
     try {
-      if (activeTab === "selling" || activeTab === "sold" || activeTab === "purchased") {
-        // For purchased tab, get sold tickets
-        if (activeTab === "purchased") {
-          const res = await fetch(`/api/tickets?user=${userId}&status=purchased`, {
-            cache: "no-store",
-          });
-          const data = await res.json();
-          setTickets(data.tickets || []);
-        } else {
-          const status = activeTab === "selling" ? "active" : "sold";
+      if (shouldLoadTickets) {
+        // For purchased tab, get sold tickets where user is the buyer
+        const status = activeTab === "selling" ? "active" : "sold";
+        try {
           const res = await fetch(`/api/tickets?user=${userId}&status=${status}`, {
             cache: "no-store",
           });
-          const data = await res.json();
-          setTickets(data.tickets || []);
+          if (res.ok) {
+            const data = await res.json();
+            setTickets(data.tickets || []);
+          } else {
+            const errorData = await res.json().catch(() => ({}));
+            console.error("Error fetching tickets:", errorData);
+            setTickets([]);
+          }
+        } catch (error: any) {
+          console.error("Error fetching tickets:", error);
+          setTickets([]);
+          toast.error("Lỗi khi tải danh sách vé");
         }
       } else if (activeTab === "messages") {
         const res = await fetch(`/api/chat/rooms`, {
@@ -119,6 +124,18 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
       const res = await fetch(`/api/bank/${bankId}`, { method: "DELETE" });
       if (res.ok) {
         toast.success("Đã xóa tài khoản");
+        // Refresh bank accounts immediately
+        try {
+          const bankRes = await fetch(`/api/bank`, {
+            cache: "no-store",
+          });
+          if (bankRes.ok) {
+            const data = await bankRes.json();
+            setBankAccounts(data.bankAccounts || []);
+          }
+        } catch (error) {
+          console.error("Error refreshing bank accounts:", error);
+        }
         loadData();
       } else {
         throw new Error("Có lỗi xảy ra");
@@ -134,8 +151,13 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
     { id: "purchased", label: "Vé đã mua", icon: ShoppingBag },
     { id: "messages", label: "Tin nhắn", icon: MessageCircle },
     { id: "transactions", label: "Ví & giao dịch", icon: Wallet },
+    { id: "deposit", label: "Nạp tiền", icon: ArrowUp },
+    { id: "withdraw", label: "Rút tiền", icon: ArrowDown },
     { id: "bank", label: "Ngân hàng của tôi", icon: CreditCard },
   ];
+
+  // Remove purchased from loadData since it's handled separately
+  const shouldLoadTickets = activeTab === "selling" || activeTab === "sold";
 
   return (
     <div className="bg-[#111827] border border-[#1F2937] rounded-2xl overflow-hidden">
@@ -206,12 +228,12 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
                       <div className="text-right">
                         <p
                           className={`font-bold text-lg ${
-                            tx.type === "deposit" || tx.type === "sale" || tx.type === "escrow_release"
+                            tx.type === "deposit" || tx.type === "sale" || tx.type === "escrow_release" || tx.type === "refund"
                               ? "text-[#10B981]"
                               : "text-red-400"
                           }`}
                         >
-                          {tx.type === "deposit" || tx.type === "sale" || tx.type === "escrow_release"
+                          {tx.type === "deposit" || tx.type === "sale" || tx.type === "escrow_release" || tx.type === "refund"
                             ? "+"
                             : "-"}
                           {new Intl.NumberFormat("vi-VN").format(tx.amount)} đ
@@ -238,6 +260,22 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
               </div>
             )}
           </div>
+        )}
+
+        {activeTab === "deposit" && (
+          <DepositForm
+            userId={userId}
+            onClose={() => handleTabChange("transactions")}
+            onSuccess={loadData}
+          />
+        )}
+
+        {activeTab === "withdraw" && (
+          <WithdrawForm
+            balance={wallet.balance}
+            onClose={() => handleTabChange("transactions")}
+            onSuccess={loadData}
+          />
         )}
 
         {activeTab === "bank" && (
@@ -340,40 +378,69 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
           </div>
         )}
 
-        {(activeTab === "selling" || activeTab === "sold" || activeTab === "purchased") && (
+        {activeTab === "purchased" && (
+          <PurchasedTicketsTab userId={userId} />
+        )}
+
+        {(activeTab === "selling" || activeTab === "sold") && (
           <div>
             {loading ? (
-              <div className="text-center py-8 text-white/70">Đang tải...</div>
-            ) : tickets.length === 0 ? (
               <div className="text-center py-12">
-                <Package className="w-16 h-16 text-white/70 mx-auto mb-4" />
-                <p className="text-white/70">Chưa có vé nào</p>
+                <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-[#10B981] mb-4"></div>
+                <p className="text-white/70">Đang tải vé...</p>
+              </div>
+            ) : tickets.length === 0 ? (
+              <div className="text-center py-16">
+                <Package className="w-20 h-20 text-white/30 mx-auto mb-4" />
+                <p className="text-white/70 text-lg font-semibold mb-2">
+                  {activeTab === "sold" ? "Chưa có vé đã bán" : "Chưa có vé đang bán"}
+                </p>
+                <p className="text-white/50 text-sm">
+                  {activeTab === "sold"
+                    ? "Bạn chưa bán vé nào. Hãy đăng tin bán vé để bắt đầu!"
+                    : "Bạn chưa có vé nào đang bán. Hãy đăng tin bán vé ngay!"}
+                </p>
               </div>
             ) : (
-              <>
-                {activeTab === "purchased" && tickets.some((t: any) => t.status === "sold" && t.ticketCode) && (
-                  <div className="mb-6 p-4 bg-gradient-to-r from-neon-green/10 to-emerald-500/10 border border-neon-green/30 rounded-xl">
-                    <div className="flex items-start gap-3">
-                      <CheckCircle className="w-5 h-5 text-neon-green flex-shrink-0 mt-0.5" />
-                      <div>
-                        <h4 className="font-semibold text-white mb-1">Vé đã mua thành công!</h4>
-                        <p className="text-sm text-white/70">
-                          Bạn đã nhận được mã vé. Vui lòng kiểm tra thông tin mã vé trong từng vé đã mua.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                  {tickets.map((ticket) =>
-                    activeTab === "selling" ? (
-                      <SellingPostCard key={ticket.id} ticket={ticket} onUpdate={loadData} />
-                    ) : (
-                      <TicketCard key={ticket.id} {...ticket} />
-                    )
-                  )}
-                </div>
-              </>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+                {tickets.map((ticket: any) => {
+                  const ticketId = ticket.id || ticket._id?.toString() || "";
+                  const ticketProps = {
+                    id: ticketId,
+                    title: ticket.title || "Không có tiêu đề",
+                    price: ticket.price || ticket.sellingPrice || 0,
+                    originalPrice: ticket.originalPrice,
+                    location: ticket.location || `${ticket.cinema || ""}, ${ticket.city || ""}`.replace(/^,\s*|,\s*$/g, "") || "Chưa có địa điểm",
+                    category: ticket.category || "other",
+                    image: ticket.image,
+                    seller: ticket.seller || { name: "Unknown" },
+                    showDate: ticket.showDate,
+                    showTime: ticket.showTime,
+                    expireAt: ticket.expireAt,
+                    isExpired: ticket.isExpired,
+                    createdAt: ticket.createdAt,
+                    movieTitle: ticket.movieTitle,
+                    cinema: ticket.cinema,
+                    city: ticket.city,
+                    seats: ticket.seats,
+                    status: ticket.status || "sold",
+                    onHoldBy: ticket.onHoldBy,
+                    ticketCode: ticket.ticketCode,
+                    qrImage: ticket.qrImage 
+                      ? (Array.isArray(ticket.qrImage) ? ticket.qrImage : (ticket.qrImage ? [ticket.qrImage] : undefined))
+                      : undefined,
+                    buyer: ticket.buyer,
+                    buyerEmail: ticket.buyerEmail,
+                    soldAt: ticket.soldAt,
+                  };
+                  
+                  return activeTab === "selling" ? (
+                    <SellingPostCard key={ticketId} ticket={ticketProps} onUpdate={loadData} />
+                  ) : (
+                    <TicketCard key={ticketId} {...ticketProps} />
+                  );
+                })}
+              </div>
             )}
           </div>
         )}
@@ -387,7 +454,52 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
             setShowBankForm(false);
             setEditingBank(null);
           }}
-          onSuccess={loadData}
+          onSuccess={async () => {
+            // Refresh bank accounts immediately
+            try {
+              const res = await fetch(`/api/bank`, {
+                cache: "no-store",
+              });
+              if (res.ok) {
+                const data = await res.json();
+                setBankAccounts(data.bankAccounts || []);
+                toast.success("Đã cập nhật danh sách tài khoản");
+              } else {
+                // Retry after a short delay
+                setTimeout(async () => {
+                  try {
+                    const retryRes = await fetch(`/api/bank`, {
+                      cache: "no-store",
+                    });
+                    if (retryRes.ok) {
+                      const retryData = await retryRes.json();
+                      setBankAccounts(retryData.bankAccounts || []);
+                    }
+                  } catch (error) {
+                    console.error("Error retrying bank accounts:", error);
+                  }
+                }, 500);
+              }
+            } catch (error) {
+              console.error("Error refreshing bank accounts:", error);
+              // Retry after a short delay
+              setTimeout(async () => {
+                try {
+                  const retryRes = await fetch(`/api/bank`, {
+                    cache: "no-store",
+                  });
+                  if (retryRes.ok) {
+                    const retryData = await retryRes.json();
+                    setBankAccounts(retryData.bankAccounts || []);
+                  }
+                } catch (retryError) {
+                  console.error("Error retrying bank accounts:", retryError);
+                }
+              }, 500);
+            }
+            loadData();
+            router.refresh();
+          }}
         />
       )}
 

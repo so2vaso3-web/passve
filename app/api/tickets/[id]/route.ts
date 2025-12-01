@@ -89,7 +89,9 @@ export async function PATCH(
         if (updateData.originalPrice) ticket.originalPrice = updateData.originalPrice;
         if (updateData.sellingPrice) ticket.sellingPrice = updateData.sellingPrice;
         if (updateData.images) ticket.images = updateData.images;
-        if (updateData.qrImage !== undefined) ticket.qrImage = updateData.qrImage;
+        if (updateData.qrImage !== undefined) {
+          ticket.qrImage = Array.isArray(updateData.qrImage) ? updateData.qrImage : (updateData.qrImage ? [updateData.qrImage] : []);
+        }
         if (updateData.reason !== undefined) ticket.reason = updateData.reason;
         if (updateData.description !== undefined) ticket.description = updateData.description;
 
@@ -303,7 +305,9 @@ export async function PATCH(
         if (updateData.originalPrice) ticket.originalPrice = updateData.originalPrice;
         if (updateData.sellingPrice) ticket.sellingPrice = updateData.sellingPrice;
         if (updateData.images) ticket.images = updateData.images;
-        if (updateData.qrImage !== undefined) ticket.qrImage = updateData.qrImage;
+        if (updateData.qrImage !== undefined) {
+          ticket.qrImage = Array.isArray(updateData.qrImage) ? updateData.qrImage : (updateData.qrImage ? [updateData.qrImage] : []);
+        }
         if (updateData.reason !== undefined) ticket.reason = updateData.reason;
         if (updateData.description !== undefined) ticket.description = updateData.description;
 

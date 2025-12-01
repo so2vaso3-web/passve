@@ -55,7 +55,23 @@
   
   /* Better touch targets */
   button, a, input, select, textarea {
-    touch-action: manipulation;
+    touch-action: pan-y;
+  }
+  
+  /* Disable zoom gestures */
+  html {
+    touch-action: pan-y;
+    -ms-touch-action: pan-y;
+  }
+  
+  /* Prevent double-tap zoom */
+  * {
+    touch-action: pan-y;
+  }
+  
+  input, textarea, select {
+    touch-action: pan-y;
+    font-size: 16px !important; /* Prevent iOS zoom on focus */
   }
 }
 
@@ -79,14 +95,92 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 body {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  touch-action: pan-y;
   font-family: var(--font-inter);
   background-color: #0F172A;
   color: #F1F5F9;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Prevent horizontal scroll on all elements */
+* {
+  max-width: 100%;
+}
+
+/* Allow text selection for inputs and textareas */
+input, textarea, [contenteditable] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Optimize modal performance */
+[data-qr-modal] {
+  contain: layout style paint;
+  transform: translateZ(0); /* Force GPU acceleration */
+}
+
+[data-qr-modal] * {
+  will-change: auto;
+}
+
+/* Welcome Modal Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.4s ease-out;
+}
+
+/* Prevent hover effects when modal is open */
+body[style*="pointer-events: none"] *:not([data-qr-modal]):not([data-qr-modal] *) {
+  pointer-events: none !important;
+}
+
+/* Prevent hover effects when modal is open */
+body[style*="pointer-events: none"] * {
+  pointer-events: none !important;
+}
+
+body[style*="pointer-events: none"] [data-qr-modal],
+body[style*="pointer-events: none"] [data-qr-modal] * {
+  pointer-events: auto !important;
 }
 
 /* Input fields - brighter for better visibility */

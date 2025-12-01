@@ -18,9 +18,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { amount, bankAccountId } = body;
 
-    if (!amount || amount < 50000) {
+    if (!amount || amount <= 50000) {
       return NextResponse.json(
-        { error: "Số tiền tối thiểu là 50,000 VNĐ" },
+        { error: "Số tiền phải lớn hơn 50,000 VNĐ" },
         { status: 400 }
       );
     }

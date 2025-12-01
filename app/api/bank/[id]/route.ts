@@ -24,6 +24,7 @@ export async function PUT(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // Find account by _id or accountNumber
     const accountIndex = (dbUser.bankAccounts || []).findIndex(
       (acc: any) => acc._id?.toString() === params.id || acc.accountNumber === params.id
     );
@@ -32,27 +33,61 @@ export async function PUT(
       return NextResponse.json({ error: "Account not found" }, { status: 404 });
     }
 
+    // Get old account to preserve _id
+    const oldAccount = dbUser.bankAccounts[accountIndex];
+    const oldId = oldAccount._id;
+
     // Nếu đặt làm mặc định, bỏ mặc định của các tài khoản khác
     if (isDefault) {
-      dbUser.bankAccounts = (dbUser.bankAccounts || []).map((acc: any, idx: number) => ({
-        ...acc,
-        isDefault: idx === accountIndex,
-      }));
-    } else {
-      dbUser.bankAccounts[accountIndex] = {
-        ...dbUser.bankAccounts[accountIndex],
-        bankName,
-        accountNumber,
-        accountHolder,
-        branch,
-        isDefault: false,
-      };
+      dbUser.bankAccounts.forEach((acc: any, idx: number) => {
+        if (idx === accountIndex) {
+          acc.isDefault = true;
+        } else {
+          acc.isDefault = false;
+        }
+      });
     }
 
+    // Update account fields directly (Mongoose will preserve _id)
+    const accountToUpdate = dbUser.bankAccounts[accountIndex];
+    accountToUpdate.bankName = bankName;
+    accountToUpdate.accountNumber = accountNumber;
+    accountToUpdate.accountHolder = accountHolder;
+    if (branch !== undefined) {
+      accountToUpdate.branch = branch;
+    }
+    if (isDefault !== undefined) {
+      accountToUpdate.isDefault = isDefault;
+    }
+
+    // Mark bankAccounts as modified để đảm bảo Mongoose save đúng
+    dbUser.markModified('bankAccounts');
     await dbUser.save();
+
+    // Reload user để đảm bảo data đúng và có _id
+    const updatedUser = await User.findOne({ email: session.user.email }).maxTimeMS(5000);
+    if (!updatedUser) {
+      return NextResponse.json({ error: "User not found after update" }, { status: 404 });
+    }
+
+    // Find updated account
+    const updatedAccount = (updatedUser.bankAccounts || []).find(
+      (acc: any) => acc._id?.toString() === params.id || acc.accountNumber === accountNumber
+    );
+
     await revalidateWallet();
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ 
+      success: true,
+      bankAccount: updatedAccount ? {
+        _id: updatedAccount._id?.toString() || updatedAccount.accountNumber,
+        bankName: updatedAccount.bankName,
+        accountNumber: updatedAccount.accountNumber,
+        accountHolder: updatedAccount.accountHolder,
+        branch: updatedAccount.branch,
+        isDefault: updatedAccount.isDefault || false,
+      } : null
+    });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

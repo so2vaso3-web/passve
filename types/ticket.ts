@@ -18,6 +18,7 @@ export interface Ticket {
   originalPrice: number;
   sellingPrice: number;
   images: string[];
+  qrImage?: string[];
   description?: string;
   status: "pending" | "approved" | "sold" | "cancelled" | "rejected";
   category: "movie" | "concert" | "event";

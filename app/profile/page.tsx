@@ -12,8 +12,9 @@ import {
   MessageCircle,
   CreditCard,
   LogOut,
-  Edit,
   Star,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import toast from "react-hot-toast";
@@ -272,14 +273,54 @@ export default function ProfilePage() {
               </span>
             </div>
 
-            {/* Edit Button */}
-            <button
-              onClick={() => router.push("/profile?tab=edit")}
-              className="bg-[#10B981] hover:bg-[#059669] text-white px-6 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2"
-            >
-              <Edit className="w-4 h-4" />
-              Chỉnh sửa
-            </button>
+            {/* Wallet Balance - Moved below avatar */}
+            <div className="w-full bg-[#0B0F19] border border-[#1F2937] rounded-xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Wallet className="w-5 h-5 text-[#10B981]" />
+                  <p className="text-white/70 text-sm">Số dư ví</p>
+                </div>
+                <button
+                  onClick={() => {
+                    const currentScroll = window.scrollY;
+                    router.push("/profile?tab=transactions");
+                    setTimeout(() => window.scrollTo(0, currentScroll), 0);
+                  }}
+                  className="text-[#10B981] text-xs font-semibold hover:text-[#059669] transition-colors"
+                >
+                  Xem chi tiết
+                </button>
+              </div>
+              <p className="text-[#10B981] text-2xl font-black text-center mb-3">
+                {formatPrice(wallet.balance)} đ
+              </p>
+              
+              {/* Nạp tiền và Rút tiền buttons */}
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => {
+                    const currentScroll = window.scrollY;
+                    router.push("/profile?tab=deposit");
+                    setTimeout(() => window.scrollTo(0, currentScroll), 0);
+                  }}
+                  className="bg-[#10B981] hover:bg-[#059669] text-white px-3 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2"
+                >
+                  <ArrowUp className="w-4 h-4" />
+                  Nạp tiền
+                </button>
+                <button
+                  onClick={() => {
+                    const currentScroll = window.scrollY;
+                    router.push("/profile?tab=withdraw");
+                    setTimeout(() => window.scrollTo(0, currentScroll), 0);
+                  }}
+                  className="bg-[#EF4444] hover:bg-[#DC2626] text-white px-3 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2"
+                >
+                  <ArrowDown className="w-4 h-4" />
+                  Rút tiền
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -307,31 +348,6 @@ export default function ProfilePage() {
               <p className="text-white/70 text-xs mb-1">Vé đã mua</p>
               <p className="text-white text-lg font-bold">{stats.purchased}</p>
             </div>
-          </div>
-        </div>
-
-        {/* Wallet Balance */}
-        <div className="bg-[#111827] border border-[#1F2937] rounded-2xl p-5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Wallet className="w-6 h-6 text-[#10B981]" />
-              <div>
-                <p className="text-white/70 text-sm">Số dư ví</p>
-                <p className="text-[#10B981] text-2xl font-black">
-                  {formatPrice(wallet.balance)} đ
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => {
-                const currentScroll = window.scrollY;
-                router.push("/profile?tab=transactions");
-                setTimeout(() => window.scrollTo(0, currentScroll), 0);
-              }}
-              className="text-[#10B981] text-sm font-semibold hover:text-[#059669] transition-colors"
-            >
-              Xem chi tiết
-            </button>
           </div>
         </div>
 

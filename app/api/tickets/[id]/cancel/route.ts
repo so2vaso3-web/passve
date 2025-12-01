@@ -28,6 +28,10 @@ export async function POST(
 
     await connectDB();
 
+    // Get request body to check if admin cancel
+    const body = await request.json().catch(() => ({}));
+    const isAdminCancel = body.adminCancel === true;
+
     // Get user
     const user = await User.findOne({ email: session.user.email });
     if (!user) {
@@ -59,6 +63,14 @@ export async function POST(
     const isBuyer = buyerIdString === user._id.toString();
     const isAdmin = user.role === "admin";
 
+    // Nếu là admin cancel, chỉ admin mới được làm
+    if (isAdminCancel && !isAdmin) {
+      return NextResponse.json(
+        { error: "Chỉ admin mới có quyền hủy vé sau thời gian giới hạn" },
+        { status: 403 }
+      );
+    }
+
     if (!isBuyer && !isAdmin) {
       return NextResponse.json(
         { error: "Bạn không có quyền hủy vé này" },
@@ -66,29 +78,42 @@ export async function POST(
       );
     }
 
-    // Kiểm tra thời gian - chỉ cho phép hủy trong vòng 5 phút sau khi mua
-    const soldAt = ticket.soldAt || ticket.createdAt;
-    const minutesSincePurchase = (Date.now() - new Date(soldAt).getTime()) / (1000 * 60);
-    
-    if (minutesSincePurchase > 5 && !isAdmin) {
-      const timeElapsed = Math.floor(minutesSincePurchase);
-      return NextResponse.json(
-        { 
-          error: `Đã quá 5 phút, không thể hủy vé. Thời gian đã trôi qua: ${timeElapsed} phút.`,
-          timeLimit: 5,
-          timeElapsed: timeElapsed,
-        },
-        { status: 400 }
-      );
+    // Kiểm tra thời gian - lấy thời gian giới hạn từ settings
+    // Chỉ kiểm tra thời gian nếu không phải admin cancel
+    if (!isAdminCancel) {
+      const { getSiteSettings } = await import("@/models/SiteSettings");
+      const settings = await getSiteSettings();
+      const timeLimitMinutes = settings?.cancellationTimeLimitMinutes || 5;
+      
+      const soldAt = ticket.soldAt || ticket.createdAt;
+      const minutesSincePurchase = (Date.now() - new Date(soldAt).getTime()) / (1000 * 60);
+      
+      if (minutesSincePurchase > timeLimitMinutes && !isAdmin) {
+        const timeElapsed = Math.floor(minutesSincePurchase);
+        return NextResponse.json(
+          { 
+            error: `Đã quá ${timeLimitMinutes} phút, không thể hủy vé. Thời gian đã trôi qua: ${timeElapsed} phút.`,
+            timeLimit: timeLimitMinutes,
+            timeElapsed: timeElapsed,
+          },
+          { status: 400 }
+        );
+      }
     }
 
     // Tính toán số tiền hoàn lại
+    // totalPaid = số tiền người mua đã trả (giá vé + 7% phí)
     const buyerFee = Math.round(ticket.sellingPrice * 0.07);
     const totalPaid = ticket.sellingPrice + buyerFee;
+    // sellerReceives = số tiền người bán đã nhận (giá vé - 7% phí)
     const sellerReceives = Math.round(ticket.sellingPrice * 0.93);
 
-    // Get wallets - sử dụng buyerId từ populate
-    const buyerIdForWallet = (ticket.buyer as any)?._id || ticket.buyer;
+    // Get wallets - đảm bảo buyerId là ObjectId
+    const mongoose = await import("mongoose");
+    const buyerIdForWallet = (ticket.buyer as any)?._id 
+      ? new mongoose.Types.ObjectId((ticket.buyer as any)._id.toString())
+      : new mongoose.Types.ObjectId(ticket.buyer.toString());
+    
     let buyerWallet = await Wallet.findOne({ user: buyerIdForWallet });
     if (!buyerWallet) {
       buyerWallet = await Wallet.create({
@@ -99,10 +124,11 @@ export async function POST(
       });
     }
 
-    let sellerWallet = await Wallet.findOne({ user: ticket.seller._id });
+    const sellerId = new mongoose.Types.ObjectId(ticket.seller._id.toString());
+    let sellerWallet = await Wallet.findOne({ user: sellerId });
     if (!sellerWallet) {
       sellerWallet = await Wallet.create({
-        user: ticket.seller._id,
+        user: sellerId,
         balance: 0,
         escrow: 0,
         totalEarned: 0,
@@ -110,16 +136,18 @@ export async function POST(
     }
 
     // Use MongoDB transaction
-    const db = (await import("mongoose")).connection;
+    const db = mongoose.connection;
     const dbSession = await db.startSession();
 
     try {
       await dbSession.withTransaction(async () => {
-        // Hoàn tiền cho buyer (toàn bộ số tiền đã trả)
+        // ===== HOÀN TIỀN CHO NGƯỜI MUA (BUYER) =====
+        // Người mua đã trả totalPaid, cần hoàn lại toàn bộ
         buyerWallet.balance += totalPaid;
         await buyerWallet.save({ session: dbSession });
 
-        // Trừ tiền từ seller (số tiền đã nhận)
+        // ===== TRỪ TIỀN TỪ NGƯỜI BÁN (SELLER) =====
+        // Người bán đã nhận sellerReceives, cần trừ lại
         if (sellerWallet.balance >= sellerReceives) {
           sellerWallet.balance -= sellerReceives;
           sellerWallet.totalEarned -= sellerReceives;
@@ -131,32 +159,34 @@ export async function POST(
           await sellerWallet.save({ session: dbSession });
         }
 
-        // Cập nhật ticket status
-        ticket.status = "cancelled";
-        await ticket.save({ session: dbSession });
-
-        // Tạo transactions - sử dụng buyerIdForWallet đã định nghĩa
-        await Transaction.create(
-          [
-            {
-              user: buyerIdForWallet,
-              type: "refund",
-              amount: totalPaid,
-              status: "completed",
-              description: `Hoàn tiền vé ${ticket.movieTitle} - ${ticket.cinema}`,
-              ticket: ticket._id,
-            },
-            {
-              user: ticket.seller._id,
-              type: "refund",
-              amount: -sellerReceives,
-              status: "completed",
-              description: `Hoàn tiền vé ${ticket.movieTitle} cho ${(ticket.buyer as any)?.name || "Người mua"}`,
-              ticket: ticket._id,
-            },
-          ],
-          { session: dbSession, ordered: true }
+        // Cập nhật ticket - trở về trạng thái approved để có thể bán lại
+        // Dùng updateOne với $unset để xóa buyer và soldAt
+        await Ticket.updateOne(
+          { _id: ticket._id },
+          {
+            $set: { status: "approved" },
+            $unset: { buyer: "", soldAt: "" },
+          },
+          { session: dbSession }
         );
+
+        // ===== TẠO TRANSACTION CHO NGƯỜI MUA (BUYER) =====
+        // Ghi lại giao dịch hoàn tiền cho người mua
+        const transactionData = {
+          user: buyerIdForWallet, // Người mua nhận tiền hoàn lại
+          type: "refund" as const,
+          amount: totalPaid, // Số tiền hoàn lại cho người mua
+          status: "completed" as const,
+          description: `Hoàn tiền vé ${ticket.movieTitle || "N/A"} - ${ticket.cinema || "N/A"} (Hủy vé)`,
+          ticket: ticket._id,
+        };
+
+        // Validate trước khi tạo
+        if (!transactionData.user || !transactionData.type || !transactionData.amount || !transactionData.description) {
+          throw new Error("Missing required transaction fields");
+        }
+
+        await Transaction.create([transactionData], { session: dbSession, ordered: true });
       });
 
       // Revalidate

@@ -66,26 +66,26 @@ export function BankAccountForm({ account, onClose, onSuccess }: BankAccountForm
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
-      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-700/50 rounded-3xl shadow-2xl max-w-md w-full p-7 animate-in fade-in zoom-in duration-300 relative overflow-hidden">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-2 sm:p-4 overflow-y-auto">
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-700/50 rounded-2xl sm:rounded-3xl shadow-2xl max-w-md w-full p-4 sm:p-6 md:p-7 my-4 sm:my-8 animate-in fade-in zoom-in duration-300 relative overflow-hidden max-h-[95vh] flex flex-col">
         {/* Decorative gradient overlay */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-neon-green/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl -ml-24 -mb-24"></div>
         
-        <div className="relative z-10">
-          <div className="flex items-center justify-between mb-7 pb-5 border-b border-slate-700/50">
-            <h3 className="text-2xl font-heading font-bold bg-gradient-to-r from-white via-slate-100 to-slate-200 bg-clip-text text-transparent">
+        <div className="relative z-10 flex flex-col min-h-0 flex-1">
+          <div className="flex items-center justify-between mb-4 sm:mb-6 md:mb-7 pb-3 sm:pb-4 md:pb-5 border-b border-slate-700/50 flex-shrink-0">
+            <h3 className="text-lg sm:text-xl md:text-2xl font-heading font-bold bg-gradient-to-r from-white via-slate-100 to-slate-200 bg-clip-text text-transparent pr-2">
               {account?._id ? "Sửa tài khoản" : "Thêm tài khoản ngân hàng"}
             </h3>
             <button
               onClick={onClose}
-              className="text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-xl p-2 transition-all hover:scale-110"
+              className="text-slate-400 hover:text-white hover:bg-slate-700/50 rounded-xl p-1.5 sm:p-2 transition-all hover:scale-110 flex-shrink-0"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 flex-1 overflow-y-auto pr-1">
             <div>
               <label className="block text-sm font-semibold text-slate-200 mb-2.5">
                 Ngân hàng <span className="text-red-400">*</span>
@@ -152,28 +152,28 @@ export function BankAccountForm({ account, onClose, onSuccess }: BankAccountForm
               </label>
             </div>
 
-            <div className="flex gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2 sm:pt-3 flex-shrink-0">
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-6 py-3.5 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 active:scale-[0.98]"
+                className="w-full sm:flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-4 sm:px-6 py-3 sm:py-3.5 rounded-xl font-semibold text-sm sm:text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 active:scale-[0.98]"
               >
                 {loading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    Đang lưu...
+                    <span>Đang lưu...</span>
                   </>
                 ) : (
                   <>
-                    <Save className="w-4 h-4" />
-                    Lưu
+                    <Save className="w-4 h-4 flex-shrink-0" />
+                    <span>Lưu</span>
                   </>
                 )}
               </button>
               <button
                 type="button"
                 onClick={onClose}
-                className="px-6 py-3.5 border-2 border-slate-700 text-slate-300 rounded-xl font-medium hover:bg-slate-700/50 hover:text-white hover:border-slate-600 transition-all active:scale-[0.98] backdrop-blur-sm"
+                className="w-full sm:w-auto px-4 sm:px-6 py-3 sm:py-3.5 border-2 border-slate-700 text-slate-300 rounded-xl font-medium text-sm sm:text-base hover:bg-slate-700/50 hover:text-white hover:border-slate-600 transition-all active:scale-[0.98] backdrop-blur-sm"
               >
                 Hủy
               </button>

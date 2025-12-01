@@ -23,6 +23,12 @@ export async function POST(
 
     await Ticket.findByIdAndUpdate(params.id, { status: "rejected" });
 
+    // Revalidate pages
+    const { revalidatePath, revalidateTag } = await import("next/cache");
+    revalidatePath("/");
+    revalidatePath("/admin/tickets");
+    revalidateTag("tickets");
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error rejecting ticket:", error);

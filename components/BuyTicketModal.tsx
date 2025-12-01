@@ -128,7 +128,7 @@ export function BuyTicketModal({ ticket, onClose }: BuyTicketModalProps) {
   if (!session) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-        <div className="bg-dark-card border border-dark-border rounded-2xl shadow-neon p-8 max-w-md w-full mx-4">
+        <div className="bg-dark-card border border-dark-border rounded-xl sm:rounded-2xl shadow-neon p-4 sm:p-6 md:p-8 max-w-md w-full mx-2 sm:mx-4 my-4 sm:my-8">
           <div className="text-center">
             <AlertCircle className="w-16 h-16 text-neon-green mx-auto mb-4" />
             <h3 className="text-2xl font-heading font-bold text-dark-text mb-2">
@@ -156,23 +156,23 @@ export function BuyTicketModal({ ticket, onClose }: BuyTicketModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-dark-card border border-dark-border rounded-2xl shadow-neon max-w-lg w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4 overflow-y-auto">
+      <div className="bg-dark-card border border-dark-border rounded-xl sm:rounded-2xl shadow-neon max-w-lg w-full max-h-[95vh] my-4 sm:my-8 flex flex-col">
         {/* Header */}
-        <div className="sticky top-0 bg-dark-card border-b border-dark-border p-6 flex items-center justify-between">
-          <h2 className="text-2xl font-heading font-black text-dark-text">
+        <div className="sticky top-0 bg-dark-card border-b border-dark-border p-4 sm:p-6 flex items-center justify-between flex-shrink-0 z-10">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-heading font-black text-dark-text pr-2">
             Xác nhận mua vé
           </h2>
           <button
             onClick={onClose}
-            className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-dark-border transition-colors"
+            className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl hover:bg-dark-border transition-colors flex-shrink-0"
           >
-            <X className="w-6 h-6 text-dark-text2" />
+            <X className="w-5 h-5 sm:w-6 sm:h-6 text-dark-text2" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 flex-1 overflow-y-auto">
           {/* Ticket Info */}
           <div className="bg-dark-bg border border-dark-border rounded-xl p-5 space-y-3">
             <h3 className="text-lg font-bold text-dark-text mb-3">{ticket.movieTitle}</h3>
@@ -259,10 +259,21 @@ export function BuyTicketModal({ ticket, onClose }: BuyTicketModalProps) {
             <div className="flex items-start gap-3">
               <CheckCircle className="w-5 h-5 text-neon-green flex-shrink-0 mt-0.5" />
               <div className="text-sm text-dark-text2">
-                <p className="font-semibold text-dark-text mb-1">Hệ thống Escrow</p>
-                <p>
-                  Tiền sẽ được giữ trong hệ thống escrow. Sau khi bạn thanh toán thành công, mã vé và ảnh QR code sẽ tự động hiển thị cho bạn. Sau khi bạn xác nhận nhận được, tiền mới được chuyển cho người bán.
-                </p>
+                <p className="font-semibold text-dark-text mb-2">Hệ thống Escrow</p>
+                <ul className="space-y-1.5 text-xs leading-relaxed">
+                  <li className="flex items-start gap-2">
+                    <span className="text-neon-green mt-0.5">•</span>
+                    <span>Tiền được giữ an toàn trong hệ thống escrow</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-neon-green mt-0.5">•</span>
+                    <span>Sau khi thanh toán, mã vé và ảnh QR sẽ tự động hiển thị</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-neon-green mt-0.5">•</span>
+                    <span>Xác nhận nhận vé → tiền mới chuyển cho người bán</span>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>
@@ -288,17 +299,17 @@ export function BuyTicketModal({ ticket, onClose }: BuyTicketModalProps) {
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-dark-card border-t border-dark-border p-6 flex gap-3">
+        <div className="sticky bottom-0 bg-dark-card border-t border-dark-border p-4 sm:p-6 flex flex-col sm:flex-row gap-2 sm:gap-3 flex-shrink-0">
           <button
             onClick={onClose}
-            className="flex-1 px-6 py-3 bg-dark-bg border border-dark-border rounded-xl text-dark-text font-semibold hover:bg-dark-border transition-colors"
+            className="w-full sm:flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-dark-bg border border-dark-border rounded-xl text-dark-text font-semibold text-sm sm:text-base hover:bg-dark-border transition-colors"
           >
             Hủy
           </button>
           <button
             onClick={handleBuy}
             disabled={loading || checkingBalance || (walletBalance !== null && walletBalance < total)}
-            className="flex-1 px-6 py-3 bg-neon-green hover:bg-neon-green-light disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-neon-sm hover:shadow-neon transition-all"
+            className="w-full sm:flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-neon-green hover:bg-neon-green-light disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-sm sm:text-base rounded-xl shadow-neon-sm hover:shadow-neon transition-all"
           >
             {loading ? "Đang xử lý..." : "Thanh toán ngay"}
           </button>

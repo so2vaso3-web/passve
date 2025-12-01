@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface ITransaction extends Document {
   user: mongoose.Types.ObjectId;
-  type: "deposit" | "withdraw" | "sale" | "purchase" | "escrow_hold" | "escrow_release";
+  type: "deposit" | "withdraw" | "sale" | "purchase" | "escrow_hold" | "escrow_release" | "refund";
   amount: number;
   status: "pending" | "completed" | "rejected" | "cancelled";
   method?: "momo" | "vnpay" | "zalopay" | "bank_transfer" | "bank_withdraw" | "sepay";
@@ -27,7 +27,7 @@ const TransactionSchema = new Schema<ITransaction>(
     },
     type: {
       type: String,
-      enum: ["deposit", "withdraw", "sale", "purchase", "escrow_hold", "escrow_release"],
+      enum: ["deposit", "withdraw", "sale", "purchase", "escrow_hold", "escrow_release", "refund"],
       required: true,
     },
     amount: {

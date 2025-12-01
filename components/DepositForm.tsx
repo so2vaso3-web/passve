@@ -102,14 +102,14 @@ export function DepositForm({ userId, onClose, onSuccess }: DepositFormProps) {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Thông tin SePay */}
+        {/* Thông tin nạp tiền ngân hàng */}
         <div className="bg-neon-green/10 border border-neon-green/30 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-2">
             <Building2 className="w-5 h-5 text-neon-green" />
-            <p className="font-semibold text-dark-text">Nạp tiền tự động qua SePay</p>
+            <p className="font-semibold text-dark-text">Nạp tiền ngân hàng nhanh chóng</p>
           </div>
           <p className="text-sm text-dark-text2">
-            Thanh toán nhanh chóng và an toàn. Tiền sẽ được cộng vào ví ngay sau khi thanh toán thành công.
+            Hỗ trợ thanh toán qua tất cả các ngân hàng trong nước. Giao dịch được xử lý tự động, tiền sẽ được cộng vào ví ngay lập tức sau khi thanh toán thành công. Bảo mật tuyệt đối với công nghệ mã hóa SSL.
           </p>
         </div>
         {/* Số tiền */}

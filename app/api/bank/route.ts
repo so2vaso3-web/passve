@@ -24,8 +24,12 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       bankAccounts: (dbUser.bankAccounts || []).map((acc: any, index: number) => ({
-        _id: acc._id || index.toString(),
-        ...acc,
+        _id: acc._id?.toString() || acc.accountNumber || index.toString(),
+        bankName: acc.bankName,
+        accountNumber: acc.accountNumber,
+        accountHolder: acc.accountHolder,
+        branch: acc.branch,
+        isDefault: acc.isDefault || false,
       })),
     });
   } catch (error: any) {
@@ -76,9 +80,19 @@ export async function POST(request: NextRequest) {
     dbUser.bankAccounts = [...(dbUser.bankAccounts || []), newAccount];
     await dbUser.save();
 
+    // Reload user to get the _id of the newly added account
+    const updatedUser = await User.findOne({ email: session.user.email }).maxTimeMS(5000);
+    const savedAccount = updatedUser?.bankAccounts?.slice(-1)[0]; // Get the last account (the one we just added)
+
     await revalidateWallet();
 
-    return NextResponse.json({ success: true, bankAccount: newAccount });
+    return NextResponse.json({ 
+      success: true, 
+      bankAccount: savedAccount ? {
+        _id: savedAccount._id?.toString() || savedAccount.accountNumber,
+        ...savedAccount.toObject ? savedAccount.toObject() : savedAccount,
+      } : newAccount 
+    });
   } catch (error: any) {
     console.error("Bank POST error:", error);
     return NextResponse.json(
