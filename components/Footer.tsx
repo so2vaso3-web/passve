@@ -3,9 +3,26 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Phone, Mail, Facebook } from "lucide-react";
+import { useState, useEffect } from "react";
+import Image from "next/image";
 
 export function Footer() {
   const pathname = usePathname();
+  const [siteLogo, setSiteLogo] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Load logo từ site settings
+    fetch("/api/site-settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.settings?.logo) {
+          setSiteLogo(data.settings.logo);
+        }
+      })
+      .catch(() => {
+        // Ignore errors
+      });
+  }, []);
   
   // Ẩn footer trên mobile ở các trang: chat, profile, my-tickets, sell
   const hideOnMobile = pathname?.includes("/chat") || 
@@ -19,9 +36,20 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-r from-neon-green to-neon-green-light rounded-xl flex items-center justify-center shadow-neon-sm">
-                <span className="text-white font-black text-xl">P</span>
-              </div>
+              {siteLogo ? (
+                <div className="relative w-10 h-10 rounded-xl overflow-hidden">
+                  <Image
+                    src={siteLogo}
+                    alt="Logo"
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+              ) : (
+                <div className="w-10 h-10 bg-gradient-to-r from-neon-green to-neon-green-light rounded-xl flex items-center justify-center shadow-neon-sm">
+                  <span className="text-white font-black text-xl">P</span>
+                </div>
+              )}
               <span className="text-xl font-heading font-black text-dark-text">Pass Vé Phim</span>
             </div>
             <p className="text-dark-text2 text-sm leading-relaxed mb-4">

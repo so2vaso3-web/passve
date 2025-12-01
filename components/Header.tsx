@@ -2,13 +2,29 @@
 
 import Link from "next/link";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu, X, User, LogOut, Wallet, LayoutDashboard } from "lucide-react";
 import { HeaderChatButton } from "./HeaderChatButton";
+import Image from "next/image";
 
 export function Header() {
   const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [siteLogo, setSiteLogo] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Load logo từ site settings
+    fetch("/api/site-settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.settings?.logo) {
+          setSiteLogo(data.settings.logo);
+        }
+      })
+      .catch(() => {
+        // Ignore errors
+      });
+  }, []);
 
   return (
     <header className="hidden md:block bg-dark-card border-b border-dark-border sticky top-0 z-50 shadow-card backdrop-blur-sm">
@@ -16,9 +32,20 @@ export function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 flex-shrink-0 group">
-            <div className="w-10 h-10 bg-gradient-to-r from-neon-green to-neon-green-light rounded-xl flex items-center justify-center shadow-neon-sm group-hover:shadow-neon transition-all">
-              <span className="text-white font-black text-xl">P</span>
-            </div>
+            {siteLogo ? (
+              <div className="relative w-10 h-10 rounded-xl overflow-hidden group-hover:scale-105 transition-transform">
+                <Image
+                  src={siteLogo}
+                  alt="Logo"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+            ) : (
+              <div className="w-10 h-10 bg-gradient-to-r from-neon-green to-neon-green-light rounded-xl flex items-center justify-center shadow-neon-sm group-hover:shadow-neon transition-all">
+                <span className="text-white font-black text-xl">P</span>
+              </div>
+            )}
             <span className="text-xl font-heading font-black text-dark-text hidden sm:block">
               Pass Vé Phim
             </span>
