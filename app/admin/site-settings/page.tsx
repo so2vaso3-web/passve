@@ -151,13 +151,24 @@ export default function SiteSettingsPage() {
           window.location.href = "/";
         }, 1500);
       } else {
-        const errorMessage = data.error || "Có lỗi xảy ra";
-        console.error("❌ Save failed:", errorMessage);
+        const errorMessage = data?.error || data?.message || `Có lỗi xảy ra (Status: ${res.status})`;
+        console.error("❌ Save failed:", {
+          status: res.status,
+          statusText: res.statusText,
+          data: data,
+          errorMessage: errorMessage,
+        });
         toast.error(errorMessage);
       }
     } catch (error: any) {
       console.error("❌ Save error:", error);
-      toast.error(error.message || "Có lỗi xảy ra khi lưu");
+      const errorMessage = error?.message || error?.toString() || "Có lỗi xảy ra khi lưu";
+      console.error("Error details:", {
+        name: error?.name,
+        message: errorMessage,
+        stack: error?.stack,
+      });
+      toast.error(errorMessage);
     } finally {
       setSaving(false);
     }

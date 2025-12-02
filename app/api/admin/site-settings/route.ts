@@ -25,7 +25,15 @@ export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { 
+          status: 401,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
     }
 
     await connectDB();
@@ -86,8 +94,13 @@ export async function PUT(request: NextRequest) {
       const minutes = Number(body.cancellationTimeLimitMinutes);
       if (isNaN(minutes) || minutes < 1 || minutes > 1440) {
         return NextResponse.json(
-          { error: "Thời gian hủy vé phải từ 1 đến 1440 phút" },
-          { status: 400 }
+          { success: false, error: "Thời gian hủy vé phải từ 1 đến 1440 phút" },
+          { 
+            status: 400,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
         );
       }
       body.cancellationTimeLimitMinutes = minutes;
