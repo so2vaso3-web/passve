@@ -40,16 +40,40 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Database not connected" }, { status: 503 });
     }
 
-    // Tìm transaction bằng order_id, order_invoice_number hoặc transaction_id
-    const transaction = await Transaction.findOne({
-      $or: [
-        { _id: order_id },
-        { sepayTransactionId: order_invoice_number || transaction_id || order_id },
-      ],
-    }).maxTimeMS(5000);
+    // Tìm transaction bằng sepayTransactionId (order_invoice_number) trước
+    // vì đó là giá trị chính xác nhất ta lưu khi tạo payment
+    let transaction = null;
+    
+    if (order_invoice_number) {
+      transaction = await Transaction.findOne({
+        sepayTransactionId: order_invoice_number,
+      }).maxTimeMS(5000);
+    }
+    
+    // Nếu không tìm thấy, thử tìm theo transaction_id hoặc order_id
+    if (!transaction && transaction_id) {
+      transaction = await Transaction.findOne({
+        sepayTransactionId: transaction_id,
+      }).maxTimeMS(5000);
+    }
+    
+    // Nếu vẫn không tìm thấy, thử tìm theo order_id (có thể là transaction._id)
+    if (!transaction && order_id) {
+      try {
+        transaction = await Transaction.findById(order_id).maxTimeMS(5000);
+      } catch (e) {
+        // order_id có thể không phải ObjectId hợp lệ
+      }
+    }
 
     if (!transaction) {
-      console.error("Transaction not found:", order_id, transaction_id);
+      console.error("Transaction not found. Search params:", {
+        order_invoice_number,
+        transaction_id,
+        order_id,
+        amount,
+        status,
+      });
       return NextResponse.json({ error: "Transaction not found" }, { status: 404 });
     }
 
@@ -60,24 +84,34 @@ export async function POST(request: NextRequest) {
 
     // Xử lý theo status từ SePay
     if (status === "success" || status === "completed" || status === "paid") {
-      // Cộng tiền vào ví
-      let wallet = await Wallet.findOne({ user: transaction.user }).maxTimeMS(5000);
-      if (!wallet) {
-        wallet = await Wallet.create({
-          user: transaction.user,
-          balance: amount,
-        });
-      } else {
-        wallet.balance += amount;
-        await wallet.save();
-      }
+      // Chỉ xử lý nếu transaction chưa completed
+      if (transaction.status !== "completed") {
+        // Use amount from webhook or transaction
+        const depositAmount = amount || transaction.amount;
+        
+        // Cộng tiền vào ví
+        let wallet = await Wallet.findOne({ user: transaction.user }).maxTimeMS(5000);
+        if (!wallet) {
+          wallet = await Wallet.create({
+            user: transaction.user,
+            balance: depositAmount,
+            escrow: 0,
+            totalEarned: 0,
+          });
+        } else {
+          wallet.balance += depositAmount;
+          await wallet.save();
+        }
 
-      // Cập nhật transaction
-      await Transaction.findByIdAndUpdate(transaction._id, {
-        status: "completed",
-        sepayTransactionId: transaction_id,
-        completedAt: new Date(),
-      });
+        // Cập nhật transaction
+        await Transaction.findByIdAndUpdate(transaction._id, {
+          status: "completed",
+          sepayTransactionId: transaction_id || order_invoice_number || transaction.sepayTransactionId,
+          completedAt: new Date(),
+        });
+
+        console.log(`✅ Payment processed: Transaction ${transaction._id}, Amount: ${depositAmount}, User: ${transaction.user}`);
+      }
 
       // Revalidate cache
       revalidatePath("/profile");

@@ -14,13 +14,42 @@ export default function PaymentSuccessPage() {
 
   useEffect(() => {
     if (transactionId) {
-      // Check transaction status
-      const checkTransaction = async () => {
+      // Check transaction status và tự động cộng tiền nếu cần
+      const checkAndProcessTransaction = async () => {
         try {
+          // Check transaction status
           const res = await fetch(`/api/transactions/${transactionId}`);
           if (res.ok) {
             const data = await res.json();
-            setTransaction(data.transaction);
+            const tx = data.transaction;
+            setTransaction(tx);
+
+            // Nếu transaction vẫn pending, thử verify và process payment
+            if (tx && tx.status === "pending") {
+              try {
+                // Gọi API để verify và process payment
+                const processRes = await fetch(`/api/sepay/verify-payment`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ transactionId: transactionId }),
+                });
+
+                if (processRes.ok) {
+                  const processData = await processRes.json();
+                  if (processData.success) {
+                    // Reload transaction để lấy status mới
+                    const refreshRes = await fetch(`/api/transactions/${transactionId}`);
+                    if (refreshRes.ok) {
+                      const refreshData = await refreshRes.json();
+                      setTransaction(refreshData.transaction);
+                    }
+                  }
+                }
+              } catch (processError) {
+                console.error("Error processing payment:", processError);
+                // Không báo lỗi cho user, vì webhook sẽ xử lý sau
+              }
+            }
           }
         } catch (error) {
           console.error("Error checking transaction:", error);
@@ -28,7 +57,7 @@ export default function PaymentSuccessPage() {
           setLoading(false);
         }
       };
-      checkTransaction();
+      checkAndProcessTransaction();
     } else {
       setLoading(false);
     }
