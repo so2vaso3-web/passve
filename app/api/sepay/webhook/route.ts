@@ -15,16 +15,51 @@ export async function POST(request: NextRequest) {
     // Log toàn bộ body để debug
     console.log("🔔 SePay Webhook received:", JSON.stringify(body, null, 2));
     
-    const {
-      transaction_id,
-      order_id,
-      order_invoice_number,
-      va_number,
-      amount,
-      status,
-      signature,
-      // Các field khác từ SePay webhook/IPN
-    } = body;
+    // SePay có thể gửi 2 format:
+    // 1. Format cũ: flat fields (transaction_id, order_id, order_invoice_number, amount, status...)
+    // 2. Format mới: order object (notification_type, order.order_invoice_number, order.order_status...)
+    let order_invoice_number: string | undefined;
+    let amount: number | undefined;
+    let status: string | undefined;
+    let transaction_id: string | undefined;
+    let order_id: string | undefined;
+    
+    // Kiểm tra format mới (order object)
+    if (body.order && typeof body.order === 'object') {
+      order_invoice_number = body.order.order_invoice_number;
+      amount = body.order.order_amount ? parseFloat(body.order.order_amount) : undefined;
+      status = body.order.order_status || body.notification_type;
+      order_id = body.order.order_id;
+      transaction_id = body.order.id;
+      
+      // Nếu notification_type = "ORDER_PAID" và order_status = "CAPTURED" => payment thành công
+      if (body.notification_type === "ORDER_PAID" && body.order.order_status === "CAPTURED") {
+        status = "completed";
+      }
+      
+      console.log("📦 Using NEW format (order object):", {
+        order_invoice_number,
+        amount,
+        status,
+        notification_type: body.notification_type,
+        order_status: body.order.order_status,
+      });
+    } else {
+      // Format cũ (flat fields)
+      order_invoice_number = body.order_invoice_number;
+      amount = body.amount ? parseFloat(body.amount.toString()) : undefined;
+      status = body.status;
+      transaction_id = body.transaction_id;
+      order_id = body.order_id;
+      
+      console.log("📦 Using OLD format (flat fields):", {
+        order_invoice_number,
+        amount,
+        status,
+        transaction_id,
+        order_id,
+      });
+    }
 
     // Verify signature (tùy theo cách SePay implement)
     const SEPAY_SECRET_KEY = process.env.SEPAY_SECRET_KEY;
@@ -127,13 +162,19 @@ export async function POST(request: NextRequest) {
     console.log(`📊 Transaction ${transaction._id} current status: ${transaction.status}`);
     
     // Xử lý theo status từ SePay - check nhiều format có thể
-    const successStatuses = ["success", "completed", "paid", "SUCCESS", "COMPLETED", "PAID"];
-    if (status && successStatuses.includes(status)) {
+    // Support cả status từ format cũ và mới
+    const successStatuses = ["success", "completed", "paid", "SUCCESS", "COMPLETED", "PAID", "CAPTURED", "ORDER_PAID"];
+    const normalizedStatus = status ? status.toString().toUpperCase() : "";
+    const isSuccess = successStatuses.includes(normalizedStatus) || 
+                      normalizedStatus.includes("CAPTURED") || 
+                      normalizedStatus.includes("PAID");
+    
+    if (isSuccess) {
       // Chỉ xử lý nếu transaction chưa completed (double check để tránh duplicate)
       const currentStatus = transaction.status as string;
       if (currentStatus !== "completed") {
-        // Use amount from webhook or transaction
-        const depositAmount = Number(amount) || transaction.amount;
+        // Use amount from webhook or transaction - convert to number
+        const depositAmount = amount ? Number(amount) : (transaction.amount ? Number(transaction.amount) : 0);
         
         console.log(`💰 Processing payment: Amount=${depositAmount}, User=${transaction.user}`);
         
