@@ -9,85 +9,135 @@ export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
-    const file = formData.get("file") as File;
-
-    if (!file) {
+    
+    // Support both "file" (single) and "files" (multiple)
+    let files: File[] = [];
+    const singleFile = formData.get("file") as File;
+    const multipleFiles = formData.getAll("files") as File[];
+    
+    if (singleFile) {
+      files = [singleFile];
+    } else if (multipleFiles && multipleFiles.length > 0) {
+      files = multipleFiles;
+    } else {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    // Validate file size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json({ error: "File size exceeds 5MB" }, { status: 400 });
+    // Validate all files first
+    for (const file of files) {
+      if (file.size > 5 * 1024 * 1024) {
+        return NextResponse.json({ error: `File ${file.name} exceeds 5MB` }, { status: 400 });
+      }
+      if (!file.type.startsWith("image/")) {
+        return NextResponse.json({ error: `File ${file.name} must be an image` }, { status: 400 });
+      }
     }
 
-    // Validate file type
-    if (!file.type.startsWith("image/")) {
-      return NextResponse.json({ error: "File must be an image" }, { status: 400 });
-    }
-
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    // Try Cloudinary first (if configured)
+    // On Vercel/production, file system is read-only - MUST use Cloudinary
+    const isProduction = process.env.VERCEL === "1" || process.env.NODE_ENV === "production";
     const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
     const apiKey = process.env.CLOUDINARY_API_KEY;
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
-    if (cloudName && cloudName !== "your-cloudinary-cloud-name" && apiKey && apiSecret) {
-      try {
-        // Upload trực tiếp từ buffer stream (nhanh hơn base64)
-        // Sử dụng upload_stream để tránh phải convert to base64
-        const result = await new Promise((resolve, reject) => {
-          const uploadStream = cloudinary.uploader.upload_stream(
-            {
-              folder: "pass-ve-phim",
-              resource_type: "image",
-              transformation: [
-                { width: 1200, height: 1200, crop: "limit" },
-                { quality: "auto:good" }, // Tối ưu chất lượng vs tốc độ
-                { fetch_format: "auto" }, // Tự động chọn format tốt nhất (webp nếu có thể)
-              ],
-              eager_async: false, // Không cần async transformation
-            },
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            }
-          );
-          uploadStream.end(buffer);
-        });
+    // Check Cloudinary config on production
+    if (isProduction && (!cloudName || cloudName === "your-cloudinary-cloud-name" || !apiKey || !apiSecret)) {
+      return NextResponse.json(
+        { 
+          error: "Cloudinary is not configured. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET environment variables on Vercel." 
+        },
+        { status: 500 }
+      );
+    }
 
-        return NextResponse.json({
-          url: (result as any).secure_url,
-          filename: (result as any).public_id,
-          cloudinary: true,
-        });
-      } catch (cloudinaryError: any) {
-        console.error("Cloudinary upload error:", cloudinaryError);
-        // Fallback to local storage if Cloudinary fails
+    // Process all files
+    const uploadPromises = files.map(async (file) => {
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+
+      // Try Cloudinary first (REQUIRED on production)
+      if (cloudName && cloudName !== "your-cloudinary-cloud-name" && apiKey && apiSecret) {
+        try {
+          // Upload trực tiếp từ buffer stream
+          const result = await new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+              {
+                folder: "pass-ve-phim",
+                resource_type: "image",
+                transformation: [
+                  { width: 1200, height: 1200, crop: "limit" },
+                  { quality: "auto:good" },
+                  { fetch_format: "auto" },
+                ],
+                eager_async: false,
+              },
+              (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+              }
+            );
+            uploadStream.end(buffer);
+          });
+
+          return {
+            url: (result as any).secure_url,
+            filename: (result as any).public_id,
+            cloudinary: true,
+          };
+        } catch (cloudinaryError: any) {
+          console.error(`Cloudinary upload error for ${file.name}:`, cloudinaryError);
+          
+          // On production, fail if Cloudinary fails (no local fallback)
+          if (isProduction) {
+            throw new Error(`Cloudinary upload failed: ${cloudinaryError.message}`);
+          }
+          // On development, fall through to local storage
+        }
       }
+
+      // Fallback: Save to local storage (ONLY for development, NOT on Vercel)
+      if (!isProduction) {
+        try {
+          const uploadsDir = join(process.cwd(), "public", "uploads");
+          if (!existsSync(uploadsDir)) {
+            mkdirSync(uploadsDir, { recursive: true });
+          }
+
+          // Generate unique filename
+          const timestamp = Date.now();
+          const randomStr = Math.random().toString(36).substring(2, 15);
+          const extension = file.name.split(".").pop();
+          const filename = `${timestamp}-${randomStr}.${extension}`;
+          const filepath = join(uploadsDir, filename);
+
+          // Save file
+          await writeFile(filepath, buffer);
+
+          // Return public URL
+          const url = `/uploads/${filename}`;
+
+          return {
+            url,
+            filename,
+            cloudinary: false,
+          };
+        } catch (localError: any) {
+          console.error(`Local storage error for ${file.name}:`, localError);
+          throw new Error(`Failed to save file locally: ${localError.message}`);
+        }
+      }
+
+      // If we reach here, it means Cloudinary is not configured and we're on production
+      throw new Error("Upload configuration error: Cloudinary is required on production");
+    });
+
+    const results = await Promise.all(uploadPromises);
+    
+    // Return format: single file -> { url, filename }, multiple files -> { urls: [...] }
+    if (results.length === 1) {
+      return NextResponse.json(results[0]);
+    } else {
+      return NextResponse.json({ urls: results.map(r => r.url) });
     }
-
-    // Fallback: Save to local storage (for development or if Cloudinary not configured)
-    const uploadsDir = join(process.cwd(), "public", "uploads");
-    if (!existsSync(uploadsDir)) {
-      mkdirSync(uploadsDir, { recursive: true });
-    }
-
-    // Generate unique filename
-    const timestamp = Date.now();
-    const randomStr = Math.random().toString(36).substring(2, 15);
-    const extension = file.name.split(".").pop();
-    const filename = `${timestamp}-${randomStr}.${extension}`;
-    const filepath = join(uploadsDir, filename);
-
-    // Save file
-    await writeFile(filepath, buffer);
-
-    // Return public URL
-    const url = `/uploads/${filename}`;
-
-    return NextResponse.json({ url, filename, cloudinary: false });
   } catch (error: any) {
     console.error("Upload error:", error);
     return NextResponse.json(
