@@ -23,8 +23,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Get all rooms where user is buyer or seller
-    // Group by otherUser để chỉ lấy 1 room duy nhất với mỗi người
-    const allRooms = await ChatRoom.find({
+    // Hiển thị TẤT CẢ rooms để user thấy tất cả tin nhắn từ tất cả tickets
+    const rooms = await ChatRoom.find({
       $or: [{ buyer: user._id }, { seller: user._id }],
       isActive: true,
     })
@@ -34,30 +34,10 @@ export async function GET(request: NextRequest) {
       .sort({ lastMessageAt: -1, updatedAt: -1 })
       .lean();
 
-    // Group rooms by otherUser - chỉ lấy room mới nhất với mỗi người
-    const roomMap = new Map();
-    allRooms.forEach((room: any) => {
-      const isBuyer = room.buyer._id.toString() === user._id.toString();
-      const otherUserId = isBuyer 
-        ? room.seller._id.toString() 
-        : room.buyer._id.toString();
-      
-      // Nếu chưa có room với người này, hoặc room này mới hơn
-      if (!roomMap.has(otherUserId)) {
-        roomMap.set(otherUserId, room);
-      } else {
-        const existingRoom = roomMap.get(otherUserId);
-        const existingTime = existingRoom.lastMessageAt || existingRoom.updatedAt || existingRoom.createdAt;
-        const currentTime = room.lastMessageAt || room.updatedAt || room.createdAt;
-        if (new Date(currentTime) > new Date(existingTime)) {
-          roomMap.set(otherUserId, room);
-        }
-      }
-    });
+    // Filter out rooms with null/undefined ticket (ticket đã bị xóa)
+    const validRooms = rooms.filter((room: any) => room.ticket && room.ticket._id);
 
-    const rooms = Array.from(roomMap.values());
-
-    const formattedRooms = rooms.map((room: any) => {
+    const formattedRooms = validRooms.map((room: any) => {
       const isBuyer = room.buyer._id.toString() === user._id.toString();
       const otherUser = isBuyer ? room.seller : room.buyer;
       const unreadCount = isBuyer ? room.unreadCountBuyer : room.unreadCountSeller;
@@ -86,6 +66,8 @@ export async function GET(request: NextRequest) {
         unreadCount,
       };
     });
+
+    console.log(`📬 [Chat Rooms API] User: ${user.email}, Found ${rooms.length} total rooms, ${validRooms.length} valid rooms (with ticket), Total unread: ${formattedRooms.reduce((sum, r) => sum + r.unreadCount, 0)}`);
 
     return NextResponse.json({ rooms: formattedRooms });
   } catch (error: any) {

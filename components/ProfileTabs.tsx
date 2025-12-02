@@ -83,11 +83,25 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
           toast.error("Lỗi khi tải danh sách vé");
         }
       } else if (activeTab === "messages") {
-        const res = await fetch(`/api/chat/rooms`, {
-          cache: "no-store",
-        });
-        const data = await res.json();
-        setChatRooms(data.rooms || []);
+        try {
+          const res = await fetch(`/api/chat/rooms`, {
+            cache: "no-store",
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setChatRooms(data.rooms || []);
+            console.log("✅ Loaded chat rooms:", data.rooms?.length || 0);
+          } else {
+            const errorData = await res.json().catch(() => ({}));
+            console.error("Error fetching chat rooms:", errorData);
+            setChatRooms([]);
+            toast.error("Lỗi khi tải tin nhắn");
+          }
+        } catch (error: any) {
+          console.error("Error fetching chat rooms:", error);
+          setChatRooms([]);
+          toast.error("Lỗi khi tải tin nhắn");
+        }
       } else if (activeTab === "transactions") {
         const res = await fetch(`/api/wallet/transactions`, {
           cache: "no-store",
