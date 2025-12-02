@@ -30,6 +30,8 @@ export const metadata: Metadata = {
     locale: "vi_VN",
     url: siteUrl,
     siteName: "Pass Vé Phim",
+    // Facebook App ID (tùy chọn - tạo Facebook App để lấy ID)
+    // appId: process.env.FACEBOOK_APP_ID,
     images: [
       {
         url: `${siteUrl}/opengraph-image`, // Dynamic OG image from Next.js
