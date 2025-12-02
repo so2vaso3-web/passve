@@ -58,7 +58,22 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
+    let body;
+    try {
+      const bodyText = await request.text();
+      body = bodyText ? JSON.parse(bodyText) : {};
+    } catch (parseError: any) {
+      console.error("❌ Error parsing request body:", parseError);
+      return NextResponse.json(
+        { success: false, error: "Invalid JSON in request body" },
+        { 
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
     
     console.log("📝 Updating site settings:", {
       userId: user._id,
@@ -103,8 +118,13 @@ export async function PUT(request: NextRequest) {
       } catch (createError: any) {
         console.error("❌ Error creating site settings:", createError);
         return NextResponse.json(
-          { error: `Lỗi khi tạo cấu hình: ${createError.message}` },
-          { status: 500 }
+          { success: false, error: `Lỗi khi tạo cấu hình: ${createError.message}` },
+          { 
+            status: 500,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
         );
       }
     } else {
@@ -132,8 +152,13 @@ export async function PUT(request: NextRequest) {
       } catch (updateError: any) {
         console.error("❌ Error updating site settings:", updateError);
         return NextResponse.json(
-          { error: `Lỗi khi cập nhật cấu hình: ${updateError.message}` },
-          { status: 500 }
+          { success: false, error: `Lỗi khi cập nhật cấu hình: ${updateError.message}` },
+          { 
+            status: 500,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
         );
       }
     }
