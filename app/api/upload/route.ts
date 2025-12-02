@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import cloudinary from "@/lib/cloudinary";
+import { v2 as cloudinary } from "cloudinary";
 import { writeFile } from "fs/promises";
 import { join } from "path";
 import { existsSync, mkdirSync } from "fs";
@@ -49,6 +49,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Initialize Cloudinary config (re-init để đảm bảo env vars được load đúng)
+    if (cloudName && cloudName !== "your-cloudinary-cloud-name" && apiKey && apiSecret) {
+      cloudinary.config({
+        cloud_name: cloudName,
+        api_key: apiKey,
+        api_secret: apiSecret,
+      });
+    }
+
     // Process all files
     const uploadPromises = files.map(async (file) => {
       const bytes = await file.arrayBuffer();
@@ -71,8 +80,12 @@ export async function POST(request: NextRequest) {
                 eager_async: false,
               },
               (error, result) => {
-                if (error) reject(error);
-                else resolve(result);
+                if (error) {
+                  console.error("Cloudinary upload stream error:", error);
+                  reject(error);
+                } else {
+                  resolve(result);
+                }
               }
             );
             uploadStream.end(buffer);
@@ -85,10 +98,20 @@ export async function POST(request: NextRequest) {
           };
         } catch (cloudinaryError: any) {
           console.error(`Cloudinary upload error for ${file.name}:`, cloudinaryError);
+          console.error("Cloudinary config check:", {
+            cloudName: cloudName ? `${cloudName.substring(0, 4)}...` : "missing",
+            apiKey: apiKey ? `${apiKey.substring(0, 4)}...` : "missing",
+            apiSecret: apiSecret ? `${apiSecret.substring(0, 4)}...` : "missing",
+          });
           
           // On production, fail if Cloudinary fails (no local fallback)
           if (isProduction) {
-            throw new Error(`Cloudinary upload failed: ${cloudinaryError.message}`);
+            const errorMessage = cloudinaryError.message || "Unknown Cloudinary error";
+            // Check if it's a credential error
+            if (errorMessage.includes("401") || errorMessage.includes("Unauthorized") || errorMessage.includes("Invalid") || errorMessage.includes("<!DOCTYPE")) {
+              throw new Error(`Cloudinary authentication failed. Please verify your API credentials (CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET) on Vercel are correct and match your Cloudinary dashboard. Error: ${errorMessage}`);
+            }
+            throw new Error(`Cloudinary upload failed: ${errorMessage}`);
           }
           // On development, fall through to local storage
         }
