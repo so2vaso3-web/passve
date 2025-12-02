@@ -65,8 +65,68 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://passve.online";
+  
+  // Structured Data cho Google Search
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Pass Vé Phim",
+    "alternateName": "Passve",
+    "url": siteUrl,
+    "description": "Chợ sang nhượng vé xem phim & sự kiện uy tín, an toàn với hệ thống escrow tự động. Mua bán vé phim, vé concert, vé sự kiện uy tín, an toàn.",
+    "inLanguage": "vi-VN",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": `${siteUrl}/?category={search_term_string}`
+      },
+      "query-input": "required name=search_term_string"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Pass Vé Phim",
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${siteUrl}/icon-192.png`,
+        "width": 192,
+        "height": 192
+      }
+    }
+  };
+
+  const organizationData = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Pass Vé Phim",
+    "url": siteUrl,
+    "logo": `${siteUrl}/icon-192.png`,
+    "description": "Chợ sang nhượng vé xem phim & sự kiện uy tín, an toàn với hệ thống escrow tự động",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer service",
+      "telephone": "+84-1900-1234",
+      "availableLanguage": "Vietnamese"
+    },
+    "sameAs": [
+      // Có thể thêm social links ở đây
+    ]
+  };
+
   return (
     <html lang="vi" className={`${inter.variable}`}>
+      <head>
+        {/* Structured Data cho Google Search */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationData) }}
+        />
+      </head>
       <body className="bg-dark-bg text-dark-text min-h-screen font-body antialiased">
         <SiteSettingsLoader />
         <Providers>
