@@ -34,12 +34,28 @@ export async function PUT(request: NextRequest) {
     
     if (!user) {
       console.error("❌ User not found:", session.user.email);
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: "User not found" },
+        { 
+          status: 404,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
     }
     
     if (user.role !== "admin") {
       console.error("❌ User is not admin:", session.user.email);
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return NextResponse.json(
+        { success: false, error: "Forbidden" },
+        { 
+          status: 403,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
     }
 
     const body = await request.json();
@@ -132,13 +148,47 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: "Cập nhật cấu hình trang chủ thành công",
-      settings,
+      settings: {
+        siteName: settings.siteName,
+        siteDescription: settings.siteDescription,
+        logo: settings.logo,
+        favicon: settings.favicon,
+        themeColor: settings.themeColor,
+        primaryColor: settings.primaryColor,
+        contactEmail: settings.contactEmail,
+        contactPhone: settings.contactPhone,
+        socialLinks: settings.socialLinks,
+        seoKeywords: settings.seoKeywords,
+        maintenanceMode: settings.maintenanceMode,
+        cancellationTimeLimitMinutes: settings.cancellationTimeLimitMinutes,
+      },
+    }, {
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
   } catch (error: any) {
-    console.error("Error updating site settings:", error);
+    console.error("❌ Error updating site settings:", error);
+    
+    // Đảm bảo luôn trả về JSON hợp lệ
+    const errorMessage = error.message || error.toString() || "Lỗi khi cập nhật cấu hình";
+    console.error("Error details:", {
+      message: errorMessage,
+      name: error.name,
+      stack: error.stack,
+    });
+    
     return NextResponse.json(
-      { error: error.message || "Lỗi khi cập nhật cấu hình" },
-      { status: 500 }
+      { 
+        success: false,
+        error: errorMessage,
+      },
+      { 
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
     );
   }
 }

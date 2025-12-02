@@ -123,8 +123,21 @@ export default function SiteSettingsPage() {
         body: JSON.stringify(settings),
       });
 
-      const data = await res.json();
-      console.log("📥 Save response:", { status: res.status, data });
+      // Kiểm tra response có content không
+      const responseText = await res.text();
+      console.log("📥 Raw response:", responseText);
+      
+      let data;
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch (parseError) {
+        console.error("❌ JSON parse error:", parseError);
+        console.error("Response text:", responseText);
+        toast.error("Lỗi khi xử lý phản hồi từ server");
+        return;
+      }
+      
+      console.log("📥 Parsed response:", { status: res.status, data });
       
       if (res.ok) {
         toast.success("Cập nhật cấu hình thành công!");
