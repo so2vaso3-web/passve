@@ -83,31 +83,67 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
           toast.error("Lỗi khi tải danh sách vé");
         }
       } else if (activeTab === "messages") {
-        try {
-          const res = await fetch(`/api/chat/rooms`, {
-            cache: "no-store",
-          });
-          if (res.ok) {
-            const data = await res.json();
-            setChatRooms(data.rooms || []);
-            console.log("✅ Loaded chat rooms:", data.rooms?.length || 0);
-          } else {
-            const errorData = await res.json().catch(() => ({ error: "Unknown error" }));
-            console.error("❌ Error fetching chat rooms:", errorData);
-            setChatRooms([]);
-            // Chỉ hiển thị error nếu không phải lỗi auth (401)
-            if (res.status !== 401) {
-              toast.error(errorData.error || "Lỗi khi tải tin nhắn");
+        // Retry logic cho fetch chat rooms
+        let retries = 0;
+        const maxRetries = 2;
+        
+        const fetchChatRooms = async (): Promise<void> => {
+          try {
+            // Thêm AbortController với timeout 10s
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+            
+            const res = await fetch(`/api/chat/rooms?t=${Date.now()}`, {
+              cache: "no-store",
+              signal: controller.signal,
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (res.ok) {
+              const data = await res.json();
+              setChatRooms(data.rooms || []);
+              console.log("✅ Loaded chat rooms:", data.rooms?.length || 0);
+            } else {
+              // Chỉ retry cho 500 errors, không retry cho 401/403/404
+              if (res.status >= 500 && retries < maxRetries) {
+                retries++;
+                console.log(`⚠️ Retrying fetch chat rooms (attempt ${retries}/${maxRetries})...`);
+                await new Promise(resolve => setTimeout(resolve, 1000 * retries)); // Exponential backoff
+                return fetchChatRooms();
+              }
+              
+              const errorData = await res.json().catch(() => ({ error: "Unknown error" }));
+              console.error("❌ Error fetching chat rooms:", errorData);
+              
+              // Giữ lại rooms cũ, không clear
+              
+              // Chỉ hiển thị error cho lỗi client (400-499) không phải auth
+              if (res.status >= 400 && res.status < 500 && res.status !== 401) {
+                toast.error(errorData.error || "Lỗi khi tải tin nhắn");
+              }
+            }
+          } catch (error: any) {
+            // Timeout hoặc network error - retry nếu chưa hết số lần
+            if (retries < maxRetries && (error.name === "AbortError" || error.message?.includes("fetch"))) {
+              retries++;
+              console.log(`⚠️ Network error, retrying fetch chat rooms (attempt ${retries}/${maxRetries})...`);
+              await new Promise(resolve => setTimeout(resolve, 1000 * retries));
+              return fetchChatRooms();
+            }
+            
+            console.error("❌ Error fetching chat rooms:", error);
+            
+            // Giữ lại rooms cũ, không clear
+            
+            // Chỉ hiển thị error cho lỗi không phải timeout/network
+            if (error.name !== "AbortError" && !error.message?.includes("fetch")) {
+              toast.error("Lỗi khi tải tin nhắn");
             }
           }
-        } catch (error: any) {
-          console.error("❌ Error fetching chat rooms:", error);
-          setChatRooms([]);
-          // Chỉ hiển thị error nếu không phải network error tạm thời
-          if (error.message && !error.message.includes("fetch")) {
-            toast.error("Lỗi khi tải tin nhắn");
-          }
-        }
+        };
+        
+        await fetchChatRooms();
       } else if (activeTab === "transactions") {
         const res = await fetch(`/api/wallet/transactions`, {
           cache: "no-store",

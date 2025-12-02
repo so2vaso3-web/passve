@@ -24,23 +24,45 @@ export async function GET(request: NextRequest) {
 
     // Get all rooms where user is buyer or seller
     // Hiển thị TẤT CẢ rooms để user thấy tất cả tin nhắn từ tất cả tickets
+    // Thêm maxTimeMS để tránh timeout
     const rooms = await ChatRoom.find({
       $or: [{ buyer: user._id }, { seller: user._id }],
       isActive: true,
     })
-      .populate("ticket", "movieTitle images sellingPrice cinema city showDate showTime seats")
-      .populate("buyer", "name image")
-      .populate("seller", "name image")
+      .populate({
+        path: "ticket",
+        select: "movieTitle images sellingPrice cinema city showDate showTime seats",
+        options: { maxTimeMS: 10000 }, // 10s timeout
+      })
+      .populate({
+        path: "buyer",
+        select: "name image",
+        options: { maxTimeMS: 10000 },
+      })
+      .populate({
+        path: "seller",
+        select: "name image",
+        options: { maxTimeMS: 10000 },
+      })
       .sort({ lastMessageAt: -1, updatedAt: -1 })
-      .lean();
+      .lean()
+      .maxTimeMS(15000); // Total query timeout 15s
 
-    // Filter out rooms with null/undefined ticket (ticket đã bị xóa)
-    const validRooms = rooms.filter((room: any) => room.ticket && room.ticket._id);
+    // Filter out rooms with null/undefined ticket hoặc user (đã bị xóa)
+    const validRooms = rooms.filter((room: any) => {
+      try {
+        return room.ticket && room.ticket._id && room.buyer && room.buyer._id && room.seller && room.seller._id;
+      } catch (error) {
+        console.warn("Invalid room data:", error);
+        return false;
+      }
+    });
 
     const formattedRooms = validRooms.map((room: any) => {
-      const isBuyer = room.buyer._id.toString() === user._id.toString();
-      const otherUser = isBuyer ? room.seller : room.buyer;
-      const unreadCount = isBuyer ? room.unreadCountBuyer : room.unreadCountSeller;
+      try {
+        const isBuyer = room.buyer._id.toString() === user._id.toString();
+        const otherUser = isBuyer ? room.seller : room.buyer;
+        const unreadCount = isBuyer ? room.unreadCountBuyer : room.unreadCountSeller;
 
       return {
         _id: room._id.toString(),
@@ -65,7 +87,11 @@ export async function GET(request: NextRequest) {
         lastMessageAt: room.lastMessageAt,
         unreadCount,
       };
-    });
+      } catch (error) {
+        console.error("Error formatting room:", error, room);
+        return null;
+      }
+    }).filter((room: any) => room !== null); // Remove null entries
 
     console.log(`📬 [Chat Rooms API] User: ${user.email}, Found ${rooms.length} total rooms, ${validRooms.length} valid rooms (with ticket), Total unread: ${formattedRooms.reduce((sum, r) => sum + r.unreadCount, 0)}`);
 
