@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { v2 as cloudinary } from "cloudinary";
 import { writeFile } from "fs/promises";
 import { join } from "path";
 import { existsSync, mkdirSync } from "fs";
+import crypto from "crypto";
 
 export const dynamic = "force-dynamic";
 
@@ -49,73 +49,87 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Initialize Cloudinary config (re-init để đảm bảo env vars được load đúng)
-    if (cloudName && cloudName !== "your-cloudinary-cloud-name" && apiKey && apiSecret) {
-      // Trim whitespace from credentials (có thể có spaces thừa khi copy-paste)
-      const trimmedCloudName = cloudName.trim();
-      const trimmedApiKey = apiKey.trim();
-      const trimmedApiSecret = apiSecret.trim();
-      
-      cloudinary.config({
-        cloud_name: trimmedCloudName,
-        api_key: trimmedApiKey,
-        api_secret: trimmedApiSecret,
-        secure: true, // Force HTTPS
-      });
-    }
-
     // Process all files
     const uploadPromises = files.map(async (file) => {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
 
-      // Try Cloudinary first (REQUIRED on production)
+      // Try Cloudinary first (REQUIRED on production) - Dùng direct HTTP API call
       if (cloudName && cloudName !== "your-cloudinary-cloud-name" && apiKey && apiSecret) {
         try {
-          // Upload trực tiếp từ buffer stream
-          const result = await new Promise((resolve, reject) => {
-            const uploadStream = cloudinary.uploader.upload_stream(
-              {
-                folder: "pass-ve-phim",
-                resource_type: "image",
-                transformation: [
-                  { width: 1200, height: 1200, crop: "limit" },
-                  { quality: "auto:good" },
-                  { fetch_format: "auto" },
-                ],
-                eager_async: false,
-              },
-              (error, result) => {
-                if (error) {
-                  console.error("Cloudinary upload stream error:", error);
-                  reject(error);
-                } else {
-                  resolve(result);
-                }
-              }
-            );
-            uploadStream.end(buffer);
+          // Trim credentials
+          const trimmedCloudName = cloudName.trim();
+          const trimmedApiKey = apiKey.trim();
+          const trimmedApiSecret = apiSecret.trim();
+
+          // Tạo signature cho Cloudinary upload
+          const timestamp = Math.round(new Date().getTime() / 1000);
+          const params: Record<string, string> = {
+            timestamp: timestamp.toString(),
+            folder: "pass-ve-phim",
+            transformation: "w_1200,h_1200,c_limit,q_auto:good,f_auto",
+          };
+
+          // Tạo param string và signature
+          const paramString = Object.keys(params)
+            .sort()
+            .map((key) => `${key}=${params[key]}`)
+            .join("&");
+
+          const signatureString = `${paramString}${trimmedApiSecret}`;
+          const signature = crypto.createHash("sha1").update(signatureString).digest("hex");
+
+          // Tạo FormData để upload
+          const formData = new FormData();
+          formData.append("file", new Blob([buffer], { type: file.type || "image/png" }), file.name);
+          formData.append("folder", "pass-ve-phim");
+          formData.append("timestamp", timestamp.toString());
+          formData.append("api_key", trimmedApiKey);
+          formData.append("signature", signature);
+          formData.append("transformation", "w_1200,h_1200,c_limit,q_auto:good,f_auto");
+
+          // Upload trực tiếp đến Cloudinary API
+          const uploadUrl = `https://api.cloudinary.com/v1_1/${trimmedCloudName}/image/upload`;
+
+          const response = await fetch(uploadUrl, {
+            method: "POST",
+            body: formData,
           });
 
+          const responseText = await response.text();
+
+          // Check if response is JSON
+          let responseData;
+          try {
+            responseData = JSON.parse(responseText);
+          } catch (parseError) {
+            console.error("Cloudinary returned non-JSON response:", responseText.substring(0, 500));
+            throw new Error(`Cloudinary returned HTML instead of JSON. Status: ${response.status}. This usually means invalid credentials.`);
+          }
+
+          if (!response.ok) {
+            const errorMsg = responseData.error?.message || responseData.error || "Unknown error";
+            console.error("Cloudinary upload failed:", {
+              status: response.status,
+              error: errorMsg,
+              response: responseData,
+            });
+            throw new Error(`Cloudinary upload failed: ${errorMsg}`);
+          }
+
           return {
-            url: (result as any).secure_url,
-            filename: (result as any).public_id,
+            url: responseData.secure_url,
+            filename: responseData.public_id,
             cloudinary: true,
           };
         } catch (cloudinaryError: any) {
           console.error(`Cloudinary upload error for ${file.name}:`, cloudinaryError);
-          console.error("Cloudinary config check:", {
-            cloudName: cloudName ? `${cloudName.substring(0, 4)}...` : "missing",
-            apiKey: apiKey ? `${apiKey.substring(0, 4)}...` : "missing",
-            apiSecret: apiSecret ? `${apiSecret.substring(0, 4)}...` : "missing",
-          });
           
           // On production, fail if Cloudinary fails (no local fallback)
           if (isProduction) {
             const errorMessage = cloudinaryError.message || "Unknown Cloudinary error";
-            // Check if it's a credential error
-            if (errorMessage.includes("401") || errorMessage.includes("Unauthorized") || errorMessage.includes("Invalid") || errorMessage.includes("<!DOCTYPE")) {
-              throw new Error(`Cloudinary authentication failed. Please verify your API credentials (CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET) on Vercel are correct and match your Cloudinary dashboard. Error: ${errorMessage}`);
+            if (errorMessage.includes("HTML") || errorMessage.includes("<!DOCTYPE") || errorMessage.includes("invalid credentials")) {
+              throw new Error(`Cloudinary authentication failed. Please verify your API credentials (CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET) on Vercel are correct and match your Cloudinary dashboard.`);
             }
             throw new Error(`Cloudinary upload failed: ${errorMessage}`);
           }
