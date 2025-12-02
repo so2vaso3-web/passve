@@ -48,7 +48,6 @@ const nextConfig = {
           '**/node_modules/**',
           '**/.next/**',
           '**/.git/**',
-          /[\/\\]C[\/\\]/,
           '**/*.sys',
           '**/*.tmp',
           '**/DumpStack.log.tmp',
