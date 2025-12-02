@@ -115,6 +115,8 @@ export default function SiteSettingsPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
+      console.log("💾 Saving site settings:", settings);
+      
       const res = await fetch("/api/admin/site-settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -122,6 +124,8 @@ export default function SiteSettingsPage() {
       });
 
       const data = await res.json();
+      console.log("📥 Save response:", { status: res.status, data });
+      
       if (res.ok) {
         toast.success("Cập nhật cấu hình thành công!");
         // Refresh trang chủ để thấy thay đổi
@@ -134,11 +138,13 @@ export default function SiteSettingsPage() {
           window.location.href = "/";
         }, 1500);
       } else {
-        toast.error(data.error || "Có lỗi xảy ra");
+        const errorMessage = data.error || "Có lỗi xảy ra";
+        console.error("❌ Save failed:", errorMessage);
+        toast.error(errorMessage);
       }
-    } catch (error) {
-      console.error("Save error:", error);
-      toast.error("Có lỗi xảy ra khi lưu");
+    } catch (error: any) {
+      console.error("❌ Save error:", error);
+      toast.error(error.message || "Có lỗi xảy ra khi lưu");
     } finally {
       setSaving(false);
     }
