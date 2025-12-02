@@ -21,6 +21,7 @@ export default function PaymentSuccessPage() {
     // Function để verify và process payment
     const verifyAndProcessPayment = async (): Promise<boolean> => {
       try {
+        console.log(`🔄 Calling verify-payment API for transaction ${transactionId}`);
         const processRes = await fetch(`/api/sepay/verify-payment`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -29,18 +30,27 @@ export default function PaymentSuccessPage() {
 
         if (processRes.ok) {
           const processData = await processRes.json();
+          console.log(`📥 Verify-payment response:`, processData);
+          
           if (processData.success) {
             // Reload transaction để lấy status mới
             const refreshRes = await fetch(`/api/transactions/${transactionId}`);
             if (refreshRes.ok) {
               const refreshData = await refreshRes.json();
               setTransaction(refreshData.transaction);
-              return (refreshData.transaction?.status as string) === "completed";
+              const isCompleted = (refreshData.transaction?.status as string) === "completed";
+              console.log(`✅ Payment verification result: ${isCompleted ? 'COMPLETED' : 'PENDING'}`);
+              return isCompleted;
             }
+          } else {
+            console.error(`❌ Verify-payment failed:`, processData.message || processData.error);
           }
+        } else {
+          const errorData = await processRes.json().catch(() => ({}));
+          console.error(`❌ Verify-payment API error (${processRes.status}):`, errorData);
         }
-      } catch (processError) {
-        console.error("Error processing payment:", processError);
+      } catch (processError: any) {
+        console.error("❌ Error processing payment:", processError);
       }
       return false;
     };

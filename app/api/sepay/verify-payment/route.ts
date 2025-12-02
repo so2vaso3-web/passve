@@ -74,49 +74,79 @@ export async function POST(request: NextRequest) {
 
     // Giả định rằng nếu user về success page, payment đã thành công
     // Vì SePay chỉ redirect về success_url khi payment thành công
-    if (transaction.status === "pending" && transaction.type === "deposit") {
+    if ((transaction.status as string) === "pending" && transaction.type === "deposit") {
       console.log(`💰 Processing payment manually (webhook may not have fired)`);
+      console.log(`📊 Transaction details:`, {
+        id: transaction._id,
+        userId: transaction.user,
+        amount: transaction.amount,
+        sepayTransactionId: transaction.sepayTransactionId,
+      });
       
-      // Cộng tiền vào ví
-      let wallet = await Wallet.findOne({ user: transaction.user }).maxTimeMS(5000);
-      if (!wallet) {
-        console.log(`📝 Creating new wallet for user ${transaction.user}`);
-        wallet = await Wallet.create({
-          user: transaction.user,
-          balance: transaction.amount,
-          escrow: 0,
-          totalEarned: 0,
+      try {
+        // Cộng tiền vào ví
+        let wallet = await Wallet.findOne({ user: transaction.user }).maxTimeMS(10000);
+        if (!wallet) {
+          console.log(`📝 Creating new wallet for user ${transaction.user}`);
+          wallet = await Wallet.create({
+            user: transaction.user,
+            balance: transaction.amount,
+            escrow: 0,
+            totalEarned: 0,
+          });
+          console.log(`✅ New wallet created with balance: ${wallet.balance}`);
+        } else {
+          const oldBalance = wallet.balance;
+          wallet.balance += transaction.amount;
+          await wallet.save();
+          console.log(`💵 Wallet updated: ${oldBalance} → ${wallet.balance}`);
+        }
+
+        // Cập nhật transaction status - đảm bảo dùng lean() để tránh lỗi
+        const updateResult = await Transaction.findByIdAndUpdate(
+          transaction._id,
+          {
+            status: "completed",
+            completedAt: new Date(),
+          },
+          { new: true }
+        );
+
+        if (!updateResult) {
+          console.error(`❌ Failed to update transaction ${transactionId}`);
+          throw new Error("Failed to update transaction status");
+        }
+
+        console.log(`✅ Transaction status updated to completed: ${transactionId}`);
+
+        // Reload transaction để return
+        const updatedTransaction = await Transaction.findById(transactionId).maxTimeMS(10000).lean();
+
+        // Revalidate cache
+        revalidatePath("/profile");
+        revalidatePath("/payment/success");
+        revalidateTag("wallet");
+        revalidateTag("transactions");
+        revalidateTag("stats");
+
+        console.log(`🎉 Payment successfully processed: Transaction ${transactionId}, Amount: ${transaction.amount}`);
+
+        return NextResponse.json({
+          success: true,
+          message: "Payment processed successfully",
+          transaction: updatedTransaction,
         });
-      } else {
-        const oldBalance = wallet.balance;
-        wallet.balance += transaction.amount;
-        await wallet.save();
-        console.log(`💵 Wallet updated: ${oldBalance} → ${wallet.balance}`);
+      } catch (processError: any) {
+        console.error(`❌ Error processing payment for transaction ${transactionId}:`, processError);
+        return NextResponse.json(
+          { 
+            success: false,
+            error: processError.message || "Failed to process payment",
+            message: "Error processing payment, please contact support",
+          },
+          { status: 500 }
+        );
       }
-
-      // Cập nhật transaction
-      await Transaction.findByIdAndUpdate(transaction._id, {
-        status: "completed",
-        completedAt: new Date(),
-      });
-
-      console.log(`✅ Payment verified and processed: Transaction ${transactionId}`);
-
-      // Reload transaction để return
-      const updatedTransaction = await Transaction.findById(transactionId).maxTimeMS(5000);
-
-      // Revalidate cache
-      revalidatePath("/profile");
-      revalidatePath("/payment/success");
-      revalidateTag("wallet");
-      revalidateTag("transactions");
-      revalidateTag("stats");
-
-      return NextResponse.json({
-        success: true,
-        message: "Payment processed successfully",
-        transaction: updatedTransaction,
-      });
     } else if ((transaction.status as string) === "completed") {
       console.log(`✅ Transaction ${transactionId} already completed`);
       return NextResponse.json({
