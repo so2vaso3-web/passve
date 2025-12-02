@@ -364,44 +364,74 @@ export default async function HomePage({
       </section>
 
       {/* Features Section */}
-      <section className="bg-dark-card border-t border-dark-border py-8 sm:py-12 md:py-16">
-        <div className="container mx-auto px-3 sm:px-4">
-          <h2 className="text-2xl sm:text-3xl font-heading font-black text-dark-text text-center mb-8 sm:mb-12">
+      <section className="bg-dark-card border-t border-dark-border py-6 sm:py-8 md:py-12 lg:py-16">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-heading font-black text-dark-text text-center mb-6 sm:mb-8 md:mb-10 lg:mb-12">
             Tại sao chọn Pass Vé Phim?
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
-            <div className="text-center bg-dark-bg border border-dark-border p-6 rounded-2xl shadow-card hover:shadow-neon hover:scale-[1.03] transition-all">
-              <div className="w-16 h-16 bg-neon-green rounded-xl flex items-center justify-center mx-auto mb-4 shadow-neon-sm">
-                <Shield className="w-8 h-8 text-white" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 lg:gap-8 max-w-7xl mx-auto">
+            <div className="text-center bg-dark-bg border border-dark-border p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-card hover:shadow-neon hover:scale-[1.02] sm:hover:scale-[1.03] transition-all">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-neon-green rounded-lg sm:rounded-xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-neon-sm">
+                <Shield className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
               </div>
-              <h3 className="text-xl font-heading font-bold text-dark-text mb-2">
+              <h3 className="text-base sm:text-lg md:text-xl font-heading font-bold text-dark-text mb-2">
                 An toàn tuyệt đối
               </h3>
-              <p className="text-dark-text2 leading-relaxed">
+              <p className="text-sm sm:text-base text-dark-text2 leading-relaxed px-2 sm:px-0">
                 Hệ thống escrow tự động, tiền được giữ an toàn cho đến khi bạn nhận được vé
               </p>
             </div>
-            <div className="text-center bg-dark-bg border border-dark-border p-6 rounded-2xl shadow-card hover:shadow-neon hover:scale-[1.03] transition-all">
-              <div className="w-16 h-16 bg-neon-green rounded-xl flex items-center justify-center mx-auto mb-4 shadow-neon-sm">
-                <Zap className="w-8 h-8 text-white" />
+            <div className="text-center bg-dark-bg border border-dark-border p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-card hover:shadow-neon hover:scale-[1.02] sm:hover:scale-[1.03] transition-all">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-neon-green rounded-lg sm:rounded-xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-neon-sm">
+                <Zap className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
               </div>
-              <h3 className="text-xl font-heading font-bold text-dark-text mb-2">
+              <h3 className="text-base sm:text-lg md:text-xl font-heading font-bold text-dark-text mb-2">
                 Giao dịch nhanh chóng
               </h3>
-              <p className="text-dark-text2 leading-relaxed">
+              <p className="text-sm sm:text-base text-dark-text2 leading-relaxed px-2 sm:px-0">
                 Thanh toán và nhận vé chỉ trong vài phút, không cần chờ đợi
               </p>
             </div>
-            <div className="text-center bg-dark-bg border border-dark-border p-6 rounded-2xl shadow-card hover:shadow-neon hover:scale-[1.03] transition-all">
-              <div className="w-16 h-16 bg-neon-green rounded-xl flex items-center justify-center mx-auto mb-4 shadow-neon-sm">
-                <CheckCircle className="w-8 h-8 text-white" />
+            <div className="text-center bg-dark-bg border border-dark-border p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-card hover:shadow-neon hover:scale-[1.02] sm:hover:scale-[1.03] transition-all sm:col-span-2 lg:col-span-1">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-neon-green rounded-lg sm:rounded-xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-neon-sm">
+                <CheckCircle className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" />
               </div>
-              <h3 className="text-xl font-heading font-bold text-dark-text mb-2">
+              <h3 className="text-base sm:text-lg md:text-xl font-heading font-bold text-dark-text mb-2">
                 Đáng tin cậy
               </h3>
-              <p className="text-dark-text2 leading-relaxed">
+              <p className="text-sm sm:text-base text-dark-text2 leading-relaxed px-2 sm:px-0">
                 Hệ thống đánh giá và xác minh người bán, đảm bảo uy tín
               </p>
+            </div>
+          </div>
+
+          {/* Why Choose Us Section */}
+          <div className="mt-8 sm:mt-10 md:mt-12 lg:mt-16 max-w-4xl mx-auto">
+            <div className="bg-dark-bg border border-dark-border rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-8 shadow-card">
+              <h3 className="text-lg sm:text-xl md:text-2xl font-heading font-bold text-dark-text mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-neon-green flex-shrink-0" />
+                <span>Tại sao chọn chúng tôi?</span>
+              </h3>
+              <ul className="space-y-3 sm:space-y-4">
+                <li className="flex items-start gap-3 sm:gap-4">
+                  <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-neon-green flex-shrink-0 mt-0.5" />
+                  <p className="text-sm sm:text-base text-dark-text2 leading-relaxed flex-1">
+                    Mua bán vé phim, concert, sự kiện uy tín và an toàn
+                  </p>
+                </li>
+                <li className="flex items-start gap-3 sm:gap-4">
+                  <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-neon-green flex-shrink-0 mt-0.5" />
+                  <p className="text-sm sm:text-base text-dark-text2 leading-relaxed flex-1">
+                    Hệ thống escrow tự động bảo vệ người mua và người bán
+                  </p>
+                </li>
+                <li className="flex items-start gap-3 sm:gap-4">
+                  <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-neon-green flex-shrink-0 mt-0.5" />
+                  <p className="text-sm sm:text-base text-dark-text2 leading-relaxed flex-1">
+                    Thanh toán nhanh chóng, tiền được cộng vào ví ngay lập tức
+                  </p>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
