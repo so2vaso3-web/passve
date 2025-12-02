@@ -74,6 +74,7 @@ export async function POST(request: NextRequest) {
 
     // Giả định rằng nếu user về success page, payment đã thành công
     // Vì SePay chỉ redirect về success_url khi payment thành công
+    // Nếu status là pending và type là deposit, ta sẽ tự động process
     if ((transaction.status as string) === "pending" && transaction.type === "deposit") {
       console.log(`💰 Processing payment manually (webhook may not have fired)`);
       console.log(`📊 Transaction details:`, {

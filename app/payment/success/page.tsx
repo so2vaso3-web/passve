@@ -64,18 +64,39 @@ export default function PaymentSuccessPage() {
           const tx = data.transaction;
           setTransaction(tx);
 
-          // Nếu transaction vẫn pending, thử verify và process payment ngay lập tức
+          // Nếu transaction vẫn pending, LUÔN LUÔN verify và process payment ngay lập tức
+          // Vì nếu user đã về success page, payment đã thành công rồi
           if (tx && (tx.status as string) === "pending") {
-            console.log("🔄 Transaction pending, verifying payment...");
-            const processed = await verifyAndProcessPayment();
+            console.log("🔄 Transaction pending, verifying payment immediately...");
+            // Retry verify-payment nhiều lần để đảm bảo thành công
+            let retryCount = 0;
+            const maxRetries = 3;
+            let processed = false;
+            
+            while (retryCount < maxRetries && !processed) {
+              retryCount++;
+              console.log(`🔄 Verify attempt ${retryCount}/${maxRetries}`);
+              processed = await verifyAndProcessPayment();
+              
+              if (processed) {
+                console.log("✅ Payment processed successfully!");
+                // Refresh transaction status
+                const refreshRes = await fetch(`/api/transactions/${transactionId}`);
+                if (refreshRes.ok) {
+                  const refreshData = await refreshRes.json();
+                  setTransaction(refreshData.transaction);
+                }
+                setLoading(false);
+                break;
+              } else {
+                // Đợi 1 giây trước khi retry
+                await new Promise(resolve => setTimeout(resolve, 1000));
+              }
+            }
             
             if (!processed) {
-              // Nếu chưa được process, bắt đầu polling
-              console.log("⏳ Payment not processed yet, starting polling...");
+              console.log("⏳ Payment still not processed, starting polling...");
               startPolling();
-            } else {
-              console.log("✅ Payment processed successfully!");
-              setLoading(false);
             }
           } else if (tx && (tx.status as string) === "completed") {
             console.log("✅ Transaction already completed");
