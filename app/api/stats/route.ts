@@ -104,7 +104,7 @@ export async function GET() {
       satisfactionRate: satisfactionRate >= 95 ? satisfactionRate : 99,
       totalUsers: Math.max(totalUsersCount, 800),
       soldTickets: Math.max(soldTickets, 300),
-      totalRevenue: Math.max(totalRevenue, 50000000), // Tối thiểu 50M
+      totalRevenue: Math.max(totalRevenue, 8000000), // Tối thiểu 8M
       activeUsers: Math.max(activeUsers, 600),
       averageRating: Math.max(averageRating, 4.7),
       approvedTickets: Math.max(approvedTickets, 500),
@@ -120,7 +120,7 @@ export async function GET() {
       satisfactionRate: 99,
       totalUsers: 1847,
       soldTickets: 892,
-      totalRevenue: 125000000,
+      totalRevenue: 8000000, // 8 triệu VNĐ
       activeUsers: 1324,
       averageRating: 4.8,
       approvedTickets: 1156,

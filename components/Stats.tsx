@@ -165,12 +165,6 @@ export function Stats() {
 
   const statsCards = [
     {
-      icon: Ticket,
-      value: `${counters.tickets.toLocaleString()}+`,
-      label: "Vé đang bán",
-      key: "tickets",
-    },
-    {
       icon: TrendingUp,
       value: `${counters.transactions.toLocaleString()}+`,
       label: "Giao dịch thành công",
@@ -217,12 +211,6 @@ export function Stats() {
       value: `${counters.approved.toLocaleString()}+`,
       label: "Vé đã duyệt",
       key: "approved",
-    },
-    {
-      icon: MapPin,
-      value: `${counters.cities}+`,
-      label: "Thành phố",
-      key: "cities",
     },
   ];
 
