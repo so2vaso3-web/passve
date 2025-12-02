@@ -7,12 +7,12 @@ importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-com
 // Initialize Firebase
 // Sẽ được set từ main app
 firebase.initializeApp({
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyBm1_ycgrKG66q9dc_5ekkY2unNqxKCvgY",
+  authDomain: "pass-ve-phim-bea23.firebaseapp.com",
+  projectId: "pass-ve-phim-bea23",
+  storageBucket: "pass-ve-phim-bea23.firebasestorage.app",
+  messagingSenderId: "640231961352",
+  appId: "1:640231961352:web:b327ffdb239da7829db2bd"
 });
 
 const messaging = firebase.messaging();
