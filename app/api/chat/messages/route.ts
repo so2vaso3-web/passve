@@ -177,7 +177,6 @@ export async function POST(request: NextRequest) {
               notification: {
                 title: notificationTitle,
                 body: notificationBody,
-                icon: "/icon-192.png",
               },
               data: {
                 roomId: roomId,
@@ -191,6 +190,7 @@ export async function POST(request: NextRequest) {
                 notification: {
                   sound: "default",
                   channelId: "chat_messages",
+                  icon: "icon",
                 },
               },
               apns: {
