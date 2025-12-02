@@ -20,6 +20,7 @@ async function getAdminStats() {
         activeTickets: 0,
         soldTickets: 0,
         pendingWithdrawals: 0,
+        pendingDeposits: 0,
         totalUsers: 0,
         activeUsers: 0,
         totalRevenue: 0,
@@ -27,7 +28,7 @@ async function getAdminStats() {
       };
     }
 
-    const [totalTickets, activeTickets, soldTickets, pendingWithdrawals, totalUsers, activeUsers, totalRevenue, totalWithdrawals] = await Promise.all([
+    const [totalTickets, activeTickets, soldTickets, pendingWithdrawals, pendingDeposits, totalUsers, activeUsers, totalRevenue, totalWithdrawals] = await Promise.all([
       Ticket.countDocuments().maxTimeMS(5000).catch(() => 0),
       Ticket.countDocuments({
         status: { $in: ["pending", "approved"] },
@@ -37,6 +38,10 @@ async function getAdminStats() {
       Ticket.countDocuments({ status: "sold" }).maxTimeMS(5000).catch(() => 0),
       Transaction.countDocuments({
         type: "withdraw",
+        status: "pending",
+      }).maxTimeMS(5000).catch(() => 0),
+      Transaction.countDocuments({
+        type: "deposit",
         status: "pending",
       }).maxTimeMS(5000).catch(() => 0),
       User.countDocuments({ role: "user" }).maxTimeMS(5000).catch(() => 0),
@@ -56,6 +61,7 @@ async function getAdminStats() {
       activeTickets: activeTickets || 0,
       soldTickets: soldTickets || 0,
       pendingWithdrawals: pendingWithdrawals || 0,
+      pendingDeposits: pendingDeposits || 0,
       totalUsers: totalUsers || 0,
       activeUsers: activeUsers || 0,
       totalRevenue: (totalRevenue as any)[0]?.total || 0,
@@ -68,6 +74,7 @@ async function getAdminStats() {
       activeTickets: 0,
       soldTickets: 0,
       pendingWithdrawals: 0,
+      pendingDeposits: 0,
       totalUsers: 0,
       activeUsers: 0,
       totalRevenue: 0,

@@ -6,6 +6,7 @@ import {
   Users, 
   DollarSign, 
   ArrowDown,
+  ArrowUp,
   TrendingUp,
   CheckCircle,
   Clock,
@@ -19,6 +20,7 @@ interface AdminDashboardProps {
     activeTickets: number;
     soldTickets: number;
     pendingWithdrawals: number;
+    pendingDeposits: number;
     totalUsers: number;
     activeUsers: number;
     totalRevenue: number;
@@ -86,6 +88,19 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Link
+            href="/admin/deposits"
+            className="bg-dark-card border border-dark-border rounded-2xl p-5 shadow-card hover:shadow-neon hover:scale-[1.03] transition-all"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <ArrowUp className="w-6 h-6 text-neon-green" />
+              <h3 className="font-heading font-bold text-dark-text">Duyệt nạp tiền</h3>
+            </div>
+            <p className="text-sm text-dark-text2">
+              {stats.pendingDeposits} yêu cầu đang chờ
+            </p>
+          </Link>
+
           <Link
             href="/admin/withdrawals"
             className="bg-dark-card border border-dark-border rounded-2xl p-5 shadow-card hover:shadow-neon hover:scale-[1.03] transition-all"
