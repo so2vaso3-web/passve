@@ -15,6 +15,18 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     // Request notification permission và register FCM token
     const registerFCMToken = async () => {
       try {
+        // Kiểm tra xem browser có hỗ trợ service worker không
+        if (!("serviceWorker" in navigator)) {
+          console.warn("⚠️ Service Worker không được hỗ trợ trên trình duyệt này");
+          return;
+        }
+
+        // Kiểm tra xem browser có hỗ trợ notifications không
+        if (!("Notification" in window)) {
+          console.warn("⚠️ Notifications không được hỗ trợ trên trình duyệt này");
+          return;
+        }
+
         const token = await requestNotificationPermission();
         
         if (token) {
@@ -27,11 +39,16 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
           if (res.ok) {
             setTokenRegistered(true);
-            console.log("FCM token registered successfully");
+            console.log("✅ FCM token registered successfully in backend");
+          } else {
+            const errorData = await res.json().catch(() => ({}));
+            console.error("❌ Failed to register FCM token in backend:", errorData);
           }
+        } else {
+          console.warn("⚠️ No FCM token obtained - notifications may not work when app is closed");
         }
-      } catch (error) {
-        console.error("Error registering FCM token:", error);
+      } catch (error: any) {
+        console.error("❌ Error registering FCM token:", error);
       }
     };
 

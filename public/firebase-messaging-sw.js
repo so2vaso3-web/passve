@@ -37,19 +37,34 @@ messaging.onBackgroundMessage((payload) => {
 
 // Handle notification click
 self.addEventListener('notificationclick', (event) => {
-  console.log('[firebase-messaging-sw.js] Notification click received.');
+  console.log('[firebase-messaging-sw.js] Notification click received:', event.notification);
   
   event.notification.close();
 
+  // Get URL từ data hoặc từ notification tag
+  const urlToOpen = event.notification.data?.url || 
+                    event.notification.data?.click_action || 
+                    `/chat/${event.notification.data?.roomId}` || 
+                    '/';
+
+  console.log('[firebase-messaging-sw.js] Opening URL:', urlToOpen);
+
   // Open app when notification is clicked
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      const urlToOpen = event.notification.data?.url || '/';
-      
-      // Check if app is already open
+    clients.matchAll({ 
+      type: 'window', 
+      includeUncontrolled: true 
+    }).then((clientList) => {
+      // Check if app is already open - try to find matching client
       for (const client of clientList) {
-        if (client.url === urlToOpen && 'focus' in client) {
-          return client.focus();
+        const clientUrl = new URL(client.url);
+        const targetUrl = new URL(urlToOpen, self.location.origin);
+        
+        if (clientUrl.origin === targetUrl.origin && 'focus' in client) {
+          // Focus existing window and navigate to target URL
+          return client.focus().then(() => {
+            return client.navigate ? client.navigate(urlToOpen) : Promise.resolve();
+          });
         }
       }
       
@@ -57,6 +72,8 @@ self.addEventListener('notificationclick', (event) => {
       if (clients.openWindow) {
         return clients.openWindow(urlToOpen);
       }
+    }).catch((error) => {
+      console.error('[firebase-messaging-sw.js] Error handling notification click:', error);
     })
   );
 });

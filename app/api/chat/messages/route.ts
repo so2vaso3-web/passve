@@ -160,27 +160,75 @@ export async function POST(request: NextRequest) {
         const { messaging } = await import("@/lib/firebase-admin");
         
         if (messaging) {
-          await messaging.send({
-            token: receiver.fcmToken,
-            notification: {
-              title: `${(newMessage.sender as any).name}`,
-              body: type === "image" ? "📷 Đã gửi ảnh" : (messageText.substring(0, 100) || "Tin nhắn mới"),
-            },
-            data: {
-              roomId: roomId,
-              senderId: sender._id.toString(),
-              type: "chat_message",
-              url: `/tickets/${room.ticket}`,
-            },
-            apns: {
-              payload: {
-                aps: {
+          const notificationTitle = `${(newMessage.sender as any).name}`;
+          const notificationBody = type === "image" ? "📷 Đã gửi ảnh" : (messageText.substring(0, 100) || "Tin nhắn mới");
+          const chatUrl = `/chat/${roomId}`;
+          
+          console.log(`📤 Sending push notification to user ${receiver.email}:`, {
+            title: notificationTitle,
+            body: notificationBody,
+            url: chatUrl,
+            roomId: roomId,
+          });
+
+          try {
+            await messaging.send({
+              token: receiver.fcmToken,
+              notification: {
+                title: notificationTitle,
+                body: notificationBody,
+                icon: "/icon-192.png",
+              },
+              data: {
+                roomId: roomId,
+                senderId: sender._id.toString(),
+                type: "chat_message",
+                url: chatUrl,
+                click_action: chatUrl,
+              },
+              android: {
+                priority: "high",
+                notification: {
                   sound: "default",
-                  badge: 1,
+                  channelId: "chat_messages",
                 },
               },
-            },
-          });
+              apns: {
+                payload: {
+                  aps: {
+                    sound: "default",
+                    badge: 1,
+                    alert: {
+                      title: notificationTitle,
+                      body: notificationBody,
+                    },
+                  },
+                },
+              },
+              webpush: {
+                notification: {
+                  icon: "/icon-192.png",
+                  badge: "/icon-192.png",
+                  requireInteraction: false,
+                },
+                fcmOptions: {
+                  link: chatUrl,
+                },
+              },
+            });
+            console.log(`✅ Push notification sent successfully to ${receiver.email}`);
+          } catch (pushError: any) {
+            console.error(`❌ Error sending push notification to ${receiver.email}:`, pushError);
+            // Nếu token không hợp lệ, xóa token khỏi database
+            if (pushError.code === "messaging/registration-token-not-registered" || 
+                pushError.code === "messaging/invalid-registration-token") {
+              console.log(`🔧 Removing invalid FCM token for user ${receiver.email}`);
+              receiver.fcmToken = undefined;
+              await receiver.save();
+            }
+          }
+        } else {
+          console.warn(`⚠️ Firebase Admin messaging not available - cannot send push notification to ${receiver.email}`);
         }
       }
     } catch (pushError) {
