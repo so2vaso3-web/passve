@@ -51,10 +51,15 @@ export async function POST(request: NextRequest) {
 
     // Initialize Cloudinary config (re-init để đảm bảo env vars được load đúng)
     if (cloudName && cloudName !== "your-cloudinary-cloud-name" && apiKey && apiSecret) {
+      // Trim whitespace from credentials (có thể có spaces thừa khi copy-paste)
+      const trimmedCloudName = cloudName.trim();
+      const trimmedApiKey = apiKey.trim();
+      const trimmedApiSecret = apiSecret.trim();
+      
       cloudinary.config({
-        cloud_name: cloudName,
-        api_key: apiKey,
-        api_secret: apiSecret,
+        cloud_name: trimmedCloudName,
+        api_key: trimmedApiKey,
+        api_secret: trimmedApiSecret,
       });
     }
 
