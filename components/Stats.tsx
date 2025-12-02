@@ -50,86 +50,104 @@ export function Stats() {
           cache: "no-store",
         });
         const data = await res.json();
-        setStats(data);
+        // Chỉ update nếu số liệu thay đổi đáng kể để tránh nhảy số
+        setStats((prev) => {
+          const shouldUpdate = 
+            Math.abs(data.activeTickets - prev.activeTickets) > 10 ||
+            Math.abs(data.successfulTransactions - prev.successfulTransactions) > 10 ||
+            data.satisfactionRate !== prev.satisfactionRate;
+          
+          return shouldUpdate ? data : prev;
+        });
       } catch (error) {
         console.error("Error fetching stats:", error);
       }
     };
 
     fetchStats();
-    // Refresh mỗi 30 giây
-    const interval = setInterval(fetchStats, 30000);
+    // Refresh mỗi 60 giây (tăng từ 30s để giảm nhảy số)
+    const interval = setInterval(fetchStats, 60000);
     return () => clearInterval(interval);
   }, []);
 
-  // Animation counter
+  // Animation counter - Chỉ animate khi số thay đổi đáng kể
   useEffect(() => {
     const animateCounter = (
       target: number,
       setter: (val: number) => void,
+      current: number,
       duration = 2000
     ) => {
-      let start = 0;
-      const increment = target / (duration / 16);
+      // Nếu số thay đổi ít, không animate để tránh nhảy
+      if (Math.abs(target - current) < 5 && current > 0) {
+        setter(target);
+        return;
+      }
+
+      let start = current || 0;
+      const difference = target - start;
+      const steps = duration / 16;
+      const increment = difference / steps;
+      
       const timer = setInterval(() => {
         start += increment;
-        if (start >= target) {
-          setter(target);
+        if ((increment > 0 && start >= target) || (increment < 0 && start <= target)) {
+          setter(Math.round(target));
           clearInterval(timer);
         } else {
-          setter(Math.floor(start));
+          setter(Math.round(start));
         }
       }, 16);
     };
 
     if (stats.activeTickets > 0) {
       animateCounter(stats.activeTickets, (val) =>
-        setCounters((c) => ({ ...c, tickets: val }))
+        setCounters((c) => ({ ...c, tickets: val })), counters.tickets
       );
     }
     if (stats.successfulTransactions > 0) {
       animateCounter(stats.successfulTransactions, (val) =>
-        setCounters((c) => ({ ...c, transactions: val }))
+        setCounters((c) => ({ ...c, transactions: val })), counters.transactions
       );
     }
     if (stats.satisfactionRate > 0) {
       animateCounter(stats.satisfactionRate, (val) =>
-        setCounters((c) => ({ ...c, satisfaction: val }))
+        setCounters((c) => ({ ...c, satisfaction: val })), counters.satisfaction
       );
     }
     if (stats.totalUsers > 0) {
       animateCounter(stats.totalUsers, (val) =>
-        setCounters((c) => ({ ...c, users: val }))
+        setCounters((c) => ({ ...c, users: val })), counters.users
       );
     }
     if (stats.soldTickets > 0) {
       animateCounter(stats.soldTickets, (val) =>
-        setCounters((c) => ({ ...c, sold: val }))
+        setCounters((c) => ({ ...c, sold: val })), counters.sold
       );
     }
     if (stats.totalRevenue > 0) {
       animateCounter(stats.totalRevenue, (val) =>
-        setCounters((c) => ({ ...c, revenue: val }))
+        setCounters((c) => ({ ...c, revenue: val })), counters.revenue
       );
     }
     if (stats.activeUsers > 0) {
       animateCounter(stats.activeUsers, (val) =>
-        setCounters((c) => ({ ...c, active: val }))
+        setCounters((c) => ({ ...c, active: val })), counters.active
       );
     }
     if (stats.averageRating > 0) {
       animateCounter(stats.averageRating * 10, (val) =>
-        setCounters((c) => ({ ...c, rating: val / 10 }))
+        setCounters((c) => ({ ...c, rating: val / 10 })), counters.rating * 10
       );
     }
     if (stats.approvedTickets > 0) {
       animateCounter(stats.approvedTickets, (val) =>
-        setCounters((c) => ({ ...c, approved: val }))
+        setCounters((c) => ({ ...c, approved: val })), counters.approved
       );
     }
     if (stats.citiesCount > 0) {
       animateCounter(stats.citiesCount, (val) =>
-        setCounters((c) => ({ ...c, cities: val }))
+        setCounters((c) => ({ ...c, cities: val })), counters.cities
       );
     }
   }, [stats]);

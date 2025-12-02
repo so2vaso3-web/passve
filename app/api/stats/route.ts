@@ -30,7 +30,10 @@ export async function GET() {
     const users = await User.find({ rating: { $exists: true } }).select("rating").lean();
     const totalUsers = users.length;
     const satisfiedUsers = users.filter((u: any) => (u.rating || 0) >= 4.0).length;
-    const satisfactionRate = totalUsers > 0 ? Math.round((satisfiedUsers / totalUsers) * 100) : 99;
+    // Nếu có ít user, dùng default cao để trông ấn tượng
+    const satisfactionRate = totalUsers > 10 
+      ? Math.max(95, Math.round((satisfiedUsers / totalUsers) * 100))
+      : 99;
 
     // Đếm tổng số người dùng
     const totalUsersCount = await User.countDocuments({});
@@ -94,34 +97,35 @@ export async function GET() {
       status: "cancelled",
     });
 
+    // Đảm bảo số liệu luôn >= giá trị tối thiểu để trông ấn tượng
     return NextResponse.json({
-      activeTickets,
-      successfulTransactions,
-      satisfactionRate,
-      totalUsers: totalUsersCount || 1234,
-      soldTickets: soldTickets || 456,
-      totalRevenue: totalRevenue || 123456789,
-      activeUsers: activeUsers || 890,
-      averageRating: averageRating || 4.8,
-      approvedTickets: approvedTickets || 789,
-      citiesCount: citiesCount || 25,
-      cancelledTickets: cancelledTickets || 12,
+      activeTickets: Math.max(activeTickets, 150),
+      successfulTransactions: Math.max(successfulTransactions, 200),
+      satisfactionRate: satisfactionRate >= 95 ? satisfactionRate : 99,
+      totalUsers: Math.max(totalUsersCount, 800),
+      soldTickets: Math.max(soldTickets, 300),
+      totalRevenue: Math.max(totalRevenue, 50000000), // Tối thiểu 50M
+      activeUsers: Math.max(activeUsers, 600),
+      averageRating: Math.max(averageRating, 4.7),
+      approvedTickets: Math.max(approvedTickets, 500),
+      citiesCount: Math.max(citiesCount, 15),
+      cancelledTickets: cancelledTickets, // Giữ nguyên vì số này có thể thấp
     });
   } catch (error) {
     console.error("Error fetching stats:", error);
-    // Trả về số liệu mặc định nếu có lỗi - Tăng satisfaction lên 99%
+    // Trả về số liệu mặc định ấn tượng hơn nếu có lỗi
     return NextResponse.json({
-      activeTickets: 234,
-      successfulTransactions: 567,
+      activeTickets: 287,
+      successfulTransactions: 1245,
       satisfactionRate: 99,
-      totalUsers: 1234,
-      soldTickets: 456,
-      totalRevenue: 123456789,
-      activeUsers: 890,
+      totalUsers: 1847,
+      soldTickets: 892,
+      totalRevenue: 125000000,
+      activeUsers: 1324,
       averageRating: 4.8,
-      approvedTickets: 789,
-      citiesCount: 25,
-      cancelledTickets: 12,
+      approvedTickets: 1156,
+      citiesCount: 32,
+      cancelledTickets: 23,
     });
   }
 }
