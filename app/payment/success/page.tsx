@@ -18,39 +18,61 @@ export default function PaymentSuccessPage() {
       return;
     }
 
-    // Function để verify và process payment
+    // Function để verify và process payment - QUAN TRỌNG: Phải process ngay khi vào success page
     const verifyAndProcessPayment = async (): Promise<boolean> => {
       try {
-        console.log(`🔄 Calling verify-payment API for transaction ${transactionId}`);
+        console.log(`🔄 [${new Date().toISOString()}] Calling verify-payment API for transaction ${transactionId}`);
         const processRes = await fetch(`/api/sepay/verify-payment`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ transactionId: transactionId }),
         });
 
+        console.log(`📥 [${new Date().toISOString()}] Verify-payment response status: ${processRes.status}`);
+
         if (processRes.ok) {
           const processData = await processRes.json();
-          console.log(`📥 Verify-payment response:`, processData);
+          console.log(`📥 Verify-payment response data:`, processData);
           
           if (processData.success) {
-            // Reload transaction để lấy status mới
-            const refreshRes = await fetch(`/api/transactions/${transactionId}`);
-            if (refreshRes.ok) {
-              const refreshData = await refreshRes.json();
-              setTransaction(refreshData.transaction);
-              const isCompleted = (refreshData.transaction?.status as string) === "completed";
-              console.log(`✅ Payment verification result: ${isCompleted ? 'COMPLETED' : 'PENDING'}`);
-              return isCompleted;
+            // Đợi 500ms để đảm bảo database đã được update
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Reload transaction để lấy status mới - retry nhiều lần nếu cần
+            let retryCount = 0;
+            let isCompleted = false;
+            
+            while (retryCount < 3 && !isCompleted) {
+              retryCount++;
+              const refreshRes = await fetch(`/api/transactions/${transactionId}?t=${Date.now()}`);
+              if (refreshRes.ok) {
+                const refreshData = await refreshRes.json();
+                setTransaction(refreshData.transaction);
+                isCompleted = (refreshData.transaction?.status as string) === "completed";
+                console.log(`🔄 [Retry ${retryCount}] Transaction status check: ${refreshData.transaction?.status}`);
+                
+                if (isCompleted) {
+                  console.log(`✅ Payment verification SUCCESS: Transaction is COMPLETED`);
+                  return true;
+                }
+              }
+              
+              if (!isCompleted && retryCount < 3) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+              }
             }
+            
+            console.log(`⚠️ Payment verification: Transaction status still not completed after ${retryCount} retries`);
+            return isCompleted;
           } else {
-            console.error(`❌ Verify-payment failed:`, processData.message || processData.error);
+            console.error(`❌ Verify-payment returned success=false:`, processData.message || processData.error);
           }
         } else {
           const errorData = await processRes.json().catch(() => ({}));
           console.error(`❌ Verify-payment API error (${processRes.status}):`, errorData);
         }
       } catch (processError: any) {
-        console.error("❌ Error processing payment:", processError);
+        console.error(`❌ Error processing payment:`, processError);
       }
       return false;
     };
@@ -64,39 +86,56 @@ export default function PaymentSuccessPage() {
           const tx = data.transaction;
           setTransaction(tx);
 
-          // Nếu transaction vẫn pending, LUÔN LUÔN verify và process payment ngay lập tức
-          // Vì nếu user đã về success page, payment đã thành công rồi
+          // QUAN TRỌNG: Nếu transaction vẫn pending, PHẢI verify và process payment ngay lập tức
+          // Vì nếu user đã về success page = SePay đã confirm payment thành công rồi
           if (tx && (tx.status as string) === "pending") {
-            console.log("🔄 Transaction pending, verifying payment immediately...");
-            // Retry verify-payment nhiều lần để đảm bảo thành công
-            let retryCount = 0;
-            const maxRetries = 3;
-            let processed = false;
+            console.log(`🚨 [${new Date().toISOString()}] Transaction is PENDING - Processing payment NOW...`);
             
-            while (retryCount < maxRetries && !processed) {
-              retryCount++;
-              console.log(`🔄 Verify attempt ${retryCount}/${maxRetries}`);
-              processed = await verifyAndProcessPayment();
-              
-              if (processed) {
-                console.log("✅ Payment processed successfully!");
-                // Refresh transaction status
-                const refreshRes = await fetch(`/api/transactions/${transactionId}`);
+            // Process ngay lập tức - không chờ
+            const processed = await verifyAndProcessPayment();
+            
+            if (processed) {
+              console.log("✅✅✅ Payment processed successfully - Transaction completed!");
+              setLoading(false);
+              // Refresh lại để hiển thị transaction mới nhất
+              setTimeout(async () => {
+                const refreshRes = await fetch(`/api/transactions/${transactionId}?t=${Date.now()}`);
                 if (refreshRes.ok) {
                   const refreshData = await refreshRes.json();
                   setTransaction(refreshData.transaction);
                 }
-                setLoading(false);
-                break;
-              } else {
-                // Đợi 1 giây trước khi retry
-                await new Promise(resolve => setTimeout(resolve, 1000));
+              }, 500);
+            } else {
+              console.log("⚠️ Payment not processed immediately, retrying...");
+              // Retry ngay lập tức thêm 2 lần nữa
+              let retryCount = 0;
+              const maxRetries = 2;
+              let finallyProcessed = false;
+              
+              while (retryCount < maxRetries && !finallyProcessed) {
+                retryCount++;
+                console.log(`🔄 Retry attempt ${retryCount}/${maxRetries}`);
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                finallyProcessed = await verifyAndProcessPayment();
+                
+                if (finallyProcessed) {
+                  console.log("✅✅ Payment processed on retry!");
+                  setLoading(false);
+                  setTimeout(async () => {
+                    const refreshRes = await fetch(`/api/transactions/${transactionId}?t=${Date.now()}`);
+                    if (refreshRes.ok) {
+                      const refreshData = await refreshRes.json();
+                      setTransaction(refreshData.transaction);
+                    }
+                  }, 500);
+                  return;
+                }
               }
-            }
-            
-            if (!processed) {
-              console.log("⏳ Payment still not processed, starting polling...");
-              startPolling();
+              
+              if (!finallyProcessed) {
+                console.log("⏳ Still pending after retries, starting polling as fallback...");
+                startPolling();
+              }
             }
           } else if (tx && (tx.status as string) === "completed") {
             console.log("✅ Transaction already completed");
@@ -172,7 +211,8 @@ export default function PaymentSuccessPage() {
       }, 20000);
     };
 
-    // Bắt đầu check ngay lập tức
+    // Bắt đầu check ngay lập tức - KHÔNG chờ gì cả
+    console.log(`🚀 [${new Date().toISOString()}] Starting payment verification for transaction ${transactionId}`);
     checkTransactionStatus();
     
     // Timeout tổng thể để đảm bảo loading không bao giờ bị stuck quá 30 giây
