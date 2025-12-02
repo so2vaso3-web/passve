@@ -123,7 +123,8 @@ export default function RootLayout({
   return (
     <html lang="vi" className={`${inter.variable}`}>
       <head>
-        {/* Open Graph Meta Tags - Đảm bảo ảnh hiển thị khi share */}
+        {/* Open Graph Meta Tags - Đảm bảo ảnh hiển thị khi share trên Facebook */}
+        {/* Facebook yêu cầu absolute URL và image phải accessible */}
         <meta property="og:image" content={`${siteUrl}/opengraph-image`} />
         <meta property="og:image:url" content={`${siteUrl}/opengraph-image`} />
         <meta property="og:image:secure_url" content={`${siteUrl}/opengraph-image`} />
@@ -131,12 +132,12 @@ export default function RootLayout({
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:image:alt" content="Pass Vé Phim - Chợ sang nhượng vé xem phim & sự kiện" />
+        {/* Facebook cần thêm các meta tags này - updated_time giúp Facebook biết có thay đổi */}
+        <meta property="og:updated_time" content={Date.now().toString()} />
         {/* Twitter Card */}
         <meta name="twitter:image" content={`${siteUrl}/opengraph-image`} />
         <meta name="twitter:image:src" content={`${siteUrl}/opengraph-image`} />
         <meta name="twitter:image:alt" content="Pass Vé Phim - Chợ sang nhượng vé xem phim & sự kiện" />
-        {/* Fallback - Dùng icon nếu OG image không load được */}
-        <meta property="og:image:fallback" content={`${siteUrl}/icon-192.png`} />
         
         {/* Structured Data cho Google Search */}
         <script
