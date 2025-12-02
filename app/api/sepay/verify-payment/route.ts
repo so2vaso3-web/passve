@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
         message: "Payment processed successfully",
         transaction: updatedTransaction,
       });
-    } else if (transaction.status === "completed") {
+    } else if ((transaction.status as string) === "completed") {
       console.log(`✅ Transaction ${transactionId} already completed`);
       return NextResponse.json({
         success: true,
