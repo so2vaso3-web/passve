@@ -37,13 +37,19 @@ export const metadata: Metadata = {
         height: 630,
         alt: "Pass Vé Phim - Chợ sang nhượng vé xem phim & sự kiện",
       },
+      {
+        url: `${siteUrl}/icon-192.png`, // Fallback image
+        width: 192,
+        height: 192,
+        alt: "Pass Vé Phim Logo",
+      },
     ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Pass Vé Phim - Chợ sang nhượng vé xem phim & sự kiện",
     description: "Mua bán vé phim, vé concert, vé sự kiện uy tín, an toàn với hệ thống escrow tự động",
-    images: [`${siteUrl}/opengraph-image`],
+    images: [`${siteUrl}/opengraph-image`, `${siteUrl}/icon-192.png`],
     site: "@passvephim",
     creator: "@passvephim",
   },
@@ -117,6 +123,17 @@ export default function RootLayout({
   return (
     <html lang="vi" className={`${inter.variable}`}>
       <head>
+        {/* Open Graph Meta Tags - Đảm bảo ảnh hiển thị khi share */}
+        <meta property="og:image" content={`${siteUrl}/opengraph-image`} />
+        <meta property="og:image:secure_url" content={`${siteUrl}/opengraph-image`} />
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="Pass Vé Phim - Chợ sang nhượng vé xem phim & sự kiện" />
+        {/* Twitter Card */}
+        <meta name="twitter:image" content={`${siteUrl}/opengraph-image`} />
+        <meta name="twitter:image:alt" content="Pass Vé Phim - Chợ sang nhượng vé xem phim & sự kiện" />
+        
         {/* Structured Data cho Google Search */}
         <script
           type="application/ld+json"
