@@ -203,22 +203,8 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
         {activeTab === "transactions" && (
           <div>
             <WalletBox balance={wallet.balance} escrow={wallet.escrow} totalEarned={wallet.totalEarned} />
-            <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 mb-4 sm:mb-6">
-              <button
-                onClick={() => setShowDepositForm(true)}
-                className="flex-1 bg-gradient-to-r from-neon-green to-neon-green-light hover:from-[#059669] hover:to-neon-green text-white px-4 sm:px-5 py-2.5 sm:py-2.5 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base transition-all duration-200 hover:shadow-neon-sm active:scale-[0.98]"
-              >
-                Nạp tiền
-              </button>
-              <button
-                onClick={() => setShowWithdrawForm(true)}
-                className="flex-1 bg-gradient-to-r from-[#EF4444] to-[#F87171] hover:from-[#DC2626] hover:to-[#EF4444] text-white px-4 sm:px-5 py-2.5 sm:py-2.5 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base transition-all duration-200 hover:shadow-lg hover:shadow-red-500/30 active:scale-[0.98]"
-              >
-                Rút tiền
-              </button>
-            </div>
 
-            <h3 className="text-xl font-bold text-white mb-4">Lịch sử giao dịch</h3>
+            <h3 className="text-xl font-bold text-white mb-4 mt-6">Lịch sử giao dịch</h3>
             {loading ? (
               <div className="text-center py-8 text-white/70">Đang tải...</div>
             ) : transactions.length === 0 ? (
