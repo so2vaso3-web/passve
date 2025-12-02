@@ -84,8 +84,9 @@ export async function POST(request: NextRequest) {
 
     // Xử lý theo status từ SePay
     if (status === "success" || status === "completed" || status === "paid") {
-      // Chỉ xử lý nếu transaction chưa completed
-      if (transaction.status !== "completed") {
+      // Chỉ xử lý nếu transaction chưa completed (double check để tránh duplicate)
+      const currentStatus = transaction.status as string;
+      if (currentStatus !== "completed") {
         // Use amount from webhook or transaction
         const depositAmount = amount || transaction.amount;
         
