@@ -47,10 +47,14 @@ const nextConfig = {
         ignored: [
           '**/node_modules/**',
           '**/.next/**',
-          '**/C:/DumpStack.log.tmp',
-          '**/C:/pagefile.sys',
-          '**/C:/hiberfil.sys',
-          '**/C:/swapfile.sys',
+          '**/.git/**',
+          /[\/\\]C[\/\\]/,
+          '**/*.sys',
+          '**/*.tmp',
+          '**/DumpStack.log.tmp',
+          '**/pagefile.sys',
+          '**/hiberfil.sys',
+          '**/swapfile.sys',
         ],
       };
     }

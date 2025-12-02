@@ -93,7 +93,24 @@ const SiteSettings =
 // Helper function để lấy settings (phải đặt sau khi định nghĩa SiteSettings)
 export async function getSiteSettings() {
   try {
-    let settings = await SiteSettings.findOne();
+    // Đảm bảo MongoDB đã connect trước khi query
+    const connectDB = (await import("@/lib/mongodb")).default;
+    const db = await connectDB();
+    if (!db) {
+      console.warn("MongoDB not connected, returning default settings");
+      return {
+        siteName: "Pass Vé Phim",
+        siteDescription: "Chợ sang nhượng vé xem phim & sự kiện uy tín, an toàn",
+        logo: "/icon-192.png",
+        favicon: "/icon-192.png",
+        themeColor: "#0F172A",
+        primaryColor: "#10B981",
+        maintenanceMode: false,
+        cancellationTimeLimitMinutes: 5,
+      } as any;
+    }
+
+    let settings = await SiteSettings.findOne().maxTimeMS(5000);
     if (!settings) {
       // Tạo settings mặc định nếu chưa có
       const User = mongoose.model("User");
@@ -111,6 +128,10 @@ export async function getSiteSettings() {
     return settings;
   } catch (error: any) {
     console.error("Error in getSiteSettings:", error);
+    // Nếu là timeout hoặc connection error, không log chi tiết
+    if (error.name === 'MongooseError' || error.message?.includes('timeout')) {
+      console.warn("MongoDB query timeout or connection issue, using default settings");
+    }
     // Trả về object mặc định nếu có lỗi
     return {
       siteName: "Pass Vé Phim",
