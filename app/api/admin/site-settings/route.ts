@@ -122,11 +122,28 @@ export async function PUT(request: NextRequest) {
           maintenanceMode: body.maintenanceMode !== undefined ? body.maintenanceMode : false,
           cancellationTimeLimitMinutes: body.cancellationTimeLimitMinutes || 5,
           socialLinks: body.socialLinks || {},
-          contactEmail: body.contactEmail,
-          contactPhone: body.contactPhone,
-          ogImage: body.ogImage,
-          seoKeywords: body.seoKeywords,
+          contactEmail: body.contactEmail || undefined,
+          contactPhone: body.contactPhone || undefined,
+          ogImage: body.ogImage || undefined,
+          seoKeywords: body.seoKeywords || undefined,
         });
+        
+        // Validate sau khi create
+        const validationError = settings.validateSync();
+        if (validationError) {
+          console.error("❌ Validation error after create:", validationError);
+          const errorMessages = Object.values(validationError.errors || {}).map((err: any) => err.message).join(", ");
+          return NextResponse.json(
+            { success: false, error: `Lỗi validation: ${errorMessages}` },
+            { 
+              status: 400,
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+        }
+        
         console.log("✅ Created new site settings");
       } catch (createError: any) {
         console.error("❌ Error creating site settings:", createError);
@@ -160,6 +177,23 @@ export async function PUT(request: NextRequest) {
         if (body.seoKeywords !== undefined) settings.seoKeywords = body.seoKeywords;
         
         settings.updatedBy = user._id;
+        
+        // Validate trước khi save
+        const validationError = settings.validateSync();
+        if (validationError) {
+          console.error("❌ Validation error:", validationError);
+          const errorMessages = Object.values(validationError.errors || {}).map((err: any) => err.message).join(", ");
+          return NextResponse.json(
+            { success: false, error: `Lỗi validation: ${errorMessages}` },
+            { 
+              status: 400,
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+        }
+        
         await settings.save();
         console.log("✅ Updated site settings successfully");
       } catch (updateError: any) {
