@@ -73,100 +73,13 @@ export async function POST(request: NextRequest) {
       amount: transaction.amount,
     });
 
-    // Giả định rằng nếu user về success page, payment đã thành công
+    // QUAN TRỌNG: Nếu user đã về success page = SePay đã confirm payment thành công
     // Vì SePay chỉ redirect về success_url khi payment thành công
-    // Nếu status là pending và type là deposit, ta sẽ tự động process
-    if ((transaction.status as string) === "pending" && transaction.type === "deposit") {
-      console.log(`💰 Processing payment manually (webhook may not have fired)`);
-      console.log(`📊 Transaction details:`, {
-        id: transaction._id,
-        userId: transaction.user,
-        amount: transaction.amount,
-        sepayTransactionId: transaction.sepayTransactionId,
-      });
-      
-      try {
-        // Cộng tiền vào ví
-        let wallet = await Wallet.findOne({ user: transaction.user }).maxTimeMS(10000);
-        if (!wallet) {
-          console.log(`📝 Creating new wallet for user ${transaction.user}`);
-          wallet = await Wallet.create({
-            user: transaction.user,
-            balance: transaction.amount,
-            escrow: 0,
-            totalEarned: 0,
-          });
-          console.log(`✅ New wallet created with balance: ${wallet.balance}`);
-        } else {
-          const oldBalance = wallet.balance;
-          wallet.balance += transaction.amount;
-          await wallet.save();
-          console.log(`💵 Wallet updated: ${oldBalance} → ${wallet.balance}`);
-        }
-
-        // Cập nhật transaction status - đảm bảo dùng lean() để tránh lỗi
-        const updateResult = await Transaction.findByIdAndUpdate(
-          transaction._id,
-          {
-            status: "completed",
-            completedAt: new Date(),
-          },
-          { new: true }
-        );
-
-        if (!updateResult) {
-          console.error(`❌ Failed to update transaction ${transactionId}`);
-          throw new Error("Failed to update transaction status");
-        }
-
-        console.log(`✅ Transaction status updated to completed: ${transactionId}`);
-
-        // Reload transaction để return
-        const updatedTransaction = await Transaction.findById(transactionId).maxTimeMS(10000).lean();
-
-        // Revalidate cache
-        revalidatePath("/profile");
-        revalidatePath("/payment/success");
-        revalidateTag("wallet");
-        revalidateTag("transactions");
-        revalidateTag("stats");
-
-        console.log(`🎉 Payment successfully processed: Transaction ${transactionId}, Amount: ${transaction.amount}`);
-
-        return NextResponse.json({
-          success: true,
-          message: "Payment processed successfully",
-          transaction: updatedTransaction,
-        });
-      } catch (processError: any) {
-        console.error(`❌ Error processing payment for transaction ${transactionId}:`, processError);
-        return NextResponse.json(
-          { 
-            success: false,
-            error: processError.message || "Failed to process payment",
-            message: "Error processing payment, please contact support",
-          },
-          { status: 500 }
-        );
-      }
-    } else if ((transaction.status as string) === "completed") {
-      console.log(`✅ Transaction ${transactionId} already completed`);
-      return NextResponse.json({
-        success: true,
-        message: "Transaction already completed",
-        transaction: transaction,
-      });
-    }
-
-    // Nếu transaction không phải pending hoặc không phải deposit, 
-    // nhưng user đã về success page => payment đã thành công
-    // Ta vẫn process để đảm bảo tiền được cộng
-    if ((transaction.status as string) !== "pending") {
-      console.log(`⚠️ Transaction status is "${transaction.status}", but user is on success page. Processing anyway...`);
-    }
+    // Vậy ta PHẢI process payment ngay, không cần check gì thêm
     
-    // Nếu type không phải deposit, không xử lý
+    // Check transaction type
     if (transaction.type !== "deposit") {
+      console.log(`⚠️ Transaction type is "${transaction.type}", not deposit - cannot process`);
       return NextResponse.json({
         success: false,
         message: `Transaction type is "${transaction.type}", not deposit`,
@@ -174,8 +87,9 @@ export async function POST(request: NextRequest) {
       });
     }
     
-    // Nếu đã completed, return success
+    // Nếu đã completed rồi, return success (đã check ở trên rồi, nhưng để an toàn)
     if ((transaction.status as string) === "completed") {
+      console.log(`✅ Transaction ${transactionId} already completed - returning success`);
       return NextResponse.json({
         success: true,
         message: "Transaction already completed",
@@ -183,8 +97,15 @@ export async function POST(request: NextRequest) {
       });
     }
     
-    // Force process payment vì user đã về success page = payment thành công
-    console.log(`💰 FORCE Processing payment - User is on success page, payment must have succeeded`);
+    // FORCE PROCESS PAYMENT - User đã về success page = payment thành công
+    console.log(`💰💰💰 FORCE Processing payment - User is on success page, payment MUST have succeeded`);
+    console.log(`📊 Transaction details:`, {
+      id: transaction._id,
+      userId: transaction.user,
+      amount: transaction.amount,
+      currentStatus: transaction.status,
+      sepayTransactionId: transaction.sepayTransactionId,
+    });
     
     try {
       // Cộng tiền vào ví
@@ -197,12 +118,12 @@ export async function POST(request: NextRequest) {
           escrow: 0,
           totalEarned: 0,
         });
-        console.log(`✅ New wallet created with balance: ${wallet.balance}`);
+        console.log(`✅✅✅ New wallet created with balance: ${wallet.balance} VND`);
       } else {
         const oldBalance = wallet.balance;
         wallet.balance += transaction.amount;
         await wallet.save();
-        console.log(`💵 Wallet updated: ${oldBalance} → ${wallet.balance}`);
+        console.log(`💵💵💵 Wallet updated: ${oldBalance} → ${wallet.balance} VND (Added: ${transaction.amount} VND)`);
       }
 
       // Cập nhật transaction status
@@ -216,23 +137,23 @@ export async function POST(request: NextRequest) {
       );
 
       if (!updateResult) {
-        console.error(`❌ Failed to update transaction ${transactionId}`);
+        console.error(`❌❌❌ CRITICAL: Failed to update transaction ${transactionId} to completed`);
         throw new Error("Failed to update transaction status");
       }
 
-      console.log(`✅ Transaction status updated to completed: ${transactionId}`);
+      console.log(`✅✅✅ Transaction status updated to COMPLETED: ${transactionId}`);
 
       // Reload transaction để return
       const updatedTransaction = await Transaction.findById(transactionId).maxTimeMS(10000).lean();
 
-      // Revalidate cache
+      // Revalidate cache để frontend cập nhật ngay
       revalidatePath("/profile");
       revalidatePath("/payment/success");
       revalidateTag("wallet");
       revalidateTag("transactions");
       revalidateTag("stats");
 
-      console.log(`🎉 Payment successfully processed: Transaction ${transactionId}, Amount: ${transaction.amount}`);
+      console.log(`🎉🎉🎉 SUCCESS: Payment processed! Transaction ${transactionId}, Amount: ${transaction.amount} VND`);
 
       return NextResponse.json({
         success: true,
@@ -240,7 +161,8 @@ export async function POST(request: NextRequest) {
         transaction: updatedTransaction,
       });
     } catch (processError: any) {
-      console.error(`❌ Error processing payment for transaction ${transactionId}:`, processError);
+      console.error(`❌❌❌ CRITICAL ERROR processing payment for transaction ${transactionId}:`, processError);
+      console.error(`Error stack:`, processError.stack);
       return NextResponse.json(
         { 
           success: false,
