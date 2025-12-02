@@ -54,8 +54,8 @@ export default function PaymentSuccessPage() {
           const tx = data.transaction;
           setTransaction(tx);
 
-            // Nếu transaction vẫn pending, thử verify và process payment ngay lập tức
-            if (tx && (tx.status as string) === "pending") {
+          // Nếu transaction vẫn pending, thử verify và process payment ngay lập tức
+          if (tx && (tx.status as string) === "pending") {
             console.log("🔄 Transaction pending, verifying payment...");
             const processed = await verifyAndProcessPayment();
             
@@ -71,8 +71,14 @@ export default function PaymentSuccessPage() {
             console.log("✅ Transaction already completed");
             setLoading(false);
           } else {
+            // Transaction không tồn tại hoặc có status khác
+            console.log("⚠️ Transaction status unknown, showing success page anyway");
             setLoading(false);
           }
+        } else {
+          // API trả về lỗi
+          console.error("Failed to fetch transaction:", res.status);
+          setLoading(false);
         }
       } catch (error) {
         console.error("Error checking transaction:", error);
@@ -80,9 +86,9 @@ export default function PaymentSuccessPage() {
       }
     };
 
-    // Polling function để check lại sau mỗi 3 giây (tối đa 10 lần = 30 giây)
+    // Polling function để check lại sau mỗi 3 giây (tối đa 5 lần = 15 giây)
     let pollCount = 0;
-    const maxPolls = 10;
+    const maxPolls = 5; // Giảm từ 10 xuống 5 để không làm user chờ quá lâu
     
     const startPolling = () => {
       const pollInterval = setInterval(async () => {
@@ -106,24 +112,48 @@ export default function PaymentSuccessPage() {
             // Nếu vẫn pending và chưa đạt max polls, thử verify lại
             if (tx && (tx.status as string) === "pending" && pollCount < maxPolls) {
               await verifyAndProcessPayment();
-            } else if (pollCount >= maxPolls) {
-              console.log("⏱️ Polling timeout, but transaction may still be processing");
+            } else {
+              // Đạt max polls hoặc status không phải pending/completed
+              console.log("⏱️ Polling timeout, showing success page (payment will be processed by webhook)");
               clearInterval(pollInterval);
               setLoading(false);
             }
-          }
-        } catch (error) {
-          console.error("Error polling transaction:", error);
-          if (pollCount >= maxPolls) {
+          } else {
+            // API lỗi, dừng polling
+            console.error("Failed to fetch transaction during polling:", res.status);
             clearInterval(pollInterval);
             setLoading(false);
           }
+        } catch (error) {
+          console.error("Error polling transaction:", error);
+          clearInterval(pollInterval);
+          setLoading(false);
         }
       }, 3000); // Poll mỗi 3 giây
+      
+      // Timeout tổng thể sau 20 giây để đảm bảo loading không bao giờ bị stuck
+      setTimeout(() => {
+        clearInterval(pollInterval);
+        if (loading) {
+          console.log("⏱️ Global timeout reached, stopping polling");
+          setLoading(false);
+        }
+      }, 20000);
     };
 
     // Bắt đầu check ngay lập tức
     checkTransactionStatus();
+    
+    // Timeout tổng thể để đảm bảo loading không bao giờ bị stuck quá 30 giây
+    const globalTimeout = setTimeout(() => {
+      console.log("⏱️ Global timeout: Stopping loading");
+      setLoading(false);
+    }, 30000);
+    
+    // Cleanup
+    return () => {
+      clearTimeout(globalTimeout);
+    };
   }, [transactionId]);
 
   if (loading) {
