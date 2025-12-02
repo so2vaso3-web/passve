@@ -17,6 +17,8 @@ import {
 import { signOut } from "next-auth/react";
 import toast from "react-hot-toast";
 import { ProfileTabs } from "@/components/ProfileTabs";
+import { DepositForm } from "@/components/DepositForm";
+import { WithdrawForm } from "@/components/WithdrawForm";
 
 interface WalletData {
   balance: number;
@@ -206,37 +208,50 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-[#0B0F19] pb-20 md:pb-0">
       {/* Back Button */}
       <div className="sticky top-0 z-10 bg-[#0B0F19] border-b border-[#1F2937] px-4 py-3">
-        <button
-          onClick={() => {
-            if (activeTab) {
-              router.push("/profile");
-            } else {
-              router.push("/");
-            }
-          }}
-          className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
-        >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => {
+              if (activeTab === "deposit" || activeTab === "withdraw") {
+                router.push("/profile");
+              } else if (activeTab) {
+                router.push("/profile");
+              } else {
+                router.push("/");
+              }
+            }}
+            className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-          <span className="text-sm font-medium">
-            {activeTab ? "Quay lại" : "Quay lại Trang chủ"}
-          </span>
-        </button>
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+          {activeTab === "deposit" && (
+            <h1 className="text-lg font-bold text-white">Nạp tiền</h1>
+          )}
+          {activeTab === "withdraw" && (
+            <h1 className="text-lg font-bold text-white">Rút tiền</h1>
+          )}
+          {(!activeTab || (activeTab !== "deposit" && activeTab !== "withdraw")) && (
+            <span className="text-sm font-medium">
+              {activeTab ? "Quay lại" : "Quay lại Trang chủ"}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="px-4 py-6 space-y-6">
-        {/* Profile Card */}
+        {/* Profile Card - Ẩn khi ở tab deposit hoặc withdraw */}
+        {activeTab !== "deposit" && activeTab !== "withdraw" && (
         <div className="bg-[#111827] border border-[#1F2937] rounded-2xl p-6">
           <div className="flex flex-col items-center text-center">
             {/* Avatar */}
@@ -319,8 +334,10 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
+        )}
 
-        {/* Statistics */}
+        {/* Statistics - Ẩn khi ở tab deposit hoặc withdraw */}
+        {activeTab !== "deposit" && activeTab !== "withdraw" && (
         <div className="bg-[#111827] border border-[#1F2937] rounded-2xl p-4">
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center">
@@ -346,16 +363,39 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
+        )}
+
+        {/* Show Deposit/Withdraw Form directly if on deposit/withdraw tab */}
+        {activeTab === "deposit" && (
+          <DepositForm
+            userId={session.user?.email || ""}
+            onSuccess={async () => {
+              router.refresh();
+            }}
+          />
+        )}
+
+        {activeTab === "withdraw" && (
+          <WithdrawForm
+            balance={wallet.balance}
+            onClose={() => router.push("/profile")}
+            onSuccess={async () => {
+              router.refresh();
+            }}
+          />
+        )}
 
         {/* Show ProfileTabs if tab is selected, otherwise show menu items */}
-        {activeTab && activeTab !== "" ? (
+        {activeTab && activeTab !== "" && activeTab !== "deposit" && activeTab !== "withdraw" && (
           <ProfileTabs
             activeTab={activeTab}
             userId={session.user?.email || ""}
             wallet={wallet}
             bankAccounts={[]}
           />
-        ) : (
+        )}
+
+        {(!activeTab || activeTab === "") && (
           <>
             {/* Menu Items */}
             <div className="bg-[#111827] border border-[#1F2937] rounded-2xl overflow-hidden">

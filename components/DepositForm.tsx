@@ -89,6 +89,93 @@ export function DepositForm({ userId, onClose, onSuccess }: DepositFormProps) {
 
   const quickAmounts = [50000, 100000, 200000, 500000, 1000000];
 
+  // Nếu không có onClose, render inline (không phải modal)
+  if (!onClose) {
+    return (
+      <div className="bg-dark-card border border-dark-border rounded-xl sm:rounded-2xl shadow-card p-4 sm:p-6 md:p-8">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 bg-neon-green/20 rounded-full flex items-center justify-center text-neon-green">
+            <CreditCard className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="font-bold text-xl text-dark-text">Nạp tiền vào ví</h3>
+            <p className="text-sm text-dark-text2">Nạp tiền nhanh chóng và an toàn</p>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Thông tin nạp tiền ngân hàng */}
+          <div className="bg-neon-green/10 border border-neon-green/30 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Building2 className="w-5 h-5 text-neon-green" />
+              <p className="font-semibold text-dark-text">Nạp tiền ngân hàng nhanh chóng</p>
+            </div>
+            <p className="text-sm text-dark-text2">
+              Hỗ trợ thanh toán qua tất cả các ngân hàng trong nước. Giao dịch được xử lý tự động, tiền sẽ được cộng vào ví ngay lập tức sau khi thanh toán thành công. Bảo mật tuyệt đối với công nghệ mã hóa SSL.
+            </p>
+          </div>
+          {/* Số tiền */}
+          <div>
+            <label className="block text-sm font-semibold text-dark-text mb-2">
+              Số tiền nạp (VNĐ) <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={amount}
+                onChange={handleAmountChange}
+                placeholder="Nhập số tiền"
+                className="w-full px-4 py-3 pr-12 border-2 border-dark-border rounded-xl focus:outline-none focus:ring-2 focus:ring-neon-green focus:border-neon-green transition-all text-dark-text text-lg font-bold bg-dark-card-bright"
+                required
+                disabled={loading}
+              />
+              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-dark-text2 text-sm font-medium">
+                đ
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-3">
+              {quickAmounts.map((amt) => (
+                <button
+                  key={amt}
+                  type="button"
+                  onClick={() => setAmount(formatCurrency(amt.toString()))}
+                  className="px-4 py-2 bg-dark-card hover:bg-dark-border rounded-xl text-sm font-semibold text-dark-text transition-colors border border-dark-border"
+                  disabled={loading}
+                >
+                  {new Intl.NumberFormat("vi-VN").format(amt)} đ
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={loading || !amount}
+            className="w-full bg-gradient-to-r from-neon-green to-neon-green-light hover:from-[#059669] hover:to-neon-green text-white px-6 py-4 rounded-xl font-semibold text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:shadow-neon"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Đang xử lý...
+              </>
+            ) : (
+              <>
+                <Building2 className="w-5 h-5" />
+                <span className="font-bold">Nạp {amount ? `${amount} đ` : "tiền"}</span>
+              </>
+            )}
+          </button>
+
+          <p className="text-xs text-dark-text2 text-center">
+            * Tiền sẽ được cập nhật ngay sau khi nạp thành công
+          </p>
+        </form>
+      </div>
+    );
+  }
+
+  // Modal version (khi có onClose)
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 overflow-y-auto" onClick={(e) => {
       if (e.target === e.currentTarget && onClose) {
