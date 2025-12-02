@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
       }
     }).filter((room: any) => room !== null); // Remove null entries
 
-    console.log(`📬 [Chat Rooms API] User: ${user.email}, Found ${rooms.length} total rooms, ${validRooms.length} valid rooms (with ticket), Total unread: ${formattedRooms.reduce((sum, r) => sum + r.unreadCount, 0)}`);
+    console.log(`📬 [Chat Rooms API] User: ${user.email}, Found ${rooms.length} total rooms, ${validRooms.length} valid rooms (with ticket), Total unread: ${formattedRooms.reduce((sum, r) => sum + (r?.unreadCount || 0), 0)}`);
 
     return NextResponse.json({ rooms: formattedRooms });
   } catch (error: any) {
