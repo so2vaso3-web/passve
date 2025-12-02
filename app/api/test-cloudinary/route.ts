@@ -56,11 +56,11 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({
           success: true,
-          message: "Cloudinary configured correctly!",
+          message: "✅ Cloudinary configured correctly! Upload test successful.",
           config: {
-            cloudName: cloudName ? `${cloudName.substring(0, 3)}...` : "missing",
-            apiKey: apiKey ? `${apiKey.substring(0, 3)}...` : "missing",
-            apiSecretLength: apiSecret ? apiSecret.length : 0,
+            cloudName: trimmedCloudName ? `${trimmedCloudName.substring(0, 3)}...` : "missing",
+            apiKey: trimmedApiKey ? `${trimmedApiKey.substring(0, 3)}...` : "missing",
+            apiSecretLength: trimmedApiSecret.length,
           },
           testUpload: {
             publicId: (result as any).public_id,
@@ -68,16 +68,42 @@ export async function GET(request: NextRequest) {
           },
         });
       } catch (uploadError: any) {
+        // Log chi tiết error để debug
+        console.error("Cloudinary upload error details:", {
+          message: uploadError.message,
+          http_code: uploadError.http_code,
+          name: uploadError.name,
+          cloudName: trimmedCloudName,
+          apiKey: trimmedApiKey,
+          apiSecretLength: trimmedApiSecret.length,
+          apiSecretFirstChars: trimmedApiSecret.substring(0, 4),
+          apiSecretLastChars: trimmedApiSecret.substring(trimmedApiSecret.length - 4),
+        });
+
         return NextResponse.json(
           {
             success: false,
             message: "Cloudinary config found but upload failed",
             error: uploadError.message,
-            errorCode: uploadError.http_code,
+            errorCode: uploadError.http_code || 500,
+            errorName: uploadError.name,
             config: {
-              cloudName: cloudName ? `${cloudName.substring(0, 3)}...` : "missing",
-              apiKey: apiKey ? `${apiKey.substring(0, 3)}...` : "missing",
-              apiSecretLength: apiSecret ? apiSecret.length : 0,
+              cloudName: trimmedCloudName ? `${trimmedCloudName.substring(0, 3)}...` : "missing",
+              apiKey: trimmedApiKey ? `${trimmedApiKey.substring(0, 3)}...` : "missing",
+              apiSecretLength: trimmedApiSecret.length,
+              // Chỉ show first và last 4 chars để verify mà không expose secret
+              apiSecretPreview: trimmedApiSecret ? 
+                `${trimmedApiSecret.substring(0, 4)}...${trimmedApiSecret.substring(trimmedApiSecret.length - 4)}` : 
+                "missing",
+            },
+            troubleshooting: {
+              hint: "Cloudinary trả về HTML thay vì JSON = credentials sai. Kiểm tra:",
+              checks: [
+                "1. API Secret trên Vercel phải khớp 100% với Cloudinary Dashboard",
+                "2. Không có spaces ở đầu/cuối",
+                "3. API Secret thường dài 27-32 ký tự",
+                "4. Verify trên Cloudinary Dashboard → Settings → Security → API Secret",
+              ],
             },
           },
           { status: 500 }
