@@ -22,10 +22,15 @@ export async function GET(request: NextRequest) {
 
     // Initialize Cloudinary
     if (hasAllVars && !hasPlaceholders) {
+      // Trim whitespace from credentials (có thể có spaces thừa khi copy-paste)
+      const trimmedCloudName = cloudName.trim();
+      const trimmedApiKey = apiKey.trim();
+      const trimmedApiSecret = apiSecret.trim();
+      
       cloudinary.config({
-        cloud_name: cloudName,
-        api_key: apiKey,
-        api_secret: apiSecret,
+        cloud_name: trimmedCloudName,
+        api_key: trimmedApiKey,
+        api_secret: trimmedApiSecret,
       });
 
       // Test upload với 1x1 pixel transparent PNG
