@@ -266,8 +266,7 @@ export default async function HomePage({
 }: {
   searchParams: { category?: string; city?: string; district?: string; seller?: string };
 }) {
-  // Check maintenance mode - middleware sẽ handle redirect chính
-  // Nhưng vẫn check ở đây để đảm bảo nếu middleware không catch được
+  // Check maintenance mode - check ở đây vì middleware không thể dùng mongoose
   try {
     const { getSiteSettings } = await import("@/models/SiteSettings");
     const settings = await getSiteSettings();
@@ -279,7 +278,7 @@ export default async function HomePage({
       
       // Only show maintenance if not admin
       if (!isAdmin) {
-        // Redirect to maintenance page thay vì render component trực tiếp
+        // Redirect to maintenance page
         const { redirect } = await import("next/navigation");
         redirect("/maintenance");
       }
