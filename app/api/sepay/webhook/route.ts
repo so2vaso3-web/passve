@@ -174,7 +174,12 @@ export async function POST(request: NextRequest) {
       const currentStatus = transaction.status as string;
       if (currentStatus !== "completed") {
         // Use amount from webhook or transaction - convert to number
-        const depositAmount = amount ? Number(amount) : (transaction.amount ? Number(transaction.amount) : 0);
+        // Fix: Check for null/undefined explicitly, not truthy (0 is valid but falsy)
+        const depositAmount = (amount != null && amount !== undefined) 
+          ? Number(amount) 
+          : (transaction.amount != null && transaction.amount !== undefined)
+            ? Number(transaction.amount)
+            : 0;
         
         console.log(`💰 Processing payment: Amount=${depositAmount}, User=${transaction.user}`);
         
@@ -214,12 +219,14 @@ export async function POST(request: NextRequest) {
       revalidateTag("stats");
 
       return NextResponse.json({ success: true, message: "Payment processed" });
-    } else if (status === "failed" || status === "cancelled" || status === "expired") {
+    } else if (normalizedStatus === "FAILED" || normalizedStatus === "CANCELLED" || normalizedStatus === "CANCELED" || normalizedStatus === "EXPIRED" || 
+               normalizedStatus.includes("FAIL") || normalizedStatus.includes("CANCEL") || normalizedStatus.includes("EXPIRE")) {
+      // Fix: Use normalizedStatus for case-insensitive comparison
       // Cập nhật transaction failed
       await Transaction.findByIdAndUpdate(transaction._id, {
         status: "failed",
-        sepayTransactionId: transaction_id,
-        errorMessage: `Payment ${status}`,
+        sepayTransactionId: transaction_id || order_invoice_number || transaction.sepayTransactionId,
+        errorMessage: `Payment ${status || normalizedStatus}`,
       });
 
       return NextResponse.json({ success: true, message: "Payment failed" });
