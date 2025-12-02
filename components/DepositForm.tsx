@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { Loader2, CreditCard, Building2 } from "lucide-react";
+import { Loader2, CreditCard, Building2, X } from "lucide-react";
 
 interface DepositFormProps {
   userId: string;
@@ -90,16 +90,31 @@ export function DepositForm({ userId, onClose, onSuccess }: DepositFormProps) {
   const quickAmounts = [50000, 100000, 200000, 500000, 1000000];
 
   return (
-    <div className="bg-dark-card border border-dark-border rounded-2xl shadow-card p-6 md:p-8">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-12 h-12 bg-neon-green/20 rounded-full flex items-center justify-center text-neon-green">
-          <CreditCard className="w-6 h-6" />
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 overflow-y-auto" onClick={(e) => {
+      if (e.target === e.currentTarget && onClose) {
+        onClose();
+      }
+    }}>
+      <div className="bg-dark-card border border-dark-border max-w-md w-full rounded-xl sm:rounded-2xl shadow-card p-4 sm:p-6 md:p-8 my-4 sm:my-8 max-h-[95vh] overflow-y-auto animate-scale-in">
+        <div className="flex items-center justify-between mb-6 flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-neon-green/20 rounded-full flex items-center justify-center text-neon-green">
+              <CreditCard className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-bold text-xl text-dark-text">Nạp tiền vào ví</h3>
+              <p className="text-sm text-dark-text2">Nạp tiền nhanh chóng và an toàn</p>
+            </div>
+          </div>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="text-dark-text2 hover:text-dark-text transition-colors flex-shrink-0 p-1 hover:bg-dark-border rounded-lg"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
         </div>
-        <div>
-          <h3 className="font-bold text-xl text-dark-text">Nạp tiền vào ví</h3>
-          <p className="text-sm text-dark-text2">Nạp tiền nhanh chóng và an toàn</p>
-        </div>
-      </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Thông tin nạp tiền ngân hàng */}
@@ -167,6 +182,7 @@ export function DepositForm({ userId, onClose, onSuccess }: DepositFormProps) {
           * Tiền sẽ được cập nhật ngay sau khi nạp thành công
         </p>
       </form>
+      </div>
     </div>
   );
 }
