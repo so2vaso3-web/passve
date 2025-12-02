@@ -11,6 +11,10 @@ export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    
+    // Log toàn bộ body để debug
+    console.log("🔔 SePay Webhook received:", JSON.stringify(body, null, 2));
+    
     const {
       transaction_id,
       order_id,
@@ -25,7 +29,7 @@ export async function POST(request: NextRequest) {
     // Verify signature (tùy theo cách SePay implement)
     const SEPAY_SECRET_KEY = process.env.SEPAY_SECRET_KEY;
     if (!SEPAY_SECRET_KEY) {
-      console.error("SePay secret not configured");
+      console.error("❌ SePay secret not configured");
       return NextResponse.json({ error: "Server error" }, { status: 500 });
     }
 
@@ -44,36 +48,73 @@ export async function POST(request: NextRequest) {
     // vì đó là giá trị chính xác nhất ta lưu khi tạo payment
     let transaction = null;
     
+    console.log("🔍 Searching transaction with:", {
+      order_invoice_number,
+      transaction_id,
+      order_id,
+      amount,
+      status,
+    });
+    
     if (order_invoice_number) {
       transaction = await Transaction.findOne({
         sepayTransactionId: order_invoice_number,
       }).maxTimeMS(5000);
+      if (transaction) {
+        console.log(`✅ Found transaction by order_invoice_number: ${transaction._id}`);
+      }
     }
     
-    // Nếu không tìm thấy, thử tìm theo transaction_id hoặc order_id
+    // Nếu không tìm thấy, thử tìm theo transaction_id
     if (!transaction && transaction_id) {
       transaction = await Transaction.findOne({
-        sepayTransactionId: transaction_id,
+        $or: [
+          { sepayTransactionId: transaction_id },
+          // Thử tìm nếu transaction_id được lưu trong description hoặc field khác
+        ],
       }).maxTimeMS(5000);
+      if (transaction) {
+        console.log(`✅ Found transaction by transaction_id: ${transaction._id}`);
+      }
     }
     
     // Nếu vẫn không tìm thấy, thử tìm theo order_id (có thể là transaction._id)
     if (!transaction && order_id) {
       try {
         transaction = await Transaction.findById(order_id).maxTimeMS(5000);
+        if (transaction) {
+          console.log(`✅ Found transaction by order_id: ${transaction._id}`);
+        }
       } catch (e) {
         // order_id có thể không phải ObjectId hợp lệ
+        console.log(`⚠️ order_id is not valid ObjectId: ${order_id}`);
+      }
+    }
+
+    // Nếu vẫn không tìm thấy, thử tìm theo amount và status pending
+    if (!transaction && amount) {
+      const pendingTransactions = await Transaction.find({
+        type: "deposit",
+        status: "pending",
+        amount: amount,
+      })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .maxTimeMS(5000);
+      
+      if (pendingTransactions.length > 0) {
+        // Lấy transaction gần nhất có thể match
+        transaction = pendingTransactions[0];
+        console.log(`⚠️ Found transaction by amount match (may be incorrect): ${transaction._id}`);
+        // Cập nhật sepayTransactionId để lần sau tìm được chính xác
+        await Transaction.findByIdAndUpdate(transaction._id, {
+          sepayTransactionId: order_invoice_number || transaction_id || order_id,
+        });
       }
     }
 
     if (!transaction) {
-      console.error("Transaction not found. Search params:", {
-        order_invoice_number,
-        transaction_id,
-        order_id,
-        amount,
-        status,
-      });
+      console.error("❌ Transaction not found. Webhook body:", JSON.stringify(body, null, 2));
       return NextResponse.json({ error: "Transaction not found" }, { status: 404 });
     }
 
@@ -82,17 +123,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, message: "Already processed" });
     }
 
-    // Xử lý theo status từ SePay
-    if (status === "success" || status === "completed" || status === "paid") {
+    // Log current transaction status
+    console.log(`📊 Transaction ${transaction._id} current status: ${transaction.status}`);
+    
+    // Xử lý theo status từ SePay - check nhiều format có thể
+    const successStatuses = ["success", "completed", "paid", "SUCCESS", "COMPLETED", "PAID"];
+    if (status && successStatuses.includes(status)) {
       // Chỉ xử lý nếu transaction chưa completed (double check để tránh duplicate)
       const currentStatus = transaction.status as string;
       if (currentStatus !== "completed") {
         // Use amount from webhook or transaction
-        const depositAmount = amount || transaction.amount;
+        const depositAmount = Number(amount) || transaction.amount;
+        
+        console.log(`💰 Processing payment: Amount=${depositAmount}, User=${transaction.user}`);
         
         // Cộng tiền vào ví
         let wallet = await Wallet.findOne({ user: transaction.user }).maxTimeMS(5000);
         if (!wallet) {
+          console.log(`📝 Creating new wallet for user ${transaction.user}`);
           wallet = await Wallet.create({
             user: transaction.user,
             balance: depositAmount,
@@ -100,8 +148,10 @@ export async function POST(request: NextRequest) {
             totalEarned: 0,
           });
         } else {
+          const oldBalance = wallet.balance;
           wallet.balance += depositAmount;
           await wallet.save();
+          console.log(`💵 Wallet updated: ${oldBalance} → ${wallet.balance}`);
         }
 
         // Cập nhật transaction
@@ -111,7 +161,9 @@ export async function POST(request: NextRequest) {
           completedAt: new Date(),
         });
 
-        console.log(`✅ Payment processed: Transaction ${transaction._id}, Amount: ${depositAmount}, User: ${transaction.user}`);
+        console.log(`✅ Payment processed successfully: Transaction ${transaction._id}, Amount: ${depositAmount}, User: ${transaction.user}`);
+      } else {
+        console.log(`⏭️ Transaction ${transaction._id} already completed, skipping`);
       }
 
       // Revalidate cache

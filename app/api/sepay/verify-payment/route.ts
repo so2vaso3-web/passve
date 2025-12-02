@@ -65,12 +65,22 @@ export async function POST(request: NextRequest) {
     // Nhưng webhook chưa cập nhật, nên ta tự cộng tiền
     // Lưu ý: Đây là fallback, webhook vẫn là cách chính xác nhất
 
+    console.log(`🔍 Verifying payment for transaction ${transactionId}:`, {
+      status: transaction.status,
+      type: transaction.type,
+      sepayTransactionId: transaction.sepayTransactionId,
+      amount: transaction.amount,
+    });
+
     // Giả định rằng nếu user về success page, payment đã thành công
     // Vì SePay chỉ redirect về success_url khi payment thành công
     if (transaction.status === "pending" && transaction.type === "deposit") {
+      console.log(`💰 Processing payment manually (webhook may not have fired)`);
+      
       // Cộng tiền vào ví
       let wallet = await Wallet.findOne({ user: transaction.user }).maxTimeMS(5000);
       if (!wallet) {
+        console.log(`📝 Creating new wallet for user ${transaction.user}`);
         wallet = await Wallet.create({
           user: transaction.user,
           balance: transaction.amount,
@@ -78,8 +88,10 @@ export async function POST(request: NextRequest) {
           totalEarned: 0,
         });
       } else {
+        const oldBalance = wallet.balance;
         wallet.balance += transaction.amount;
         await wallet.save();
+        console.log(`💵 Wallet updated: ${oldBalance} → ${wallet.balance}`);
       }
 
       // Cập nhật transaction
@@ -87,6 +99,8 @@ export async function POST(request: NextRequest) {
         status: "completed",
         completedAt: new Date(),
       });
+
+      console.log(`✅ Payment verified and processed: Transaction ${transactionId}`);
 
       // Reload transaction để return
       const updatedTransaction = await Transaction.findById(transactionId).maxTimeMS(5000);
@@ -102,6 +116,13 @@ export async function POST(request: NextRequest) {
         success: true,
         message: "Payment processed successfully",
         transaction: updatedTransaction,
+      });
+    } else if (transaction.status === "completed") {
+      console.log(`✅ Transaction ${transactionId} already completed`);
+      return NextResponse.json({
+        success: true,
+        message: "Transaction already completed",
+        transaction: transaction,
       });
     }
 
