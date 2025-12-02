@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
         cloud_name: trimmedCloudName,
         api_key: trimmedApiKey,
         api_secret: trimmedApiSecret,
+        secure: true, // Force HTTPS
       });
 
       // Test upload với 1x1 pixel transparent PNG

@@ -60,6 +60,7 @@ export async function POST(request: NextRequest) {
         cloud_name: trimmedCloudName,
         api_key: trimmedApiKey,
         api_secret: trimmedApiSecret,
+        secure: true, // Force HTTPS
       });
     }
 
