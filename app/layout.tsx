@@ -11,6 +11,8 @@ import { WelcomeModal } from "@/components/WelcomeModal";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
+const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://passve.online";
+
 export const metadata: Metadata = {
   title: "Pass Vé Phim - Chợ sang nhượng vé xem phim & sự kiện",
   description: "Mua bán vé phim, vé concert, vé sự kiện uy tín, an toàn với hệ thống escrow tự động",
@@ -18,17 +20,35 @@ export const metadata: Metadata = {
   authors: [{ name: "Pass Vé Phim" }],
   icons: {
     icon: "/icon-192.png",
+    apple: "/icon-192.png",
   },
+  metadataBase: new URL(siteUrl),
   openGraph: {
     title: "Pass Vé Phim - Chợ sang nhượng vé xem phim & sự kiện",
-    description: "Mua bán vé phim, vé concert, vé sự kiện uy tín, an toàn",
+    description: "Mua bán vé phim, vé concert, vé sự kiện uy tín, an toàn với hệ thống escrow tự động. Chợ sang nhượng vé số 1 Việt Nam.",
     type: "website",
     locale: "vi_VN",
+    url: siteUrl,
+    siteName: "Pass Vé Phim",
+    images: [
+      {
+        url: `${siteUrl}/opengraph-image`, // Dynamic OG image from Next.js
+        width: 1200,
+        height: 630,
+        alt: "Pass Vé Phim - Chợ sang nhượng vé xem phim & sự kiện",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pass Vé Phim",
-    description: "Mua bán vé phim, vé concert, vé sự kiện uy tín",
+    title: "Pass Vé Phim - Chợ sang nhượng vé xem phim & sự kiện",
+    description: "Mua bán vé phim, vé concert, vé sự kiện uy tín, an toàn với hệ thống escrow tự động",
+    images: [`${siteUrl}/opengraph-image`],
+    site: "@passvephim",
+    creator: "@passvephim",
+  },
+  alternates: {
+    canonical: siteUrl,
   },
 };
 
