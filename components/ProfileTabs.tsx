@@ -92,15 +92,21 @@ export function ProfileTabs({ activeTab: initialTab, userId, wallet, bankAccount
             setChatRooms(data.rooms || []);
             console.log("✅ Loaded chat rooms:", data.rooms?.length || 0);
           } else {
-            const errorData = await res.json().catch(() => ({}));
-            console.error("Error fetching chat rooms:", errorData);
+            const errorData = await res.json().catch(() => ({ error: "Unknown error" }));
+            console.error("❌ Error fetching chat rooms:", errorData);
             setChatRooms([]);
-            toast.error("Lỗi khi tải tin nhắn");
+            // Chỉ hiển thị error nếu không phải lỗi auth (401)
+            if (res.status !== 401) {
+              toast.error(errorData.error || "Lỗi khi tải tin nhắn");
+            }
           }
         } catch (error: any) {
-          console.error("Error fetching chat rooms:", error);
+          console.error("❌ Error fetching chat rooms:", error);
           setChatRooms([]);
-          toast.error("Lỗi khi tải tin nhắn");
+          // Chỉ hiển thị error nếu không phải network error tạm thời
+          if (error.message && !error.message.includes("fetch")) {
+            toast.error("Lỗi khi tải tin nhắn");
+          }
         }
       } else if (activeTab === "transactions") {
         const res = await fetch(`/api/wallet/transactions`, {

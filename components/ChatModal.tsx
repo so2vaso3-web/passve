@@ -53,8 +53,12 @@ export function ChatModal({ ticketId, ticket, seller, onClose }: ChatModalProps)
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [roomId, setRoomId] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [viewingImage, setViewingImage] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -193,8 +197,91 @@ export function ChatModal({ ticketId, ticket, seller, onClose }: ChatModalProps)
     const file = e.target.files?.[0];
     if (!file || !roomId) return;
 
-    // TODO: Upload to Cloudinary and send message with attachment
-    toast("Tính năng gửi file đang được phát triển");
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Chỉ hỗ trợ file ảnh");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Ảnh không được vượt quá 5MB");
+      return;
+    }
+
+    setSelectedFile(file);
+    // Show preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewImage(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const sendImageMessage = async () => {
+    if (!selectedFile || !roomId || !session || uploading) return;
+
+    setUploading(true);
+    try {
+      // Upload image to Cloudinary
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      const uploadRes = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!uploadRes.ok) {
+        const errorData = await uploadRes.json().catch(() => ({}));
+        toast.error(errorData.error || "Lỗi khi upload ảnh");
+        setUploading(false);
+        return;
+      }
+
+      const uploadData = await uploadRes.json();
+      const imageUrl = uploadData.url;
+
+      // Send message with image
+      const res = await fetch("/api/chat/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roomId,
+          message: "📷 Đã gửi ảnh",
+          receiverId: seller._id,
+          type: "image",
+          attachments: [imageUrl],
+        }),
+      });
+
+      if (res.ok) {
+        setSelectedFile(null);
+        setPreviewImage(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        playNotificationSound();
+        setTimeout(fetchMessages, 500);
+        toast.success("Đã gửi ảnh");
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Không thể gửi ảnh");
+      }
+    } catch (error) {
+      console.error("Error sending image:", error);
+      toast.error("Có lỗi xảy ra khi gửi ảnh");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const cancelImagePreview = () => {
+    setSelectedFile(null);
+    setPreviewImage(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const playNotificationSound = () => {
@@ -253,6 +340,32 @@ export function ChatModal({ ticketId, ticket, seller, onClose }: ChatModalProps)
   }
 
   return (
+    <>
+      {/* Image Viewing Modal */}
+      {viewingImage && (
+        <div 
+          className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setViewingImage(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh] w-full">
+            <button
+              onClick={() => setViewingImage(null)}
+              className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
+            >
+              <X className="w-8 h-8" />
+            </button>
+            <Image
+              src={viewingImage}
+              alt="Full size image"
+              width={1200}
+              height={1200}
+              className="rounded-lg object-contain max-w-full max-h-[90vh] w-auto h-auto mx-auto"
+              unoptimized
+            />
+          </div>
+        </div>
+      )}
+
     <div className="fixed inset-0 z-[100] bg-[#0B0F19]">
       <div className="bg-[#111827] border border-[#1F2937] w-full h-full flex flex-col pb-20 md:pb-0">
         {/* Header */}
@@ -412,13 +525,27 @@ export function ChatModal({ ticketId, ticket, seller, onClose }: ChatModalProps)
                     >
                       {msg.type === "image" && msg.attachments && msg.attachments[0] && (
                         <div className="mb-2">
-                          <Image
-                            src={msg.attachments[0]}
-                            alt="Image"
-                            width={200}
-                            height={200}
-                            className="rounded-lg object-cover"
-                          />
+                          <div 
+                            className="cursor-pointer group relative"
+                            onClick={() => setViewingImage(msg.attachments![0])}
+                          >
+                            <Image
+                              src={msg.attachments[0]}
+                              alt="Chat image"
+                              width={300}
+                              height={300}
+                              className="rounded-lg object-cover max-w-full h-auto max-h-96 transition-transform group-hover:scale-[1.02]"
+                              unoptimized
+                            />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-lg transition-colors flex items-center justify-center">
+                              <span className="opacity-0 group-hover:opacity-100 text-white text-sm font-semibold bg-black/50 px-3 py-1 rounded-full transition-opacity">
+                                Click để xem lớn
+                              </span>
+                            </div>
+                          </div>
+                          {msg.message && msg.message !== "📷 Đã gửi ảnh" && (
+                            <p className="text-sm leading-relaxed whitespace-pre-wrap mt-2">{msg.message}</p>
+                          )}
                         </div>
                       )}
                       {msg.type === "file" && msg.attachments && msg.attachments[0] && (
@@ -434,7 +561,9 @@ export function ChatModal({ ticketId, ticket, seller, onClose }: ChatModalProps)
                           </a>
                         </div>
                       )}
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.message}</p>
+                      {msg.type !== "image" && (
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.message}</p>
+                      )}
                       <div className="flex items-center justify-end gap-2 mt-2">
                         <p className={`text-xs ${
                           isMe ? "text-white/70" : "text-dark-text2"
@@ -458,13 +587,61 @@ export function ChatModal({ ticketId, ticket, seller, onClose }: ChatModalProps)
           <div ref={messagesEndRef} />
         </div>
 
+        {/* Image Preview */}
+        {previewImage && (
+          <div className="border-t border-[#1F2937] p-3 md:p-4 bg-[#0B0F19] fixed bottom-32 md:bottom-20 left-0 right-0 z-[101]">
+            <div className="relative inline-block max-w-xs md:max-w-md">
+              <button
+                onClick={cancelImagePreview}
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors z-10"
+              >
+                <X className="w-4 h-4" />
+              </button>
+              <Image
+                src={previewImage}
+                alt="Preview"
+                width={300}
+                height={300}
+                className="rounded-lg object-cover max-w-full h-auto"
+                unoptimized
+              />
+              <div className="flex gap-2 mt-2">
+                <button
+                  onClick={cancelImagePreview}
+                  className="flex-1 px-4 py-2 bg-[#1F2937] hover:bg-[#374151] text-white rounded-xl font-semibold transition-colors"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={sendImageMessage}
+                  disabled={uploading}
+                  className="flex-1 px-4 py-2 bg-[#10B981] hover:bg-[#059669] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
+                >
+                  {uploading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span>Đang gửi...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      <span>Gửi</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Input - Fixed at bottom, above bottom nav */}
         <div className="border-t border-[#1F2937] p-3 md:p-4 bg-[#0B0F19] fixed bottom-20 md:bottom-0 left-0 right-0 z-[101]">
           <div className="flex gap-2 md:gap-3 items-center">
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="p-2.5 bg-[#111827] border border-[#1F2937] rounded-xl hover:bg-[#1F2937] transition-colors flex-shrink-0"
-              title="Gửi ảnh/file"
+              className="p-2.5 bg-[#111827] border border-[#1F2937] rounded-xl hover:bg-[#1F2937] transition-colors flex-shrink-0 disabled:opacity-50"
+              title="Gửi ảnh"
+              disabled={uploading || !roomId}
             >
               <ImageIcon className="w-5 h-5 text-[#10B981]" />
             </button>
@@ -472,8 +649,9 @@ export function ChatModal({ ticketId, ticket, seller, onClose }: ChatModalProps)
               type="file"
               ref={fileInputRef}
               onChange={handleFileUpload}
-              accept="image/*,.pdf"
+              accept="image/*"
               className="hidden"
+              disabled={uploading}
             />
             <input
               type="text"
@@ -486,12 +664,12 @@ export function ChatModal({ ticketId, ticket, seller, onClose }: ChatModalProps)
                 }
               }}
               placeholder="Nhập tin nhắn..."
-              disabled={sending || !roomId}
+              disabled={sending || uploading || !roomId || !!previewImage}
               className="flex-1 px-4 py-3 bg-[#111827] border border-[#1F2937] rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-[#10B981] focus:ring-2 focus:ring-[#10B981]/20 transition-all disabled:opacity-50 text-base"
             />
             <button
               onClick={sendMessage}
-              disabled={!newMessage.trim() || sending || !roomId}
+              disabled={!newMessage.trim() || sending || uploading || !roomId || !!previewImage}
               className="px-5 py-3 bg-[#10B981] hover:bg-[#059669] disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2 flex-shrink-0 min-w-[60px]"
             >
               {sending ? (
@@ -504,5 +682,6 @@ export function ChatModal({ ticketId, ticket, seller, onClose }: ChatModalProps)
         </div>
       </div>
     </div>
+    </>
   );
 }

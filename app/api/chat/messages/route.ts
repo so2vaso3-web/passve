@@ -80,9 +80,24 @@ export async function POST(request: NextRequest) {
 
     const { roomId, message, receiverId, type = "text", attachments = [] } = await request.json();
 
-    if (!roomId || !message || !receiverId) {
+    if (!roomId || !receiverId) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "Missing required fields: roomId and receiverId are required" },
+        { status: 400 }
+      );
+    }
+
+    // For image/file type, message can be optional but attachments are required
+    if (type === "text" && !message?.trim()) {
+      return NextResponse.json(
+        { error: "Message is required for text messages" },
+        { status: 400 }
+      );
+    }
+
+    if ((type === "image" || type === "file") && (!attachments || attachments.length === 0)) {
+      return NextResponse.json(
+        { error: "Attachments are required for image/file messages" },
         { status: 400 }
       );
     }
@@ -108,18 +123,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Create message
+    const messageText = type === "text" ? (message?.trim() || "") : (message?.trim() || (type === "image" ? "📷 Đã gửi ảnh" : "📎 Đã gửi file"));
     const newMessage = await ChatMessage.create({
       room: roomId,
       sender: sender._id,
       receiver: receiverId,
-      message: message.trim(),
+      message: messageText,
       type,
-      attachments,
+      attachments: attachments || [],
       isRead: false,
     });
 
     // Update room
-    room.lastMessage = message.trim();
+    room.lastMessage = messageText;
     room.lastMessageAt = new Date();
     if (room.buyer.toString() === sender._id.toString()) {
       room.unreadCountSeller += 1;
@@ -148,7 +164,7 @@ export async function POST(request: NextRequest) {
             token: receiver.fcmToken,
             notification: {
               title: `${(newMessage.sender as any).name}`,
-              body: message.trim().substring(0, 100),
+              body: type === "image" ? "📷 Đã gửi ảnh" : (messageText.substring(0, 100) || "Tin nhắn mới"),
             },
             data: {
               roomId: roomId,
