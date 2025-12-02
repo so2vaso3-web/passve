@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { v2 as cloudinary } from "cloudinary";
+import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
 
 export const dynamic = "force-dynamic";
 
@@ -41,18 +41,52 @@ export async function GET(request: NextRequest) {
       );
 
       try {
-        const result = await new Promise((resolve, reject) => {
-          const uploadStream = cloudinary.uploader.upload_stream(
-            {
-              folder: "test",
-              resource_type: "image",
-            },
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            }
-          );
-          uploadStream.end(testImage);
+        // Log config trước khi upload
+        console.log("Cloudinary config check:", {
+          cloudName: trimmedCloudName,
+          apiKey: trimmedApiKey,
+          apiSecretLength: trimmedApiSecret.length,
+          apiSecretFirst4: trimmedApiSecret.substring(0, 4),
+          apiSecretLast4: trimmedApiSecret.substring(trimmedApiSecret.length - 4),
+        });
+
+        const result = await new Promise<UploadApiResponse>((resolve, reject) => {
+          try {
+            const uploadStream = cloudinary.uploader.upload_stream(
+              {
+                folder: "test",
+                resource_type: "image",
+                timeout: 60000, // 60s timeout
+              },
+              (error, result) => {
+                if (error) {
+                  console.error("Cloudinary upload_stream error:", {
+                    message: error.message,
+                    http_code: error.http_code,
+                    name: error.name,
+                    // Log full error object để debug
+                    fullError: error,
+                  });
+                  reject(error);
+                } else if (result) {
+                  console.log("Cloudinary upload success:", result.public_id);
+                  resolve(result);
+                } else {
+                  reject(new Error("Upload result is null"));
+                }
+              }
+            );
+            
+            uploadStream.on("error", (streamError) => {
+              console.error("Upload stream error event:", streamError);
+              reject(streamError);
+            });
+            
+            uploadStream.end(testImage);
+          } catch (streamError: any) {
+            console.error("Exception creating upload stream:", streamError);
+            reject(streamError);
+          }
         });
 
         return NextResponse.json({
