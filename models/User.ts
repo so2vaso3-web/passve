@@ -21,6 +21,7 @@ export interface IUser extends Document {
   totalReviews: number;
   bankAccounts: IBankAccount[];
   isActive: boolean; // Admin có thể khóa user
+  fcmToken?: string; // Firebase Cloud Messaging token cho push notifications
   createdAt: Date;
   updatedAt: Date;
 }
@@ -106,6 +107,10 @@ const UserSchema = new Schema<IUser>(
     isActive: {
       type: Boolean,
       default: true,
+    },
+    fcmToken: {
+      type: String,
+      sparse: true, // Cho phép null/undefined
     },
   },
   {

@@ -136,6 +136,42 @@ export async function POST(request: NextRequest) {
     // Populate sender
     await newMessage.populate("sender", "name image");
 
+    // Send push notification to receiver if they have FCM token
+    try {
+      const receiver = await User.findById(receiverId);
+      if (receiver?.fcmToken) {
+        // Import firebase-admin messaging
+        const { messaging } = await import("@/lib/firebase-admin");
+        
+        if (messaging) {
+          await messaging.send({
+            token: receiver.fcmToken,
+            notification: {
+              title: `${(newMessage.sender as any).name}`,
+              body: message.trim().substring(0, 100),
+            },
+            data: {
+              roomId: roomId,
+              senderId: sender._id.toString(),
+              type: "chat_message",
+              url: `/tickets/${room.ticket}`,
+            },
+            apns: {
+              payload: {
+                aps: {
+                  sound: "default",
+                  badge: 1,
+                },
+              },
+            },
+          });
+        }
+      }
+    } catch (pushError) {
+      // Log error nhưng không fail request nếu push notification thất bại
+      console.error("Error sending push notification:", pushError);
+    }
+
     return NextResponse.json({
       success: true,
       message: {
