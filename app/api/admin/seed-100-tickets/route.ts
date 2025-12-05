@@ -175,7 +175,32 @@ export async function POST(request: NextRequest) {
     await connectDB();
     console.log("✅ Connected to database");
 
-    // Lấy hoặc tạo 100 users với avatar khác nhau
+    // Danh sách tên người Việt Nam thật
+    const vietnameseNames = [
+      "Nguyễn Văn An", "Trần Thị Bình", "Lê Minh Cường", "Phạm Thị Dung", "Hoàng Văn Đức",
+      "Vũ Thị Hương", "Đặng Văn Hùng", "Bùi Thị Lan", "Phan Văn Long", "Ngô Thị Mai",
+      "Đỗ Văn Nam", "Võ Thị Nga", "Lý Văn Phong", "Trương Thị Quỳnh", "Đinh Văn Sơn",
+      "Dương Thị Tâm", "Lưu Văn Tuấn", "Chu Thị Uyên", "Hồ Văn Việt", "Nguyễn Thị Anh",
+      "Trần Minh Bảo", "Lê Thị Chi", "Phạm Văn Dũng", "Hoàng Thị Giang", "Vũ Văn Hải",
+      "Đặng Thị Hoa", "Bùi Văn Khánh", "Phan Thị Linh", "Ngô Văn Mạnh", "Đỗ Thị Nhung",
+      "Võ Văn Oanh", "Lý Thị Phương", "Trương Văn Quang", "Đinh Thị Sen", "Dương Văn Thành",
+      "Lưu Thị Thảo", "Chu Văn Thắng", "Hồ Thị Thu", "Nguyễn Văn Tiến", "Trần Thị Uyên",
+      "Lê Văn Vinh", "Phạm Thị Xuân", "Hoàng Văn Yên", "Vũ Thị Ánh", "Đặng Văn Bình",
+      "Bùi Thị Cẩm", "Phan Văn Đạt", "Ngô Thị Em", "Đỗ Văn Giang", "Võ Thị Hạnh",
+      "Lý Văn Hiếu", "Trương Thị Kim", "Đinh Văn Lâm", "Dương Thị My", "Lưu Văn Nghĩa",
+      "Chu Thị Oanh", "Hồ Văn Phúc", "Nguyễn Thị Quyên", "Trần Văn Sang", "Lê Thị Thanh",
+      "Phạm Văn Thắng", "Hoàng Thị Trang", "Vũ Văn Tuấn", "Đặng Thị Uyên", "Bùi Văn Vinh",
+      "Phan Thị Xoan", "Ngô Văn Anh", "Đỗ Thị Bích", "Võ Văn Cường", "Lý Thị Dung",
+      "Trương Văn Đức", "Đinh Thị Hương", "Dương Văn Hùng", "Lưu Thị Lan", "Chu Văn Long",
+      "Hồ Thị Mai", "Nguyễn Văn Nam", "Trần Thị Nga", "Lê Văn Phong", "Phạm Thị Quỳnh",
+      "Hoàng Văn Sơn", "Vũ Thị Tâm", "Đặng Văn Tuấn", "Bùi Thị Uyên", "Phan Văn Việt",
+      "Ngô Thị Yến", "Đỗ Văn Bảo", "Võ Thị Chi", "Lý Văn Dũng", "Trương Thị Giang",
+      "Đinh Văn Hải", "Dương Thị Hoa", "Lưu Văn Khánh", "Chu Thị Linh", "Hồ Văn Mạnh",
+      "Nguyễn Thị Nhung", "Trần Văn Oanh", "Lê Thị Phương", "Phạm Văn Quang", "Hoàng Thị Sen",
+      "Vũ Văn Thành", "Đặng Thị Thảo", "Bùi Văn Thắng", "Phan Thị Thu", "Ngô Văn Tiến",
+    ];
+
+    // Lấy hoặc tạo 100 users với tên thật và avatar khác nhau
     console.log("👥 Creating/Getting 100 users...");
     const users = [];
     
@@ -183,12 +208,16 @@ export async function POST(request: NextRequest) {
       const email = `seller${i + 1}@example.com`;
       let user = await User.findOne({ email });
       
+      const realName = vietnameseNames[i] || `Người bán ${i + 1}`;
+      
       if (!user) {
-        // Tạo user mới với avatar ngẫu nhiên từ UI Avatars
-        const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(`Seller ${i + 1}`)}&background=random&color=fff&size=200`;
+        // Tạo user mới với tên thật và avatar từ i.pravatar.cc (ổn định hơn)
+        // Dùng số thứ tự để mỗi user có avatar khác nhau
+        const avatarId = (i % 70) + 1; // 70 avatars khác nhau, lặp lại
+        const avatarUrl = `https://i.pravatar.cc/200?img=${avatarId}`;
         
         user = await User.create({
-          name: `Người bán ${i + 1}`,
+          name: realName,
           email,
           image: avatarUrl,
           role: "user",
@@ -196,12 +225,16 @@ export async function POST(request: NextRequest) {
         });
         console.log(`✅ Created user ${i + 1}/100: ${user.name}`);
       } else {
-        // Update avatar nếu chưa có
-        if (!user.image) {
-          const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random&color=fff&size=200`;
-          user.image = avatarUrl;
-          await user.save();
+        // Update tên và avatar nếu chưa có
+        if (user.name === `Người bán ${i + 1}` || !user.name) {
+          user.name = realName;
         }
+        if (!user.image) {
+          const avatarId = (i % 70) + 1;
+          const avatarUrl = `https://i.pravatar.cc/200?img=${avatarId}`;
+          user.image = avatarUrl;
+        }
+        await user.save();
       }
       
       users.push(user);
@@ -257,9 +290,17 @@ export async function POST(request: NextRequest) {
       }
       const sellingPrice = Math.floor(originalPrice * (0.7 + Math.random() * 0.3)); // 70% - 100% giá gốc
       
-      // Ảnh vé từ placeholder service (mỗi vé có ảnh khác nhau)
-      const imageSeed = i + 1;
-      const ticketImageUrl = `https://picsum.photos/seed/ticket${imageSeed}${Date.now()}/800/600`;
+      // Ảnh vé giống thật - dùng Unsplash với keyword phù hợp
+      let imageKeyword = "movie";
+      if (category === "concert") {
+        imageKeyword = "concert,music,stage";
+      } else if (category === "event") {
+        imageKeyword = "event,conference,meeting";
+      }
+      
+      // Dùng Unsplash Source với keyword và seed khác nhau cho mỗi vé
+      const imageId = (i % 50) + 1; // 50 ảnh khác nhau, lặp lại
+      const ticketImageUrl = `https://source.unsplash.com/800x600/?${imageKeyword}&sig=${imageId}`;
       
       // Ảnh QR code (cần ít nhất 1 ảnh)
       const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=TICKET-${i + 1}-${Date.now()}`;

@@ -24,6 +24,10 @@ const nextConfig = {
       },
       {
         protocol: "https",
+        hostname: "pravatar.cc",
+      },
+      {
+        protocol: "https",
         hostname: "upload.wikimedia.org",
       },
       {
