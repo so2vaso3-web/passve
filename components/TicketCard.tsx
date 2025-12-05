@@ -211,6 +211,19 @@ export function TicketCard({
                 alt={title}
                 fill
                 className="object-cover transition-transform duration-300 group-hover:scale-110"
+                unoptimized={image?.includes('picsum.photos') || image?.includes('unsplash.com') || image?.includes('placeholder.com')}
+                onError={(e) => {
+                  // Fallback nếu ảnh không load được
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const parent = target.parentElement;
+                  if (parent) {
+                    const fallback = document.createElement('div');
+                    fallback.className = 'w-full h-full flex items-center justify-center';
+                    fallback.innerHTML = '<svg class="w-16 h-16 text-dark-text2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>';
+                    parent.appendChild(fallback);
+                  }
+                }}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">

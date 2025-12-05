@@ -26,6 +26,30 @@ const nextConfig = {
         protocol: "https",
         hostname: "upload.wikimedia.org",
       },
+      {
+        protocol: "https",
+        hostname: "picsum.photos",
+      },
+      {
+        protocol: "https",
+        hostname: "**.picsum.photos",
+      },
+      {
+        protocol: "https",
+        hostname: "api.qrserver.com",
+      },
+      {
+        protocol: "https",
+        hostname: "ui-avatars.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "via.placeholder.com",
+      },
     ],
   },
   experimental: {

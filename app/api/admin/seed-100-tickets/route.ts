@@ -151,7 +151,9 @@ export async function POST(request: NextRequest) {
       const sellingPrice = Math.floor(originalPrice * (0.7 + Math.random() * 0.3)); // 70% - 100% giá gốc
       
       // Ảnh vé từ placeholder service (mỗi vé có ảnh khác nhau)
-      const ticketImageUrl = `https://picsum.photos/seed/ticket${i}${Date.now()}/800/600`;
+      // Dùng placeholder.com với seed khác nhau để mỗi vé có ảnh khác nhau
+      const imageSeed = i + 1;
+      const ticketImageUrl = `https://picsum.photos/seed/ticket${imageSeed}${Date.now()}/800/600`;
       
       // Ảnh QR code (cần ít nhất 1 ảnh)
       const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=TICKET-${i + 1}-${Date.now()}`;
