@@ -62,9 +62,28 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Nếu transaction có sepayTransactionId, có thể đã được SePay xử lý
-    // Nhưng webhook chưa cập nhật, nên ta tự cộng tiền
-    // Lưu ý: Đây là fallback, webhook vẫn là cách chính xác nhất
+    // BẢO MẬT: Chỉ process nếu transaction có sepayTransactionId (đã được SePay tạo)
+    // Điều này ngăn user tự tạo transaction giả và cộng tiền
+    if (!transaction.sepayTransactionId) {
+      console.log(`⚠️ Transaction ${transactionId} does not have sepayTransactionId - cannot verify payment`);
+      return NextResponse.json({
+        success: false,
+        message: "Transaction chưa được tạo qua SePay. Vui lòng thử lại.",
+        transaction: transaction,
+      }, { status: 400 });
+    }
+
+    // BẢO MẬT: Kiểm tra transaction không quá cũ (tránh replay attack)
+    const transactionAge = Date.now() - new Date(transaction.createdAt).getTime();
+    const maxAge = 24 * 60 * 60 * 1000; // 24 giờ
+    if (transactionAge > maxAge) {
+      console.log(`⚠️ Transaction ${transactionId} is too old (${Math.round(transactionAge / 1000 / 60)} minutes)`);
+      return NextResponse.json({
+        success: false,
+        message: "Transaction đã quá cũ. Vui lòng tạo giao dịch mới.",
+        transaction: transaction,
+      }, { status: 400 });
+    }
 
     console.log(`🔍 Verifying payment for transaction ${transactionId}:`, {
       status: transaction.status,
@@ -73,10 +92,6 @@ export async function POST(request: NextRequest) {
       amount: transaction.amount,
     });
 
-    // QUAN TRỌNG: Nếu user đã về success page = SePay đã confirm payment thành công
-    // Vì SePay chỉ redirect về success_url khi payment thành công
-    // Vậy ta PHẢI process payment ngay, không cần check gì thêm
-    
     // Check transaction type
     if (transaction.type !== "deposit") {
       console.log(`⚠️ Transaction type is "${transaction.type}", not deposit - cannot process`);
@@ -87,18 +102,12 @@ export async function POST(request: NextRequest) {
       });
     }
     
-    // Nếu đã completed rồi, return success (đã check ở trên rồi, nhưng để an toàn)
-    if ((transaction.status as string) === "completed") {
-      console.log(`✅ Transaction ${transactionId} already completed - returning success`);
-      return NextResponse.json({
-        success: true,
-        message: "Transaction already completed",
-        transaction: transaction,
-      });
-    }
+    // BẢO MẬT: Chỉ process nếu transaction đã có sepayTransactionId (đã được SePay tạo)
+    // Và chỉ process khi user thực sự đã về success page (có nghĩa là SePay đã redirect)
+    // Tuy nhiên, để an toàn hơn, ta sẽ đợi webhook confirm hoặc verify với SePay API
+    // Ở đây ta chỉ process như một fallback, nhưng phải có sepayTransactionId
     
-    // FORCE PROCESS PAYMENT - User đã về success page = payment thành công
-    console.log(`💰💰💰 FORCE Processing payment - User is on success page, payment MUST have succeeded`);
+    console.log(`💰 Processing payment - Transaction has sepayTransactionId, user is on success page`);
     console.log(`📊 Transaction details:`, {
       id: transaction._id,
       userId: transaction.user,

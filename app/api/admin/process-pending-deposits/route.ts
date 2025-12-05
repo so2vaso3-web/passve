@@ -27,10 +27,11 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { transactionId } = body;
+    const { transactionId, processAll } = body;
 
     // Nếu có transactionId cụ thể, process transaction đó
     if (transactionId) {
+      // BẢO MẬT: Chỉ process transaction có sepayTransactionId
       const transaction = await Transaction.findById(transactionId).maxTimeMS(10000);
       
       if (!transaction) {
@@ -38,6 +39,14 @@ export async function POST(request: NextRequest) {
           { error: "Transaction not found" },
           { status: 404 }
         );
+      }
+
+      // BẢO MẬT: Chỉ process nếu có sepayTransactionId
+      if (!transaction.sepayTransactionId) {
+        return NextResponse.json({
+          success: false,
+          message: "Transaction chưa có sepayTransactionId. Chỉ có thể process transaction đã được tạo qua SePay.",
+        }, { status: 400 });
       }
 
       if (transaction.status !== "pending" || transaction.type !== "deposit") {
@@ -78,20 +87,31 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // BẢO MẬT: Chỉ cho phép process tất cả nếu có explicit flag
+    // Tránh việc gọi API này vô tình process tất cả transactions
+    if (!processAll) {
+      return NextResponse.json({
+        success: false,
+        message: "Để process tất cả pending deposits, cần gửi { processAll: true } trong body. Hoặc gửi transactionId cụ thể để process một transaction.",
+      }, { status: 400 });
+    }
+
     // Nếu không có transactionId, process tất cả pending deposits cũ hơn 5 phút
     // (để tránh process các transaction vừa tạo)
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
     
+    // BẢO MẬT: Chỉ process các transaction có sepayTransactionId (đã được SePay tạo)
     const pendingTransactions = await Transaction.find({
       type: "deposit",
       status: "pending",
       createdAt: { $lt: fiveMinutesAgo }, // Chỉ process các transaction cũ hơn 5 phút
+      sepayTransactionId: { $exists: true, $ne: null }, // BẢO MẬT: Chỉ process transaction đã có sepayTransactionId
     })
       .sort({ createdAt: -1 })
-      .limit(50)
+      .limit(50) // Giới hạn số lượng để tránh overload
       .maxTimeMS(10000);
 
-    console.log(`🔍 Found ${pendingTransactions.length} pending deposits older than 5 minutes`);
+    console.log(`🔍 Found ${pendingTransactions.length} pending deposits older than 5 minutes with sepayTransactionId`);
 
     const results = [];
     for (const transaction of pendingTransactions) {
@@ -154,4 +174,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

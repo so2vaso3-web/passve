@@ -31,6 +31,13 @@ yarn-error.log*
 # vercel
 .vercel
 
+# Sensitive files with secrets
+VERCEL_*.txt
+FACEBOOK_ENV_VARS.txt
+*_ENV*.txt
+*_SECRET*.txt
+*_KEY*.txt
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

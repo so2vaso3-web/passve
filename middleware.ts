@@ -30,7 +30,7 @@ export const config = {
   matcher: [
     "/admin/:path*",
     "/profile/:path*",
-    "/",
-    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)).*)",
+    // Không chặn /signup và các public routes
+    "/((?!api|_next/static|_next/image|favicon.ico|signup|about|contact|faq|help|terms|privacy|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)).*)",
   ],
 };
