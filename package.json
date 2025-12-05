@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "seed": "tsx scripts/seed.ts",
+    "seed-100-tickets": "tsx scripts/seed-100-tickets.ts",
     "set-admin": "tsx scripts/set-admin.ts",
     "change-password": "tsx scripts/change-password.ts",
     "add-admin-balance": "tsx scripts/add-admin-balance.ts",

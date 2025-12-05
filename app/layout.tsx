@@ -8,6 +8,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { Inter } from "next/font/google";
 import { SiteSettingsLoader } from "@/components/SiteSettingsLoader";
 import { WelcomeModal } from "@/components/WelcomeModal";
+import { DevToolsBlocker } from "@/components/DevToolsBlocker";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -152,6 +153,7 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-dark-bg text-dark-text min-h-screen font-body antialiased">
+        <DevToolsBlocker />
         <SiteSettingsLoader />
         <Providers>
           <WelcomeModal />

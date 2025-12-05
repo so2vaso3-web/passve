@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { 
   Package, 
   Users, 
@@ -11,8 +12,10 @@ import {
   CheckCircle,
   Clock,
   Building2,
-  Image
+  Image,
+  Plus
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 interface AdminDashboardProps {
   stats: {
@@ -29,8 +32,45 @@ interface AdminDashboardProps {
 }
 
 export function AdminDashboard({ stats }: AdminDashboardProps) {
+  const [seeding, setSeeding] = useState(false);
+  
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN").format(price);
+  };
+
+  const handleSeed100Tickets = async () => {
+    if (seeding) return;
+    
+    if (!confirm("Bạn có chắc muốn tạo 100 vé mẫu? Mỗi vé sẽ có ảnh và avatar người bán khác nhau.")) {
+      return;
+    }
+
+    setSeeding(true);
+    try {
+      const response = await fetch("/api/admin/seed-100-tickets", {
+        method: "POST",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Lỗi khi seed vé");
+      }
+
+      toast.success(`✅ Đã tạo ${data.tickets} vé với ${data.sellers} người bán!`, {
+        duration: 5000,
+      });
+      
+      // Reload page sau 2 giây
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    } catch (error: any) {
+      console.error("Seed error:", error);
+      toast.error(error.message || "Lỗi khi seed vé");
+    } finally {
+      setSeeding(false);
+    }
   };
 
   return (
@@ -178,6 +218,20 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
               Logo, Favicon, SEO & Cấu hình
             </p>
           </Link>
+
+          <button
+            onClick={handleSeed100Tickets}
+            disabled={seeding}
+            className="bg-dark-card border border-dark-border rounded-2xl p-5 shadow-card hover:shadow-neon hover:scale-[1.03] transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <Plus className="w-6 h-6 text-neon-green" />
+              <h3 className="font-heading font-bold text-dark-text">Seed 100 vé</h3>
+            </div>
+            <p className="text-sm text-dark-text2">
+              {seeding ? "Đang tạo vé..." : "Tạo 100 vé mẫu với ảnh & avatar khác nhau"}
+            </p>
+          </button>
         </div>
       </div>
     </div>
