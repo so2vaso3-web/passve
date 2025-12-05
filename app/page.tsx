@@ -1,5 +1,4 @@
 import { Hero } from "@/components/Hero";
-import { TicketCard } from "@/components/TicketCard";
 import { Stats } from "@/components/Stats";
 import Link from "next/link";
 import { Shield, Zap, CheckCircle } from "lucide-react";
@@ -10,6 +9,7 @@ import { TicketFilters } from "@/components/TicketFilters";
 import { MaintenanceMode } from "@/components/MaintenanceMode";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { LoadMoreTickets } from "@/components/LoadMoreTickets";
 
 async function getTickets(category?: string, city?: string, district?: string, sellerId?: string) {
   try {
@@ -332,11 +332,12 @@ export default async function HomePage({
 
         {/* Tickets Grid */}
         {tickets.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-            {tickets.map((ticket) => (
-              <TicketCard key={ticket.id} {...ticket} />
-            ))}
-          </div>
+          <LoadMoreTickets
+            initialTickets={tickets}
+            category={category}
+            city={city}
+            district={district}
+          />
         ) : (
           <div className="text-center py-16 bg-dark-card border border-dark-border rounded-2xl shadow-card">
             <p className="text-dark-text2 text-lg mb-4">
@@ -350,15 +351,6 @@ export default async function HomePage({
               variant="primary"
             >
               Đăng bán vé đầu tiên
-            </Button>
-          </div>
-        )}
-
-        {/* Load More */}
-        {tickets.length > 0 && tickets.length >= 20 && (
-          <div className="text-center mt-12">
-            <Button variant="secondary" size="md">
-              Xem thêm
             </Button>
           </div>
         )}
